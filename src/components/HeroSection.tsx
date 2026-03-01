@@ -10,10 +10,9 @@ const HeroSection = () => {
       <div className="absolute top-32 left-[40%] w-3 h-3 bg-secondary animate-float-pixel-slow opacity-40" />
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
-        {/* Main Card */}
         <div className="pixel-border-primary bg-primary/10 backdrop-blur-sm p-8 sm:p-12 md:p-16 mb-8">
           <h1 className="font-pixel text-2xl sm:text-3xl md:text-4xl text-foreground leading-relaxed mb-4">
-            a Community
+            Community
           </h1>
           <p className="text-lg sm:text-xl md:text-2xl text-foreground/80 mb-2 tracking-wide">
             of the <span className="font-bold text-foreground">PEOPLE</span> • by the <span className="font-bold text-foreground">PEOPLE</span> • for the <span className="font-bold text-foreground">PEOPLE</span>
@@ -24,7 +23,6 @@ const HeroSection = () => {
             </p>
           </div>
 
-          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="#about"
@@ -33,10 +31,10 @@ const HeroSection = () => {
               KONNECT
             </a>
             <a
-              href="#programs"
+              href="#vision"
               className="inline-block font-pixel text-[10px] sm:text-xs bg-transparent text-foreground px-8 py-4 border-[3px] border-foreground hover:border-primary hover:text-primary transition-all hover:translate-y-[-2px]"
             >
-              DISCOVER
+              OUR VISION
             </a>
           </div>
         </div>

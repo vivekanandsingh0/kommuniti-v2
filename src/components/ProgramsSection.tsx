@@ -5,7 +5,7 @@ const pillars = [
     title: "KOMMUTE",
     subtitle: "Travel & Cultural Exchange",
     description:
-      "Experience the world through meaningful travel. Immerse yourself in diverse cultures, forge global connections, and broaden your horizons beyond borders.",
+      "Travelling opens your mind to changes and helps you be free of attachments. We encourage people to pursue travel where their heart calls — not as a tourist, but as an observer and problem solver. Through KO Pods, we partner with spaces across geographies to provide lifestyle skills, health, wellness and responsible growth.",
     icon: Globe,
     accentClass: "text-primary",
     borderClass: "border-primary",
@@ -14,7 +14,7 @@ const pillars = [
     title: "KONNECT",
     subtitle: "Community & Voice Sharing",
     description:
-      "A platform where every voice matters. Share your stories, engage in dialogue, and build lasting connections with a global network of changemakers.",
+      "Conversations and storytelling have ever been a part of human evolution. Kommuniti encourages meaningful discussions that open minds from different perspectives. Through talks, workshops, events, webinars and conferences, we create awareness about the larger goal of life. Our decentralised library KO Reads keeps people connected across tribes.",
     icon: MessageCircle,
     accentClass: "text-accent",
     borderClass: "border-accent",
@@ -23,7 +23,7 @@ const pillars = [
     title: "KREATE",
     subtitle: "Transform Into Change",
     description:
-      "Turn experiences into impact. Channel your creativity and passion into projects, initiatives, and movements that drive real-world transformation.",
+      "Where everything comes together — developing a healthy body, mind and relationships to bring each one's vision into sustainable creation. Kommuniti envisions to be an incubation centre where we build the right individual, connect them with tribe members who contribute to their vision, and help them go to market.",
     icon: Lightbulb,
     accentClass: "text-primary",
     borderClass: "border-primary",
@@ -35,10 +35,10 @@ const ProgramsSection = () => {
     <section id="programs" className="py-20 px-4 bg-secondary/5">
       <div className="max-w-6xl mx-auto">
         <h2 className="font-pixel text-sm sm:text-base md:text-lg text-center text-foreground mb-4">
-          THREE PILLARS
+          WHAT IS KOMMUNITI?
         </h2>
-        <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-          Our mission operates through three interconnected programs
+        <p className="text-center text-muted-foreground mb-12 max-w-3xl mx-auto">
+          Kommuniti is a global network of people, centres and digital resources which can aid its members to learn, experiment and solve critical problems of the world.
         </p>
 
         <div className="grid md:grid-cols-3 gap-6">

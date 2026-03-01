@@ -3,55 +3,42 @@ const AboutSection = () => {
     <section id="about" className="py-20 px-4 pixel-grid-bg">
       <div className="max-w-5xl mx-auto">
         <h2 className="font-pixel text-sm sm:text-base md:text-lg text-center text-foreground mb-12">
-          WHAT IS KOMMUNITI?
+          WHY KOMMUNITI ?
         </h2>
 
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          {/* Text */}
-          <div className="space-y-6">
-            <p className="text-lg leading-relaxed text-foreground/80">
-              Kommuniti is a global community built by the people, for the people. We believe in the power of
-              shared experiences, cross-cultural exchange, and collective creativity to drive meaningful change.
+        {/* Three Pillars - matching the reference layout */}
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <div className="space-y-4">
+            <h3 className="text-xl sm:text-2xl font-bold text-foreground tracking-wide">KOMMUTE</h3>
+            <p className="text-foreground/70 leading-relaxed">
+              Encourage movement through cultures and places with a mission to gain a deep understanding of its uniqueness and differences.
             </p>
-            <p className="text-lg leading-relaxed text-foreground/80">
-              Through our three pillars — <span className="font-bold text-accent">Kommute</span>,{" "}
-              <span className="font-bold text-accent">Konnect</span>, and{" "}
-              <span className="font-bold text-accent">Kreate</span> — we empower individuals to travel,
-              connect, and transform ideas into action.
-            </p>
-            <a
-              href="#programs"
-              className="inline-block font-pixel text-[10px] text-accent border-b-2 border-accent hover:text-primary hover:border-primary transition-colors"
-            >
-              EXPLORE OUR VISION →
-            </a>
           </div>
+          <div className="space-y-4">
+            <h3 className="text-xl sm:text-2xl font-bold text-foreground tracking-wide">KONNECT</h3>
+            <p className="text-foreground/70 leading-relaxed">
+              Be a safe and creative platform to keep the connections, share your voice and share individual uniqueness for world unity.
+            </p>
+          </div>
+          <div className="space-y-4">
+            <h3 className="text-xl sm:text-2xl font-bold text-foreground tracking-wide">KREATE</h3>
+            <p className="text-foreground/70 leading-relaxed">
+              Provide people and resources to transform experiences into meaningful changes for an equitable world.
+            </p>
+          </div>
+        </div>
 
-          {/* Pixel Art Panel */}
-          <div className="pixel-border p-8 bg-card">
-            <div className="grid grid-cols-4 gap-2">
-              {Array.from({ length: 16 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="aspect-square"
-                  style={{
-                    backgroundColor:
-                      i % 5 === 0
-                        ? "hsl(var(--primary))"
-                        : i % 3 === 0
-                        ? "hsl(var(--accent))"
-                        : i % 2 === 0
-                        ? "hsl(var(--secondary))"
-                        : "hsl(var(--muted))",
-                    opacity: 0.3 + (i % 4) * 0.2,
-                  }}
-                />
-              ))}
-            </div>
-            <p className="font-pixel text-[8px] text-muted-foreground text-center mt-4">
-              [ PIXEL PEOPLE MOSAIC ]
-            </p>
-          </div>
+        {/* Vision */}
+        <div id="vision" className="pixel-border bg-card p-8 sm:p-12">
+          <h3 className="font-pixel text-xs sm:text-sm text-primary mb-4">OUR VISION</h3>
+          <p className="text-lg leading-relaxed text-foreground/80 mb-6">
+            Kommuniti envisions to be a decentralised, international and non-partisan commune where mankind
+            can function as one while expressing their individual uniqueness.
+          </p>
+          <p className="text-foreground/60 leading-relaxed">
+            Our approach is one of decentralisation where members can innovate and come up with ideas which
+            can nurture their uniqueness while contributing to the oneness of global unity.
+          </p>
         </div>
       </div>
     </section>
