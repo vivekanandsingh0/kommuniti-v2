@@ -18,55 +18,33 @@ const HeroSection = () => {
       <div className="absolute bottom-24 right-[22%] w-5 h-5 bg-accent/20 rotate-12 animate-float-pixel z-[2]" />
 
       {/* Main content */}
-      <div className="relative z-10 max-w-6xl mx-auto px-6 sm:px-8 w-full">
-        <div className="mb-16 sm:mb-24">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="space-y-2 sm:space-y-3"
-          >
-            <div className="flex items-baseline gap-3 sm:gap-4 flex-wrap">
-              <span className="font-pixel text-foreground/25 text-2xl sm:text-4xl">[</span>
-              <h1 className="font-pixel text-xl sm:text-3xl md:text-4xl lg:text-5xl text-foreground leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
-                a Community
-              </h1>
-            </div>
-            <div className="flex items-baseline gap-3 sm:gap-4 flex-wrap pl-4 sm:pl-8">
-              <span className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">of the PEOPLE</span>
-              <span className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground/30">by the PEOPLE</span>
-            </div>
-            <div className="flex items-baseline gap-3 sm:gap-4 flex-wrap pl-4 sm:pl-8">
-              <span className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground/30">for the PEOPLE</span>
-              <span className="font-pixel text-foreground/25 text-2xl sm:text-4xl">]</span>
-            </div>
-          </motion.div>
-        </div>
+      {/* Centered hero text block */}
+      <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 w-full">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="mb-12 sm:mb-16"
+        >
+          <h1 className="font-pixel text-[28px] sm:text-[44px] md:text-[60px] lg:text-[80px] xl:text-[96px] text-primary leading-[1.15] tracking-tight drop-shadow-[0_0_40px_hsl(var(--primary)/0.3)]">
+            A COMMUNITY,
+            <br />
+            OF THE PEOPLE
+            <br />
+            <span className="text-accent">FOR THE PEOPLE</span>
+          </h1>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-8"
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="flex gap-4"
         >
-          <div className="flex gap-3">
-            <a href="#about" className="btn-pixel-primary">KONNECT</a>
-            <a href="#vision" className="btn-pixel-outline">OUR VISION</a>
-          </div>
+          <a href="#about" className="btn-pixel-primary">KONNECT</a>
+          <a href="#vision" className="btn-pixel-outline">OUR VISION</a>
         </motion.div>
       </div>
-
-      {/* Giant title at bottom */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.8 }}
-        className="relative z-10 mt-16 sm:mt-24 overflow-hidden"
-      >
-        <h2 className="font-pixel text-[40px] sm:text-[60px] md:text-[80px] lg:text-[110px] xl:text-[140px] text-foreground/[0.04] leading-none tracking-tight whitespace-nowrap text-center select-none">
-          KOMMUNITI
-        </h2>
-      </motion.div>
 
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent z-10" />
     </section>
