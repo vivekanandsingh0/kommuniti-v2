@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Onest:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,23 +6,23 @@
 
 @layer base {
   :root {
-    --background: 0 0% 96.1%;
-    --foreground: 0 0% 10.2%;
+    --background: 0 0% 9%;
+    --foreground: 0 0% 91%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 10.2%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 91%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10.2%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 91%;
 
     --primary: 45 100% 51%;
-    --primary-foreground: 0 0% 10.2%;
+    --primary-foreground: 0 0% 9%;
 
     --secondary: 0 0% 17.6%;
-    --secondary-foreground: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 91%;
 
-    --muted: 0 0% 90%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 55%;
 
     --accent: 340 82% 52%;
     --accent-foreground: 0 0% 100%;
@@ -30,49 +30,19 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 17.6%;
-    --input: 0 0% 80%;
+    --border: 0 0% 22%;
+    --input: 0 0% 22%;
     --ring: 45 100% 51%;
 
-    --radius: 0.25rem;
+    --radius: 0rem;
 
-    --sidebar-background: 0 0% 17.6%;
-    --sidebar-foreground: 0 0% 96.1%;
+    --sidebar-background: 0 0% 9%;
+    --sidebar-foreground: 0 0% 91%;
     --sidebar-primary: 45 100% 51%;
-    --sidebar-primary-foreground: 0 0% 10.2%;
+    --sidebar-primary-foreground: 0 0% 9%;
     --sidebar-accent: 340 82% 52%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 30%;
-    --sidebar-ring: 45 100% 51%;
-  }
-
-  .dark {
-    --background: 0 0% 10.2%;
-    --foreground: 0 0% 96.1%;
-    --card: 0 0% 15%;
-    --card-foreground: 0 0% 96.1%;
-    --popover: 0 0% 15%;
-    --popover-foreground: 0 0% 96.1%;
-    --primary: 45 100% 51%;
-    --primary-foreground: 0 0% 10.2%;
-    --secondary: 0 0% 17.6%;
-    --secondary-foreground: 0 0% 96.1%;
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 340 82% 52%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 30%;
-    --input: 0 0% 30%;
-    --ring: 45 100% 51%;
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 96.1%;
-    --sidebar-primary: 45 100% 51%;
-    --sidebar-primary-foreground: 0 0% 10.2%;
-    --sidebar-accent: 340 82% 52%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 20%;
+    --sidebar-border: 0 0% 22%;
     --sidebar-ring: 45 100% 51%;
   }
 }
@@ -83,7 +53,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Onest', system-ui, sans-serif;
   }
 }
 
@@ -92,86 +62,163 @@
     font-family: 'Press Start 2P', monospace;
   }
 
+  /* Pixel-stepped border using box-shadow stacking */
   .pixel-border {
-    border: 3px solid hsl(var(--secondary));
-    box-shadow: 4px 4px 0px hsl(var(--secondary));
-  }
-
-  .pixel-border-accent {
-    border: 3px solid hsl(var(--accent));
-    box-shadow: 4px 4px 0px hsl(var(--accent));
+    border: 3px solid hsl(var(--foreground) / 0.2);
+    box-shadow: 4px 4px 0px hsl(var(--foreground) / 0.1);
   }
 
   .pixel-border-primary {
     border: 3px solid hsl(var(--primary));
-    box-shadow: 4px 4px 0px hsl(var(--primary) / 0.5);
+    box-shadow: 4px 4px 0px hsl(var(--primary) / 0.3);
   }
 
+  .pixel-border-accent {
+    border: 3px solid hsl(var(--accent));
+    box-shadow: 4px 4px 0px hsl(var(--accent) / 0.3);
+  }
+
+  /* Pixel glow on hover */
   .pixel-glow:hover {
-    box-shadow: 0 0 12px hsl(var(--primary) / 0.6), 4px 4px 0px hsl(var(--secondary));
-    transition: box-shadow 0.2s ease;
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.4), 4px 4px 0px hsl(var(--primary) / 0.3);
+    transition: box-shadow 0.25s ease;
   }
 
   .pixel-glow-accent:hover {
-    box-shadow: 0 0 12px hsl(var(--accent) / 0.6), 4px 4px 0px hsl(var(--accent) / 0.3);
-    transition: box-shadow 0.2s ease;
+    box-shadow: 0 0 20px hsl(var(--accent) / 0.4), 4px 4px 0px hsl(var(--accent) / 0.3);
+    transition: box-shadow 0.25s ease;
   }
 
+  /* Retro card with hover lift */
   .retro-card {
     @apply pixel-border bg-card p-6;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
   }
-
   .retro-card:hover {
     transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px hsl(var(--secondary));
+    box-shadow: 6px 6px 0px hsl(var(--foreground) / 0.15);
   }
 
+  /* Pixel grid backgrounds */
   .pixel-grid-bg {
     background-image:
-      linear-gradient(hsl(var(--secondary) / 0.06) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--secondary) / 0.06) 1px, transparent 1px);
+      linear-gradient(hsl(var(--foreground) / 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.03) 1px, transparent 1px);
     background-size: 16px 16px;
   }
 
   .pixel-grid-hero {
     background-image:
-      linear-gradient(hsl(var(--primary) / 0.08) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--primary) / 0.08) 1px, transparent 1px),
-      radial-gradient(circle 2px, hsl(var(--primary) / 0.12) 1px, transparent 1px);
-    background-size: 16px 16px, 16px 16px, 48px 48px;
+      linear-gradient(hsl(var(--primary) / 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--primary) / 0.04) 1px, transparent 1px),
+      radial-gradient(circle 1.5px, hsl(var(--primary) / 0.06) 1px, transparent 1px);
+    background-size: 24px 24px, 24px 24px, 48px 48px;
   }
+
+  /* Marquee */
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll 20s linear infinite;
+  }
+  .marquee-track:hover {
+    animation-play-state: paused;
+  }
+
+  /* Button pixel style */
+  .btn-pixel {
+    @apply font-pixel text-[10px] sm:text-xs px-8 py-4 border-[3px] transition-all;
+    position: relative;
+  }
+  .btn-pixel:hover {
+    transform: translateY(-2px);
+  }
+  .btn-pixel-primary {
+    @apply btn-pixel bg-accent text-accent-foreground border-accent;
+  }
+  .btn-pixel-primary:hover {
+    box-shadow: 0 0 20px hsl(var(--accent) / 0.5);
+  }
+  .btn-pixel-outline {
+    @apply btn-pixel bg-transparent text-foreground border-foreground/30;
+  }
+  .btn-pixel-outline:hover {
+    border-color: hsl(var(--primary));
+    color: hsl(var(--primary));
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+  }
+
+  /* Section padding */
+  .section-padding {
+    @apply py-24 sm:py-32 px-4;
+  }
+
+  /* Text indent like reference */
+  .text-indent {
+    text-indent: 3em;
+  }
+
+  /* Bracket text styling */
+  .bracket-text {
+    @apply text-foreground/30;
+  }
+}
+
+/* Animations */
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 @keyframes float-pixel {
   0%, 100% { transform: translateY(0) rotate(0deg); }
-  25% { transform: translateY(-12px) rotate(2deg); }
+  25% { transform: translateY(-14px) rotate(2deg); }
   50% { transform: translateY(-6px) rotate(-1deg); }
-  75% { transform: translateY(-16px) rotate(1deg); }
+  75% { transform: translateY(-18px) rotate(1deg); }
 }
 
 @keyframes float-pixel-slow {
   0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(3deg); }
+  50% { transform: translateY(-24px) rotate(3deg); }
 }
 
 @keyframes pixel-flicker {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.85; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px hsl(var(--primary) / 0.2); }
+  50% { box-shadow: 0 0 20px hsl(var(--primary) / 0.4); }
 }
 
 .animate-float-pixel {
   animation: float-pixel 4s ease-in-out infinite;
 }
-
 .animate-float-pixel-slow {
   animation: float-pixel-slow 6s ease-in-out infinite;
 }
-
 .animate-pixel-flicker {
   animation: pixel-flicker 2s ease-in-out infinite;
+}
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.3);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.5);
 }

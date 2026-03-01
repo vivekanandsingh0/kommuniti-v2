@@ -15,7 +15,7 @@ export default {
     extend: {
       fontFamily: {
         pixel: ["'Press Start 2P'", "monospace"],
-        sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+        sans: ["'Onest'", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
