@@ -1,12 +1,13 @@
 import { useEffect, useRef } from "react";
 
 // Pixel character definitions - each is a grid of colored cells
-// 0 = transparent, 1 = skin, 2 = hair/dark, 3 = shirt, 4 = pants, 5 = accent, 6 = laptop/item
+// 0 = transparent, 1 = skin, 2 = hair/dark, 3 = shirt, 4 = pants, 5 = accent, 6 = item
 const COLORS: Record<string, string[]> = {
   warm: ["transparent", "#D4A574", "#4A3728", "#E91E63", "#2D2D2D", "#FFC107", "#5C6BC0"],
   cool: ["transparent", "#C8A882", "#3D2E1F", "#5C6BC0", "#2D2D2D", "#FFC107", "#E91E63"],
   earth: ["transparent", "#BF9B7A", "#2D2D2D", "#4CAF50", "#3E2723", "#FFC107", "#FF9800"],
   muted: ["transparent", "#D4A574", "#5D4037", "#78909C", "#37474F", "#FFC107", "#E91E63"],
+  golden: ["transparent", "#E0C097", "#3E2723", "#FFC107", "#2D2D2D", "#E91E63", "#4CAF50"],
 };
 
 type CharFrame = number[][];
@@ -141,7 +142,85 @@ const LOOKING: CharFrame[] = [
   ],
 ];
 
-const CHARACTER_TYPES = [WAVING, WALKING, TYPING, DANCING, LOOKING];
+// Two people talking (2 frames)
+const TALKING: CharFrame[] = [
+  [
+    [0,2,2,2,0,0,0,2,2,2,0],
+    [2,1,1,1,2,0,2,1,1,1,2],
+    [0,1,1,1,0,0,0,1,1,1,0],
+    [0,3,3,3,5,0,0,3,3,3,0],
+    [0,3,3,3,0,0,5,3,3,3,0],
+    [0,3,3,3,0,0,0,3,3,3,0],
+    [0,4,0,4,0,0,0,4,0,4,0],
+    [0,4,0,4,0,0,0,4,0,4,0],
+    [4,4,0,4,4,0,4,4,0,4,4],
+  ],
+  [
+    [0,2,2,2,0,0,0,2,2,2,0],
+    [2,1,1,1,2,0,2,1,1,1,2],
+    [0,1,1,1,0,5,0,1,1,1,0],
+    [0,3,3,3,0,0,5,3,3,3,0],
+    [0,3,3,3,0,0,0,3,3,3,0],
+    [0,3,3,3,0,0,0,3,3,3,0],
+    [0,4,0,4,0,0,0,4,0,4,0],
+    [0,4,0,4,0,0,0,4,0,4,0],
+    [4,4,0,4,4,0,4,4,0,4,4],
+  ],
+];
+
+// Vendor / selling at stall (2 frames)
+const SELLING: CharFrame[] = [
+  [
+    [0,0,2,2,2,0,0,0,0],
+    [0,2,1,1,1,2,0,0,0],
+    [0,0,1,1,1,0,0,0,0],
+    [0,0,3,3,3,0,0,0,0],
+    [0,3,3,3,3,3,0,0,0],
+    [6,6,6,6,6,6,6,6,6],
+    [6,5,0,5,0,5,0,5,6],
+    [6,6,6,6,6,6,6,6,6],
+    [0,0,4,0,4,0,0,0,0],
+  ],
+  [
+    [0,0,2,2,2,0,0,0,0],
+    [0,2,1,1,1,2,0,0,0],
+    [0,0,1,1,1,0,0,0,0],
+    [0,5,3,3,3,0,0,0,0],
+    [0,3,3,3,3,3,0,0,0],
+    [6,6,6,6,6,6,6,6,6],
+    [6,0,5,0,5,0,5,0,6],
+    [6,6,6,6,6,6,6,6,6],
+    [0,0,4,0,4,0,0,0,0],
+  ],
+];
+
+// Sitting / meditating (2 frames)
+const SITTING: CharFrame[] = [
+  [
+    [0,0,2,2,2,0,0],
+    [0,2,1,1,1,2,0],
+    [0,0,1,1,1,0,0],
+    [0,0,3,3,3,0,0],
+    [0,3,3,3,3,3,0],
+    [0,0,3,3,3,0,0],
+    [0,4,4,4,4,4,0],
+    [4,4,0,0,0,4,4],
+    [0,0,0,0,0,0,0],
+  ],
+  [
+    [0,0,2,2,2,0,0],
+    [0,2,1,1,1,2,0],
+    [0,0,1,1,1,0,0],
+    [5,0,3,3,3,0,5],
+    [0,3,3,3,3,3,0],
+    [0,0,3,3,3,0,0],
+    [0,4,4,4,4,4,0],
+    [4,4,0,0,0,4,4],
+    [0,0,0,0,0,0,0],
+  ],
+];
+
+const CHARACTER_TYPES = [WAVING, WALKING, TYPING, DANCING, LOOKING, TALKING, SELLING, SITTING];
 const PALETTE_KEYS = Object.keys(COLORS);
 
 interface Character {
@@ -152,6 +231,7 @@ interface Character {
   frame: number;
   scale: number;
   opacity: number;
+  dx: number; // horizontal drift for walking chars
 }
 
 const PixelPeopleBackground = () => {
@@ -178,25 +258,26 @@ const PixelPeopleBackground = () => {
       const w = canvas.offsetWidth;
       const h = canvas.offsetHeight;
       const chars: Character[] = [];
-      const spacing = 120;
+      const spacing = 100;
       const cols = Math.ceil(w / spacing);
       const rows = Math.ceil(h / spacing);
 
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
-          // Skip some positions randomly for organic feel
-          if (Math.random() < 0.35) continue;
+          if (Math.random() < 0.3) continue;
 
           const typeIdx = Math.floor(Math.random() * CHARACTER_TYPES.length);
           const paletteIdx = Math.floor(Math.random() * PALETTE_KEYS.length);
+          const isWalker = typeIdx === 1; // WALKING type
           chars.push({
-            x: col * spacing + (Math.random() - 0.5) * 40 + 30,
-            y: row * spacing + (Math.random() - 0.5) * 30 + 20,
+            x: col * spacing + (Math.random() - 0.5) * 40 + 20,
+            y: row * spacing + (Math.random() - 0.5) * 30 + 15,
             type: CHARACTER_TYPES[typeIdx],
             palette: COLORS[PALETTE_KEYS[paletteIdx]],
             frame: Math.random() > 0.5 ? 0 : 1,
-            scale: 3 + Math.random() * 1.5,
-            opacity: 0.12 + Math.random() * 0.12,
+            scale: 2.5 + Math.random() * 1.5,
+            opacity: 0.1 + Math.random() * 0.14,
+            dx: isWalker ? (Math.random() > 0.5 ? 0.15 : -0.15) : 0,
           });
         }
       }
@@ -223,11 +304,17 @@ const PixelPeopleBackground = () => {
     };
 
     const animate = (time: number) => {
-      // Toggle frames every 800ms
       if (time - lastFrameTime.current > 800) {
         lastFrameTime.current = time;
+        const w = canvas.offsetWidth;
         charsRef.current.forEach((c) => {
           c.frame = c.frame === 0 ? 1 : 0;
+          // Move walkers
+          if (c.dx !== 0) {
+            c.x += c.dx * 8;
+            if (c.x > w + 20) c.x = -40;
+            if (c.x < -50) c.x = w + 10;
+          }
         });
       }
 
