@@ -24,12 +24,12 @@ const pillars = [
     subtitle: "Travel & Cultural Exchange",
     description:
       "Travelling opens your mind to changes and helps you be free of attachments. We encourage people to pursue travel where their heart calls — not as a tourist, but as an observer and problem solver.",
-    detail: "Through KO Pods, we partner with spaces across geographies to provide lifestyle skills, health, wellness and responsible growth.",
+    detail: "Explore our curated properties and trips which will help you experience the real community and its lifestyle.",
     icon: Globe,
   },
   {
     title: "KONNECT",
-    subtitle: "Community & Voice Sharing",
+    subtitle: "Sharing & Learning",
     description:
       "Conversations and storytelling have ever been a part of human evolution. Kommuniti encourages meaningful discussions that open minds from different perspectives.",
     detail: "Through talks, workshops, events, webinars and conferences, we create awareness about the larger goal of life.",
@@ -37,9 +37,9 @@ const pillars = [
   },
   {
     title: "KREATE",
-    subtitle: "Transform Into Change",
+    subtitle: "Innovate and Transform",
     description:
-      "Where everything comes together — developing a healthy body, mind and relationships to bring each one's vision into sustainable creation.",
+      "An observation needs a healthy mind and body to innovate and the right ecosystem for transforming an idea into a product/business.",
     detail: "Kommuniti envisions to be an incubation centre where we build the right individual, connect them with tribe members, and help them go to market.",
     icon: Lightbulb,
   },
@@ -61,7 +61,7 @@ const ProgramsSection = () => {
 
         <FadeIn delay={0.1}>
           <p className="text-indent text-lg sm:text-xl text-foreground/50 leading-relaxed mb-16 max-w-4xl">
-            Kommuniti is a global network of people, centres and digital resources which can aid its members to learn, experiment and solve critical problems of the world.
+            Kommuniti is a decentralized, international, and politically non-partisan commune. We empower mankind to function as one collective consciousness while celebrating individual uniqueness.
           </p>
         </FadeIn>
 

@@ -15,7 +15,7 @@ export default {
     extend: {
       fontFamily: {
         pixel: ["'Press Start 2P'", "monospace"],
-        sans: ["'Onest'", "system-ui", "sans-serif"],
+        sans: ["'Chakra Petch'", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

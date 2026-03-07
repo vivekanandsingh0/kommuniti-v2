@@ -42,7 +42,7 @@ const HeroSection = () => {
           className="flex gap-4"
         >
           <a href="#about" className="btn-pixel-primary">KONNECT</a>
-          <a href="#vision" className="btn-pixel-outline">OUR VISION</a>
+          <a href="#programs" className="btn-pixel-outline">OUR VISION</a>
         </motion.div>
       </div>
 
