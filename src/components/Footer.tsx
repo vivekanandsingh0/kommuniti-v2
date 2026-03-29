@@ -13,8 +13,8 @@ const Footer = () => {
                   i % 4 === 0
                     ? "hsl(var(--primary) / 0.4)"
                     : i % 7 === 0
-                    ? "hsl(var(--accent) / 0.3)"
-                    : "hsl(var(--foreground) / 0.05)",
+                      ? "hsl(var(--accent) / 0.3)"
+                      : "hsl(var(--foreground) / 0.05)",
               }}
             />
           ))}
@@ -54,13 +54,18 @@ const Footer = () => {
           <div>
             <p className="font-pixel text-[8px] text-foreground/50 mb-4 tracking-wider">CONNECT</p>
             <div className="space-y-3">
-              {["Instagram", "Twitter/X", "LinkedIn", "YouTube"].map((social) => (
+              {[
+                { label: "Instagram", href: "https://www.instagram.com/thekommuniti" },
+                { label: "LinkedIn", href: "https://www.linkedin.com/company/kommuniti144" },
+              ].map((social) => (
                 <a
-                  key={social}
-                  href="#"
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="block text-sm text-foreground/30 hover:text-accent transition-colors"
                 >
-                  {social}
+                  {social.label}
                 </a>
               ))}
             </div>
@@ -73,7 +78,7 @@ const Footer = () => {
             © 2026 KOMMUNITI. ALL RIGHTS RESERVED.
           </p>
           <p className="text-xs text-foreground/15">
-            Built with ♥ for the community
+            Built with ♥ for the kommuniti
           </p>
         </div>
       </div>
