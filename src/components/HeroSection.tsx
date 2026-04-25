@@ -1,52 +1,307 @@
 import { motion } from "framer-motion";
-import PixelPeopleBackground from "./PixelPeopleBackground";
 
 const HeroSection = () => {
-  return (
-    <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-20">
-      {/* Full-width pixel village background */}
-      <PixelPeopleBackground />
+  const stats = [
+    { value: "2,000+", label: "Kore Members", color: "#C9A84C" },
+    { value: "45", label: "Active Kores", color: "#6BBFB5" },
+    { value: "₹12L+", label: "Community Earned", color: "#FF6B35" },
+  ];
 
-      {/* Atmospheric overlay for text readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/20 to-background/60 z-[1]" />
+  // Exact pattern from design document (14 columns x 3 rows)
+  const mapData = [
+    // Row 1
+    { active: false }, { active: false }, { active: true, color: "#6BBFB5" }, { active: false }, 
+    { active: true, color: "#F5C842" }, { active: false }, { active: false }, { active: true, color: "#4895EF" }, 
+    { active: false }, { active: true, color: "#E63946" }, { active: false }, { active: false }, 
+    { active: false }, { active: false },
+    // Row 2
+    { active: false }, { active: true, color: "#6BBFB5" }, { active: true, color: "#6BBFB5" }, { active: false }, 
+    { active: false }, { active: true, color: "#FF6B35" }, { active: false }, { active: true, color: "#4895EF" }, 
+    { active: false }, { active: false }, { active: false }, { active: false }, 
+    { active: true, color: "#AAFF00" }, { active: false },
+    // Row 3
+    { active: false }, { active: false }, { active: true, color: "#F5C842" }, { active: true, color: "#F5C842" }, 
+    { active: false }, { active: false }, { active: false }, { active: false }, 
+    { active: true, color: "#4895EF" }, { active: false }, { active: false }, { active: false }, 
+    { active: false }, { active: false }
+  ];
 
-      {/* Subtle vignette */}
-      <div
-        className="absolute inset-0 z-[2] pointer-events-none"
+  const mapPixels = mapData.map(pixel => ({
+    ...pixel,
+    color: pixel.active ? pixel.color : "rgba(240, 232, 213, 0.05)"
+  }));
+
+  const pillars = [
+    {
+      icon: "🗺️",
+      title: "Kommute",
+      color: "#6BBFB5",
+      desc: "Stays, experiences, and community travel curated by Kores across Kerala and beyond.",
+    },
+    {
+      icon: "🎓",
+      title: "Konnect",
+      color: "#FF6B35",
+      desc: "Workshops, talks and intensives facilitated by community experts. Earn and spend KO Coins.",
+    },
+    {
+      icon: "⚡",
+      title: "Kreate",
+      color: "#AAFF00",
+      desc: "Community products, KO Reads — the democratic writing platform — and the KO Store.",
+    },
+  ];
+
+  const MapCard = ({ className }: { className?: string }) => (
+    <div 
+      className={className}
+      style={{
+        background: "#0B1828",
+        border: "1px solid rgba(201, 168, 76, 0.2)",
+        padding: "12px",
+        borderRadius: "4px",
+        boxShadow: "0 20px 40px rgba(0,0,0,0.4)"
+      }}
+    >
+      <div 
         style={{
-          background: "radial-gradient(ellipse at center, transparent 40%, hsl(0 0% 9% / 0.5) 100%)",
+          fontSize: "8px",
+          letterSpacing: "2px",
+          textTransform: "uppercase",
+          color: "#C9A84C",
+          marginBottom: "10px",
+          fontFamily: "'Rajdhani', sans-serif"
+        }}
+      >
+        Kerala KO Universe · Live Map
+      </div>
+      
+      <div 
+        className="grid gap-[2px]"
+        style={{ gridTemplateColumns: "repeat(14, 1fr)" }}
+      >
+        {mapPixels.slice(0, 42).map((pixel, i) => (
+          <div 
+            key={i}
+            style={{
+              aspectRatio: "1",
+              background: pixel.color,
+              borderRadius: "0.5px",
+              boxShadow: pixel.active ? `0 0 6px ${pixel.color}66` : "none"
+            }}
+            className={pixel.active ? "animate-pulse" : ""}
+          />
+        ))}
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5">
+        {[
+          { label: "Root Kore", color: "#C9A84C" },
+          { label: "Branch", color: "#6BBFB5" },
+          { label: "Canopy", color: "#4895EF" },
+          { label: "Issue", color: "#E63946" },
+          { label: "Grey zone", color: "rgba(240, 232, 213, 0.1)" },
+        ].map((item) => (
+          <div key={item.label} className="flex items-center gap-1">
+            <div style={{ width: "5px", height: "5px", background: item.color }}></div>
+            <span style={{ fontSize: "7px", color: "rgba(240, 232, 213, 0.6)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{item.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <section className="relative pt-20 overflow-hidden bg-[#0B1828]">
+      {/* Grid Background */}
+      <div 
+        className="absolute inset-0 z-0 opacity-20 pointer-events-none"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(201, 168, 76, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(201, 168, 76, 0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: "40px 40px",
         }}
       />
 
-      {/* Main content */}
-      <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 w-full">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="mb-12 sm:mb-16"
+      <div className="container mx-auto relative z-10">
+        <div 
+          className="flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-12"
+          style={{ padding: "48px 24px" }}
         >
-          <h1 className="font-pixel text-[28px] sm:text-[44px] md:text-[60px] lg:text-[80px] xl:text-[96px] text-primary leading-[1.15] tracking-tight drop-shadow-[0_0_40px_hsl(var(--primary)/0.3)]">
-            A COMMUNITY,
-            <br />
-            OF THE PEOPLE
-            <br />
-            <span className="text-accent">FOR THE PEOPLE</span>
-          </h1>
-        </motion.div>
+          {/* Left Content */}
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+            className="flex-1 max-w-2xl"
+          >
+            {/* Sub-label */}
+            <div 
+              style={{ 
+                fontSize: "9px", 
+                letterSpacing: "3px", 
+                textTransform: "uppercase", 
+                color: "#C9A84C",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                marginBottom: "12px"
+              }}
+            >
+              <span style={{ width: "24px", height: "1px", background: "#C9A84C" }}></span>
+              Community · Commerce · Action
+            </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="flex gap-4"
+            {/* Heading */}
+            <h1 
+              style={{ 
+                fontFamily: "'Syne', sans-serif", 
+                fontWeight: 800, 
+                lineHeight: 0.92, 
+                letterSpacing: "-2px",
+                marginBottom: "16px"
+              }}
+              className="text-[36px] sm:text-[48px] md:text-[60px]"
+            >
+              <span style={{ color: "#F0E8D5" }}>Build the</span><br />
+              <span style={{ color: "#C9A84C" }}>Community</span><br />
+              <span style={{ color: "#F0E8D5" }}>You Deserve.</span>
+            </h1>
+
+            {/* Tagline */}
+            <p 
+              style={{ 
+                fontFamily: "'Cormorant Garamond', serif", 
+                fontStyle: "italic", 
+                fontSize: "18px",
+                color: "rgba(240,232,213,0.6)", 
+                marginBottom: "28px",
+                maxWidth: "400px",
+                lineHeight: 1.4
+              }}
+            >
+              Where every action earns, every contribution matters, and every neighbourhood becomes a Kore.
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row gap-3 mb-8">
+              <a 
+                href="#kores" 
+                className="no-underline transition-all hover:brightness-110 active:scale-95 text-center"
+                style={{
+                  background: "#C9A84C",
+                  color: "#0B1828",
+                  fontFamily: "'Rajdhani', sans-serif",
+                  fontWeight: 700,
+                  fontSize: "12px",
+                  letterSpacing: "2px",
+                  textTransform: "uppercase",
+                  padding: "14px 28px",
+                }}
+              >
+                Find Your Kore →
+              </a>
+              <a 
+                href="#kommute" 
+                className="no-underline transition-all hover:bg-[#C9A84C]/10 active:scale-95 text-center"
+                style={{
+                  border: "1.5px solid rgba(201, 168, 76, 0.4)",
+                  color: "#C9A84C",
+                  fontFamily: "'Rajdhani', sans-serif",
+                  fontWeight: 700,
+                  fontSize: "12px",
+                  letterSpacing: "2px",
+                  textTransform: "uppercase",
+                  padding: "14px 28px",
+                }}
+              >
+                Explore Kommute
+              </a>
+            </div>
+
+            {/* Mobile Map Card (Only on Mobile, Below Buttons) */}
+            <MapCard className="mb-8 lg:hidden" />
+
+            {/* Stats */}
+            <div className="flex flex-wrap gap-8 lg:gap-10">
+              {stats.map((stat) => (
+                <div key={stat.label}>
+                  <div 
+                    style={{ 
+                      fontFamily: "'Syne', sans-serif", 
+                      fontWeight: 800, 
+                      fontSize: "28px",
+                      color: stat.color,
+                      lineHeight: 1
+                    }}
+                  >
+                    {stat.value}
+                  </div>
+                  <div 
+                    style={{ 
+                      fontSize: "10px", 
+                      letterSpacing: "1px", 
+                      color: "rgba(240, 232, 213, 0.5)",
+                      marginTop: "4px"
+                    }}
+                  >
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Desktop Map Card (Only on Large Screens) */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="hidden lg:block w-[280px] shrink-0"
+          >
+            <MapCard />
+          </motion.div>
+        </div>
+
+        {/* THREE PILLARS ROW - Horizontal on all devices */}
+        <div 
+          className="grid grid-cols-3 border-t border-[rgba(201,168,76,0.1)] overflow-hidden"
+          style={{ gap: "0" }}
         >
-          <a href="#about" className="btn-pixel-primary">KONNECT</a>
-          <a href="#programs" className="btn-pixel-outline">OUR VISION</a>
-        </motion.div>
+          {pillars.map((pillar, idx) => (
+            <div 
+              key={pillar.title}
+              className={`p-3 sm:p-6 ${idx !== 2 ? 'border-r border-[rgba(201,168,76,0.1)]' : ''}`}
+            >
+              <div className="text-[18px] sm:text-[24px] mb-1 sm:mb-2">{pillar.icon}</div>
+              <div 
+                style={{ 
+                  fontFamily: "'Syne', sans-serif", 
+                  fontWeight: 700, 
+                  color: pillar.color,
+                  lineHeight: 1.1,
+                  marginBottom: "4px"
+                }}
+                className="text-[12px] sm:text-[18px]"
+              >
+                {pillar.title}
+              </div>
+              <div 
+                style={{ 
+                  fontSize: "9px",
+                  lineHeight: "1.4",
+                  color: "rgba(240, 232, 213, 0.5)", 
+                }}
+                className="sm:text-[11px]"
+              >
+                {pillar.desc}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent z-10" />
     </section>
   );
 };

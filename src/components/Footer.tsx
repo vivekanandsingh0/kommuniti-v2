@@ -1,85 +1,202 @@
+import { motion } from "framer-motion";
+
 const Footer = () => {
+  const platformLinks = [
+    { label: "🗺️ Kommute", color: "#6BBFB5" },
+    { label: "🎓 Konnect", color: "#FF6B35" },
+    { label: "⚡ Kreate", color: "#AAFF00" },
+    { label: "📖 KO Reads", color: "#C77DFF" },
+    { label: "🛒 KO Store", color: "#C9A84C" },
+  ];
+
+  const communityLinks = [
+    "Find a Kore",
+    "Start a Kore",
+    "Kore Directory",
+    "Founding 50",
+    "KO Passport",
+  ];
+
+  const companyLinks = [
+    "About Kommuniti",
+    "For Investors",
+    "NGO Partners",
+    "Press & Media",
+    "Contact Us",
+  ];
+
+  const legalLinks = [
+    "Privacy Policy",
+    "Terms of Service",
+    "Cookie Policy",
+    "Grievance Officer",
+  ];
+
   return (
-    <footer className="border-t border-border bg-background">
-      <div className="max-w-6xl mx-auto px-6 sm:px-8">
-        {/* Pixel divider bar */}
-        <div className="flex gap-[2px] py-6">
-          {Array.from({ length: 60 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-[3px] flex-1"
-              style={{
-                backgroundColor:
-                  i % 4 === 0
-                    ? "hsl(var(--primary) / 0.4)"
-                    : i % 7 === 0
-                      ? "hsl(var(--accent) / 0.3)"
-                      : "hsl(var(--foreground) / 0.05)",
+    <footer className="bg-[#0B1828] pt-16 pb-8 border-t border-[rgba(201,168,76,0.1)]">
+      <div className="container mx-auto px-6 lg:px-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
+          {/* Brand Info */}
+          <div className="lg:col-span-2">
+            <div className="flex items-center gap-2 mb-6">
+              <span className="text-[28px]">🌻</span>
+              <span 
+                style={{ 
+                  fontFamily: "'Syne', sans-serif", 
+                  fontWeight: 800, 
+                  fontSize: "22px",
+                  color: "#F0E8D5",
+                  lineHeight: 1
+                }}
+              >
+                Kommu<span style={{ color: "#F5C842" }}>ni</span><span style={{ color: "#E63946" }}>t</span>i
+              </span>
+            </div>
+            <div 
+              style={{ 
+                fontFamily: "'Cormorant Garamond', serif", 
+                fontStyle: "italic", 
+                fontSize: "16px", 
+                color: "rgba(240, 232, 213, 0.6)", 
+                marginBottom: "16px" 
               }}
-            />
-          ))}
-        </div>
-
-        <div className="grid sm:grid-cols-3 gap-10 py-10">
-          {/* Brand */}
-          <div>
-            <p className="font-pixel text-[10px] text-primary mb-4 tracking-wider">KOMMUNITI</p>
-            <p className="text-sm text-foreground/30 leading-relaxed">
-              A global community of the people, by the people, for the people. Decentralised. International. Non-partisan.
+            >
+              A Feeling of Home.
+            </div>
+            <p 
+              style={{ 
+                fontSize: "12px", 
+                color: "rgba(240, 232, 213, 0.5)", 
+                lineHeight: 1.8, 
+                maxWidth: "320px",
+                marginBottom: "24px"
+              }}
+            >
+              Building resilient communities through commerce, creativity, and collective action. Based in Kerala, rooted everywhere.
             </p>
+            <a 
+              href="#app" 
+              className="inline-block no-underline transition-all hover:brightness-110 active:scale-95"
+              style={{
+                background: "#C9A84C",
+                color: "#0B1828",
+                fontFamily: "'Rajdhani', sans-serif",
+                fontWeight: 700,
+                fontSize: "11px",
+                letterSpacing: "1.5px",
+                textTransform: "uppercase",
+                padding: "10px 20px",
+              }}
+            >
+              Get the App →
+            </a>
           </div>
 
-          {/* Links */}
+          {/* Platform */}
           <div>
-            <p className="font-pixel text-[8px] text-foreground/50 mb-4 tracking-wider">LINKS</p>
-            <div className="space-y-3">
-              {[
-                { label: "About Us", href: "#about" },
-                { label: "Programs", href: "#programs" },
-                { label: "KO Reads", href: "#koreads" },
-                { label: "KOKO Store", href: "#" },
-              ].map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="block text-sm text-foreground/30 hover:text-primary transition-colors"
-                >
-                  {link.label}
-                </a>
+            <h4 
+              style={{ 
+                fontSize: "9px", 
+                letterSpacing: "2px", 
+                textTransform: "uppercase", 
+                color: "rgba(240, 232, 213, 0.4)", 
+                marginBottom: "20px" 
+              }}
+            >
+              Platform
+            </h4>
+            <ul className="list-none p-0 m-0 space-y-3">
+              {platformLinks.map((link) => (
+                <li key={link.label}>
+                  <a 
+                    href="#" 
+                    style={{ color: link.color }}
+                    className="text-[13px] no-underline hover:opacity-80 transition-opacity"
+                  >
+                    {link.label}
+                  </a>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
 
-          {/* Social */}
+          {/* Community */}
           <div>
-            <p className="font-pixel text-[8px] text-foreground/50 mb-4 tracking-wider">CONNECT</p>
-            <div className="space-y-3">
-              {[
-                { label: "Instagram", href: "https://www.instagram.com/thekommuniti" },
-                { label: "LinkedIn", href: "https://www.linkedin.com/company/kommuniti144" },
-              ].map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-sm text-foreground/30 hover:text-accent transition-colors"
-                >
-                  {social.label}
-                </a>
+            <h4 
+              style={{ 
+                fontSize: "9px", 
+                letterSpacing: "2px", 
+                textTransform: "uppercase", 
+                color: "rgba(240, 232, 213, 0.4)", 
+                marginBottom: "20px" 
+              }}
+            >
+              Community
+            </h4>
+            <ul className="list-none p-0 m-0 space-y-3">
+              {communityLinks.map((link) => (
+                <li key={link}>
+                  <a 
+                    href="#" 
+                    className="text-[13px] text-[rgba(240,232,213,0.6)] no-underline hover:text-[#C9A84C] transition-colors"
+                  >
+                    {link}
+                  </a>
+                </li>
               ))}
-            </div>
+            </ul>
+          </div>
+
+          {/* Company */}
+          <div>
+            <h4 
+              style={{ 
+                fontSize: "9px", 
+                letterSpacing: "2px", 
+                textTransform: "uppercase", 
+                color: "rgba(240, 232, 213, 0.4)", 
+                marginBottom: "20px" 
+              }}
+            >
+              Company
+            </h4>
+            <ul className="list-none p-0 m-0 space-y-3">
+              {companyLinks.map((link) => (
+                <li key={link}>
+                  <a 
+                    href="#" 
+                    className="text-[13px] text-[rgba(240,232,213,0.6)] no-underline hover:text-[#C9A84C] transition-colors"
+                  >
+                    {link}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
-        {/* Bottom */}
-        <div className="border-t border-border py-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="font-pixel text-[7px] text-foreground/20 tracking-wider">
-            © 2026 KOMMUNITI. ALL RIGHTS RESERVED.
-          </p>
-          <p className="text-xs text-foreground/15">
-            Built with ♥ for the kommuniti
-          </p>
+        {/* Bottom Bar */}
+        <div className="pt-8 border-t border-[rgba(201,168,76,0.1)] flex flex-col lg:flex-row justify-between items-center gap-6">
+          <div 
+            style={{ 
+              fontSize: "11px", 
+              color: "rgba(240, 232, 213, 0.35)", 
+              textAlign: "center" 
+            }}
+          >
+            © 2026 Kommuniti Private Limited · Registered in Kerala, India · CIN: U74999KL2026PTC083000
+          </div>
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+            {legalLinks.map((link) => (
+              <a 
+                key={link} 
+                href="#" 
+                className="text-[11px] text-[rgba(240,232,213,0.4)] no-underline hover:text-[#F0E8D5] transition-colors"
+              >
+                {link}
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </footer>
