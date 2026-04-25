@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
@@ -21,190 +21,207 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav
-      className="fixed top-0 left-0 right-0 z-50 flex items-center"
-      style={{
-        background: "rgba(11, 24, 40, 0.98)",
-        borderBottom: "1px solid rgba(201, 168, 76, 0.2)",
-        padding: "14px 28px",
-        gap: "20px",
-        backdropFilter: "blur(12px)",
-        height: "72px"
-      }}
-    >
-      {/* Logo */}
-      <a href="#" className="flex items-center gap-2 transition-transform hover:scale-[1.02] no-underline">
-        <span style={{ fontSize: "20px" }}>🌻</span>
-        <span 
-          className="hidden sm:block" 
-            style={{ 
-              fontFamily: "'Syne', sans-serif", 
-              fontWeight: 800, 
-              fontSize: "20px", 
-              letterSpacing: "-0.5px", 
-              lineHeight: 1,
-              color: "#F0E8D5"
-            }}
+    <>
+      <nav
+        className="fixed top-0 left-0 right-0 z-[100]"
+        style={{
+          background: "#0B1828",
+          borderBottom: "1px solid rgba(201, 168, 76, 0.2)",
+          backdropFilter: "blur(12px)",
+          height: "72px"
+        }}
+      >
+        <div 
+          className="flex items-center w-full h-full"
+          style={{ 
+            padding: "0 20px",
+            gap: "15px"
+          }}
         >
-          Kommu<span style={{ color: "#F5C842" }}>ni</span><span style={{ color: "#E63946" }}>t</span>i
-        </span>
-      </a>
-
-      {/* Desktop Links */}
-      <div className="hidden lg:flex items-center justify-center flex-1" style={{ gap: "32px" }}>
-        {navLinks.map((link) => (
-          <a
-            key={link.label}
-            href={link.href}
-            className="hover:opacity-80 transition-all no-underline flex items-center gap-1.5"
-            style={{
-              fontFamily: "'Rajdhani', sans-serif",
-              fontSize: "13px",
-              fontWeight: 600,
-              letterSpacing: "1px",
-              textTransform: "uppercase",
-              color: link.color
-            }}
-          >
-            {link.icon && <span style={{ fontSize: "16px" }}>{link.icon}</span>}
-            {link.label}
+          {/* Logo */}
+          <a href="#" className="flex items-center gap-1.5 no-underline">
+            <span className="text-[16px] sm:text-[20px]">🌻</span>
+            <span 
+                style={{ 
+                  fontFamily: "'Syne', sans-serif", 
+                  fontWeight: 800, 
+                  letterSpacing: "-0.5px", 
+                  lineHeight: 1,
+                  color: "#F0E8D5"
+                }}
+                className="text-[16px] sm:text-[20px]"
+            >
+              Kommu<span style={{ color: "#F5C842" }}>ni</span><span style={{ color: "#E63946" }}>t</span>i
+            </span>
           </a>
-        ))}
-      </div>
 
-      {/* Right side elements */}
-      <div className="hidden md:flex items-center" style={{ gap: "12px" }}>
-        {/* KO Coin Badge */}
-        <div 
-          style={{
-            background: "rgba(201, 168, 76, 0.15)",
-            border: "1.5px solid #C9A84C",
-            borderRadius: "24px",
-            padding: "6px 14px 6px 8px",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "6px",
-            fontFamily: "'Rajdhani', sans-serif",
-            fontWeight: 700,
-            fontSize: "15px",
-            color: "#C9A84C"
-          }}
-        >
-          <div 
-            style={{
-              width: "22px",
-              height: "22px",
-              borderRadius: "50%",
-              background: "radial-gradient(circle at 35% 35%, #FFE066, #C9A84C)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "10px"
-            }}
-          >
-            🪙
+          {/* Desktop Links */}
+          <div className="hidden lg:flex items-center justify-center flex-1" style={{ gap: "32px" }}>
+            {navLinks.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                className="hover:opacity-80 transition-all no-underline flex items-center gap-1.5"
+                style={{
+                  fontFamily: "'Rajdhani', sans-serif",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  letterSpacing: "1px",
+                  textTransform: "uppercase",
+                  color: link.color
+                }}
+              >
+                {link.icon && <span style={{ fontSize: "16px" }}>{link.icon}</span>}
+                {link.label}
+              </a>
+            ))}
           </div>
-          840
+
+          {/* Right side elements (Desktop) */}
+          <div className="hidden md:flex items-center" style={{ gap: "12px" }}>
+            <div 
+              style={{
+                background: "rgba(201, 168, 76, 0.15)",
+                border: "1.5px solid #C9A84C",
+                borderRadius: "24px",
+                padding: "4px 12px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                fontFamily: "'Rajdhani', sans-serif",
+                fontWeight: 700,
+                fontSize: "14px",
+                color: "#C9A84C"
+              }}
+            >
+              🪙 840
+            </div>
+            <div 
+              style={{
+                width: "34px",
+                height: "34px",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #6BBFB5, #4895EF)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: "2px solid rgba(201, 168, 76, 0.4)",
+              }}
+            >
+               👤
+            </div>
+            <a 
+              href="#app" 
+              className="no-underline"
+              style={{
+                background: "#C9A84C",
+                color: "#0B1828",
+                fontFamily: "'Rajdhani', sans-serif",
+                fontWeight: 700,
+                fontSize: "11px",
+                letterSpacing: "1px",
+                textTransform: "uppercase",
+                padding: "8px 16px"
+              }}
+            >
+              Get App
+            </a>
+          </div>
+
+          {/* Mobile Toggle */}
+          <div className="flex lg:hidden items-center ml-auto">
+             <button
+                className="text-[#F0E8D5] p-2"
+                onClick={() => setMobileOpen(!mobileOpen)}
+              >
+                {mobileOpen ? <X size={28} /> : <Menu size={28} />}
+              </button>
+          </div>
         </div>
+      </nav>
 
-        {/* User Avatar */}
-        <div 
-          style={{
-            width: "34px",
-            height: "34px",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, #6BBFB5, #4895EF)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "14px",
-            border: "2px solid rgba(201, 168, 76, 0.4)",
-            cursor: "pointer"
-          }}
-        >
-           👤
-        </div>
-
-        {/* CTA Button */}
-        <a 
-          href="#app" 
-          className="hover:brightness-110 transition-all no-underline"
-          style={{
-            background: "#C9A84C",
-            color: "#0B1828",
-            fontFamily: "'Rajdhani', sans-serif",
-            fontWeight: 700,
-            fontSize: "11px",
-            letterSpacing: "1.5px",
-            textTransform: "uppercase",
-            padding: "8px 16px"
-          }}
-        >
-          Get the App
-        </a>
-      </div>
-
-      {/* Mobile Toggle */}
-      <div className="flex lg:hidden items-center ml-auto">
-         <button
-            className="text-[#F0E8D5] hover:text-[#C9A84C] transition-colors p-2"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
-          >
-            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-      </div>
-
-      {/* Mobile Menu */}
+      {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="lg:hidden fixed inset-0 top-[72px] bg-navy/98 backdrop-blur-2xl z-40 border-t border-gold/10"
-            style={{ background: "rgba(11, 24, 40, 0.98)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[90] lg:hidden"
+            style={{ 
+              background: "#0B1828",
+              paddingTop: "72px"
+            }}
           >
-            <div className="flex flex-col h-full py-10 px-8 space-y-8 overflow-y-auto">
-              <div className="space-y-6">
-                  <p className="text-[10px] tracking-[0.3em] text-[#C9A84C] opacity-50 uppercase" style={{ fontFamily: "'Rajdhani', sans-serif" }}>Navigation</p>
-                  {navLinks.map((link) => (
-                  <a
-                      key={link.label}
-                      href={link.href}
-                      onClick={() => setMobileOpen(false)}
-                      className="block transition-colors py-2 tracking-tight uppercase no-underline"
-                      style={{
-                        fontFamily: "'Syne', sans-serif",
-                        fontSize: "30px",
-                        fontWeight: 800,
-                        color: link.color.includes("rgba") ? "#F0E8D5" : link.color
-                      }}
+            <div className="flex flex-col h-full p-6 overflow-y-auto">
+              <div className="mb-8">
+                  <div 
+                    style={{ 
+                      fontSize: "9px", 
+                      letterSpacing: "3px", 
+                      textTransform: "uppercase", 
+                      color: "#C9A84C",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      marginBottom: "24px"
+                    }}
                   >
-                      {link.label}
-                  </a>
-                  ))}
+                    <span style={{ width: "24px", height: "1px", background: "#C9A84C" }}></span>
+                    Navigation
+                  </div>
+                  <div className="flex flex-col gap-5">
+                    {navLinks.map((link) => (
+                    <a
+                        key={link.label}
+                        href={link.href}
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-3 no-underline py-1 transition-all active:opacity-60"
+                        style={{
+                          fontFamily: "'Rajdhani', sans-serif",
+                          fontSize: "15px",
+                          fontWeight: 700,
+                          letterSpacing: "1px",
+                          textTransform: "uppercase",
+                          color: link.color.includes("rgba") ? "#F0E8D5" : link.color
+                        }}
+                    >
+                        {link.icon && <span style={{ fontSize: "18px" }}>{link.icon}</span>}
+                        {link.label}
+                    </a>
+                    ))}
+                  </div>
               </div>
               
-              <div className="pt-8 border-t border-gold/10 space-y-8">
-                  <div className="flex items-center justify-between">
-                      <div className="flex flex-col gap-1">
-                          <p className="text-[10px] tracking-[0.3em] text-[#C9A84C] opacity-50 uppercase" style={{ fontFamily: "'Rajdhani', sans-serif" }}>Account</p>
-                          <div className="text-2xl font-bold text-[#C9A84C] flex items-center gap-2" style={{ fontFamily: "'Space Mono', monospace" }}>
-                              🪙 840 <span className="text-xs uppercase tracking-widest ml-2" style={{ fontFamily: "'Rajdhani', sans-serif", color: "rgba(201, 168, 76, 0.6)" }}>Coins Earned</span>
+              <div className="mt-auto pt-8 border-t border-[rgba(201,168,76,0.1)]">
+                  <div className="flex items-center justify-between mb-8">
+                      <div>
+                          <p 
+                            style={{ 
+                              fontSize: "8px", 
+                              letterSpacing: "2px", 
+                              textTransform: "uppercase", 
+                              color: "rgba(201, 168, 76, 0.5)",
+                              fontFamily: "'Rajdhani', sans-serif",
+                              marginBottom: "4px"
+                            }}
+                          >
+                            Your Wallet
+                          </p>
+                          <div className="text-2xl font-bold text-[#C9A84C]" style={{ fontFamily: "'Space Mono', monospace" }}>
+                              🪙 840
                           </div>
                       </div>
                       <div 
                         style={{
-                          width: "56px",
-                          height: "56px",
+                          width: "50px",
+                          height: "50px",
                           borderRadius: "50%",
                           background: "linear-gradient(135deg, #6BBFB5, #4895EF)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          fontSize: "24px",
+                          fontSize: "20px",
                           border: "2px solid rgba(201, 168, 76, 0.4)"
                         }}
                       >
@@ -212,33 +229,33 @@ const Navbar = () => {
                       </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 gap-4">
-                      <a 
-                        href="#app" 
-                        onClick={() => setMobileOpen(false)} 
-                        className="w-full text-center no-underline"
-                        style={{
-                          background: "#C9A84C",
-                          color: "#0B1828",
-                          fontFamily: "'Rajdhani', sans-serif",
-                          fontWeight: 700,
-                          fontSize: "14px",
-                          letterSpacing: "2px",
-                          textTransform: "uppercase",
-                          padding: "18px"
-                        }}
-                      >
-                          Get the App ↓
-                      </a>
+                  <div className="flex justify-center pb-12">
+                    <a 
+                      href="#app" 
+                      onClick={() => setMobileOpen(false)} 
+                      className="no-underline transition-all active:scale-95"
+                      style={{
+                        background: "#C9A84C",
+                        color: "#0B1828",
+                        fontFamily: "'Rajdhani', sans-serif",
+                        fontWeight: 700,
+                        fontSize: "12px",
+                        letterSpacing: "1.5px",
+                        textTransform: "uppercase",
+                        padding: "10px 24px",
+                        textAlign: "center"
+                      }}
+                    >
+                        App ↓
+                    </a>
                   </div>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </>
   );
 };
 
 export default Navbar;
-
