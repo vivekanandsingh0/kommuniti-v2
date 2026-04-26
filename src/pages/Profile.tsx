@@ -1,25 +1,22 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { LogOut, ArrowLeft, Trophy, Zap, Map, Coins, Wallet, Flame } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const Profile = () => {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading, refreshProfile } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate("/auth");
-      } else {
-        setUser(session.user);
-      }
-      setLoading(false);
-    });
-  }, [navigate]);
+    if (!loading && !user) {
+      navigate("/auth");
+    } else if (user) {
+      refreshProfile();
+    }
+  }, [user, loading, navigate]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -27,31 +24,37 @@ const Profile = () => {
     navigate("/");
   };
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0B1828] flex items-center justify-center">
+        <div className="text-[#C9A84C] animate-pulse uppercase tracking-[4px] text-[10px]">
+          Verifying Member Session...
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) return null;
 
   const kssDimensions = [
-    { label: "Gathering Consistency", score: 88, max: 100, color: "#C9A84C" },
-    { label: "Member Diversity", score: 130, max: 150, color: "#6BBFB5" },
-    { label: "KOKO Store Listings", score: 65, max: 80, color: "#FF6B35" },
-    { label: "Kreate Impact", score: 120, max: 150, color: "#C77DFF" },
-    { label: "Konnect Sessions", score: 82, max: 100, color: "#4895EF" },
-    { label: "Kommute Events", score: 88, max: 100, color: "#6BBFB5" },
-    { label: "Role Rotation", score: 75, max: 80, color: "#AAFF00" },
-    { label: "Stories & Transparency", score: 70, max: 80, color: "#C9A84C" },
+    { label: "Gathering Consistency", score: 0, max: 100, color: "#C9A84C" },
+    { label: "Member Diversity", score: 0, max: 150, color: "#6BBFB5" },
+    { label: "KOKO Store Listings", score: 0, max: 80, color: "#FF6B35" },
+    { label: "Kreate Impact", score: 0, max: 150, color: "#C77DFF" },
+    { label: "Konnect Sessions", score: 0, max: 100, color: "#4895EF" },
+    { label: "Kommute Events", score: 0, max: 100, color: "#6BBFB5" },
+    { label: "Role Rotation", score: 0, max: 80, color: "#AAFF00" },
+    { label: "Stories & Transparency", score: 0, max: 80, color: "#C9A84C" },
   ];
 
   const impactStats = [
-    { label: "This Month Earnings", value: "₹4,520", color: "#4CAF50" },
-    { label: "Deliveries Done", value: "34", color: "#6BBFB5" },
-    { label: "Issues Solved", value: "12", color: "#E63946" },
-    { label: "KO Reads Contributions", value: "3", color: "#C77DFF" },
+    { label: "This Month Earnings", value: "₹0", color: "#4CAF50" },
+    { label: "Deliveries Done", value: "0", color: "#6BBFB5" },
+    { label: "Issues Solved", value: "0", color: "#E63946" },
+    { label: "KO Reads Contributions", value: "0", color: "#C77DFF" },
   ];
 
-  const achievements = [
-    { icon: "🏅", title: "Trusted Runner", desc: "5-star delivery streak", color: "#C9A84C" },
-    { icon: "🌱", title: "Campaign Pioneer", desc: "First-tagged 2 viral campaigns", color: "#6BBFB5" },
-    { icon: "📖", title: "KO Contributor", desc: "3 accepted KO Reads submissions", color: "#C77DFF" },
-  ];
+  const achievements: any[] = [];
 
   return (
     <div className="min-h-screen bg-[#0B1828] text-[#F0E8D5]">
@@ -66,10 +69,10 @@ const Profile = () => {
                 className="w-32 h-32 rounded-full flex items-center justify-center text-5xl border-[4px] border-[rgba(201,168,76,0.4)]"
                 style={{ background: "linear-gradient(135deg, #6BBFB5, #4895EF)" }}
               >
-                🦸
+                👨‍🚀
               </div>
               <div className="absolute -bottom-2 right-0 bg-[#C9A84C] text-[#0B1828] px-3 py-1 font-bold text-xs border-2 border-[#0B1828]">
-                LVL 4
+                LVL 0
               </div>
             </div>
 
@@ -79,7 +82,7 @@ const Profile = () => {
                 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800 }}
                 className="text-4xl mb-2"
               >
-                {user?.email?.split('@')[0].toUpperCase() || "COMMUNITY MEMBER"}
+                {user?.user_metadata?.full_name?.toUpperCase() || user?.email?.split('@')[0].toUpperCase() || "COMMUNITY MEMBER"}
               </h1>
               <p className="text-[rgba(240,232,213,0.5)] mb-6 flex items-center justify-center lg:justify-start gap-2">
                 <span className="text-[#6BBFB5]">🌀 Mankulam Kore Zero</span> • Branch Level • Koordinator
@@ -88,15 +91,15 @@ const Profile = () => {
               <div className="flex flex-wrap justify-center lg:justify-start gap-4">
                 <div className="bg-[rgba(201,168,76,0.1)] border border-[rgba(201,168,76,0.3)] rounded-full px-4 py-2 flex items-center gap-2">
                   <span className="text-xl">🪙</span>
-                  <span className="font-bold text-[#C9A84C]">4,200</span>
+                  <span className="font-bold text-[#C9A84C]">{user?.profile?.ko_coins || 0}</span>
                 </div>
                 <div className="bg-[rgba(76,175,80,0.15)] border border-[#4CAF50] rounded-full px-4 py-2 flex items-center gap-2 text-[#4CAF50]">
-                  <span className="font-bold text-lg">₹2,840</span>
+                  <span className="font-bold text-lg">₹0</span>
                   <span className="text-[10px] opacity-70 uppercase tracking-widest">withdrawable</span>
                 </div>
                 <div className="bg-[rgba(230,57,70,0.1)] border border-[rgba(230,57,70,0.4)] rounded-full px-4 py-2 flex items-center gap-2 text-[#E63946]">
                   <Flame size={18} />
-                  <span className="font-bold">14 weeks</span>
+                  <span className="font-bold">0 weeks</span>
                 </div>
               </div>
             </div>
@@ -108,7 +111,7 @@ const Profile = () => {
                   style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800 }}
                   className="text-4xl text-[#F0E8D5]"
                 >
-                  847
+                  0
                 </div>
                 <div className="text-[9px] uppercase tracking-widest text-[#C9A84C] mt-1">KSS Score</div>
               </div>

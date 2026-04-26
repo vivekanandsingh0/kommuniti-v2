@@ -9,6 +9,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const navigate = useNavigate();
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -28,6 +29,11 @@ const Auth = () => {
         const { error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              full_name: fullName,
+            }
+          }
         });
         if (error) throw error;
         toast.success("Check your email for confirmation!");
@@ -93,6 +99,35 @@ const Auth = () => {
           </h2>
 
           <form onSubmit={handleAuth} className="space-y-6">
+            {!isLogin && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="overflow-hidden"
+              >
+                <label 
+                  style={{ 
+                    fontSize: "10px", 
+                    letterSpacing: "2px", 
+                    textTransform: "uppercase", 
+                    color: "rgba(240, 232, 213, 0.4)",
+                    display: "block",
+                    marginBottom: "8px"
+                  }}
+                >
+                  Full Name
+                </label>
+                <input 
+                  type="text"
+                  required={!isLogin}
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full bg-transparent border-b border-[rgba(201,168,76,0.2)] text-[#F0E8D5] py-2 focus:border-[#C9A84C] outline-none transition-colors mb-2"
+                  style={{ fontFamily: "'Rajdhani', sans-serif" }}
+                />
+              </motion.div>
+            )}
+
             <div>
               <label 
                 style={{ 

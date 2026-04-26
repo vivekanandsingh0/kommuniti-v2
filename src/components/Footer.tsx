@@ -1,35 +1,35 @@
-import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const platformLinks = [
-    { label: "🗺️ Kommute", color: "#6BBFB5" },
-    { label: "🎓 Konnect", color: "#FF6B35" },
-    { label: "⚡ Kreate", color: "#AAFF00" },
-    { label: "📖 KO Reads", color: "#C77DFF" },
-    { label: "🛒 KO Store", color: "#C9A84C" },
+    { label: "🗺️ Kommute", color: "#6BBFB5", href: "/kommute" },
+    { label: "🎓 Konnect", color: "#FF6B35", href: "/konnect" },
+    { label: "⚡ Kreate", color: "#AAFF00", href: "/kreate" },
+    { label: "📖 KO Reads", color: "#C77DFF", href: "/koreads" },
+    { label: "🛒 KO Store", color: "#C9A84C", href: "/kostore" },
   ];
 
   const communityLinks = [
-    "Find a Kore",
-    "Start a Kore",
-    "Kore Directory",
-    "Founding 50",
-    "KO Passport",
+    { label: "Find a Kore", href: "/kores" },
+    { label: "Start a Kore", href: "/kreate" },
+    { label: "Kore Directory", href: "/kores" },
+    { label: "Founding 50", href: "/founding-50" },
+    { label: "KO Passport", href: "/passport" },
   ];
 
   const companyLinks = [
-    "About Kommuniti",
-    "For Investors",
-    "NGO Partners",
-    "Press & Media",
-    "Contact Us",
+    { label: "About Kommuniti", href: "/about" },
+    { label: "For Investors", href: "/investors" },
+    { label: "NGO Partners", href: "/partners" },
+    { label: "Press & Media", href: "/press" },
+    { label: "Contact Us", href: "/contact" },
   ];
 
   const legalLinks = [
-    "Privacy Policy",
-    "Terms of Service",
-    "Cookie Policy",
-    "Grievance Officer",
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms of Service", href: "/terms" },
+    { label: "Cookie Policy", href: "/cookies" },
+    { label: "Grievance Officer", href: "/grievance" },
   ];
 
   return (
@@ -38,7 +38,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
           {/* Brand Info */}
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-2 mb-6">
+            <Link to="/" className="flex items-center gap-2 mb-6 no-underline">
               <span className="text-[28px]">🌻</span>
               <span 
                 style={{ 
@@ -51,7 +51,7 @@ const Footer = () => {
               >
                 Kommu<span style={{ color: "#F5C842" }}>ni</span><span style={{ color: "#E63946" }}>t</span>i
               </span>
-            </div>
+            </Link>
             <div 
               style={{ 
                 fontFamily: "'Cormorant Garamond', serif", 
@@ -108,13 +108,13 @@ const Footer = () => {
             <ul className="list-none p-0 m-0 space-y-3">
               {platformLinks.map((link) => (
                 <li key={link.label}>
-                  <a 
-                    href="#" 
+                  <Link 
+                    to={link.href} 
                     style={{ color: link.color }}
                     className="text-[13px] no-underline hover:opacity-80 transition-opacity"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -135,13 +135,13 @@ const Footer = () => {
             </h4>
             <ul className="list-none p-0 m-0 space-y-3">
               {communityLinks.map((link) => (
-                <li key={link}>
-                  <a 
-                    href="#" 
+                <li key={link.label}>
+                  <Link 
+                    to={link.href} 
                     className="text-[13px] text-[rgba(240,232,213,0.6)] no-underline hover:text-[#C9A84C] transition-colors"
                   >
-                    {link}
-                  </a>
+                    {link.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -162,13 +162,13 @@ const Footer = () => {
             </h4>
             <ul className="list-none p-0 m-0 space-y-3">
               {companyLinks.map((link) => (
-                <li key={link}>
-                  <a 
-                    href="#" 
+                <li key={link.label}>
+                  <Link 
+                    to={link.href} 
                     className="text-[13px] text-[rgba(240,232,213,0.6)] no-underline hover:text-[#C9A84C] transition-colors"
                   >
-                    {link}
-                  </a>
+                    {link.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -188,13 +188,13 @@ const Footer = () => {
           </div>
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
             {legalLinks.map((link) => (
-              <a 
-                key={link} 
-                href="#" 
+              <Link 
+                key={link.label} 
+                to={link.href} 
                 className="text-[11px] text-[rgba(240,232,213,0.4)] no-underline hover:text-[#F0E8D5] transition-colors"
               >
-                {link}
-              </a>
+                {link.label}
+              </Link>
             ))}
           </div>
         </div>

@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Kreate — Start a Kore · Kommuniti</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   KOMMUNITI · KREATE PAGE
+   The Kore Creation & Onboarding Experience
+   Designer Handoff Document
+   www.thekommuniti.org/kreate
+═══════════════════════════════════════════════ */
+:root{
+  --navy:#0B1828;--n2:#12243A;--n3:#0D1E30;--n4:#060D16;
+  --gold:#C9A84C;--gl:#F5C842;--gd:#8B6914;
+  --ivory:#F0E8D5;--ivd:rgba(240,232,213,.55);--ivdd:rgba(240,232,213,.28);
+  --red:#E63946;--teal:#6BBFB5;--blue:#4895EF;
+  --orange:#FF6B35;--lime:#AAFF00;--purple:#C77DFF;--green:#4CAF50;
+  --ff:'Syne',sans-serif;--fs:'Cormorant Garamond',serif;
+  --fm:'Space Mono',monospace;--fu:'Rajdhani',sans-serif;
+  --ease-out:cubic-bezier(0.22,1,0.36,1);
+  --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--navy);color:var(--ivory);
+  font-family:var(--fm);font-size:13px;line-height:1.7;
+  overflow-x:hidden;cursor:default;
+}
+
+/* ── SCANLINE OVERLAY ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.04) 3px,rgba(0,0,0,.04) 4px);
+  mix-blend-mode:multiply;
+}
+
+/* ═══ NAVIGATION ═══ */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:60px;
+  background:rgba(11,24,40,.96);
+  border-bottom:1px solid rgba(201,168,76,.14);
+  backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 40px;
+  transition:border-color .3s;
+}
+.nav-logo{
+  display:flex;align-items:center;gap:10px;text-decoration:none;
+}
+.nav-sunflower{
+  width:34px;height:34px;border-radius:50%;
+  background:radial-gradient(circle at 38% 35%,#FFE066,#C9A84C);
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  box-shadow:0 0 14px rgba(201,168,76,.35);
+  flex-shrink:0;
+}
+.nav-wordmark{
+  font-family:var(--ff);font-weight:800;font-size:18px;letter-spacing:-.5px;
+  color:var(--gold);line-height:1;
+}
+.nav-wordmark .ni{color:var(--ivory);}
+.nav-wordmark .t{color:var(--red);}
+.nav-links{display:flex;align-items:center;gap:2px;}
+.nav-link{
+  font-family:var(--fu);font-size:12px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--ivdd);text-decoration:none;padding:8px 14px;
+  transition:color .2s;border-bottom:2px solid transparent;
+}
+.nav-link:hover{color:var(--ivory);}
+.nav-link.active{color:var(--lime);border-bottom-color:var(--lime);}
+.nav-link.active.t{color:var(--teal);border-bottom-color:var(--teal);}
+.nav-link.active.o{color:var(--orange);border-bottom-color:var(--orange);}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.ko-badge{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(201,168,76,.12);border:1.5px solid rgba(201,168,76,.3);
+  border-radius:20px;padding:5px 12px 5px 7px;
+  font-family:var(--fu);font-weight:700;font-size:14px;color:var(--gold);
+}
+.ko-coin{
+  width:20px;height:20px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#FFE066,#C9A84C);
+  border:1px solid rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;font-size:9px;
+}
+.nav-cta{
+  background:var(--gold);color:var(--navy);
+  font-family:var(--fu);font-weight:700;font-size:11px;letter-spacing:1.5px;
+  text-transform:uppercase;padding:9px 18px;
+  text-decoration:none;border:none;cursor:pointer;
+  transition:background .2s,transform .15s;
+}
+.nav-cta:hover{background:var(--gl);transform:translateY(-1px);}
+
+/* ═══ HERO ═══ */
+.hero{
+  min-height:100vh;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:80px 40px 40px;
+}
+.hero-grid-bg{
+  position:absolute;inset:0;z-index:0;
+  background-image:
+    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(201,168,76,.04) 39px,rgba(201,168,76,.04) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(201,168,76,.04) 39px,rgba(201,168,76,.04) 40px);
+}
+.hero-glow{
+  position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);
+  width:800px;height:500px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(201,168,76,.06) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+.hero-content{
+  position:relative;z-index:2;text-align:center;max-width:800px;
+  animation:fadeUp .8s var(--ease-out) both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+
+.hero-kicker{
+  font-family:var(--fm);font-size:8.5px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--lime);margin-bottom:16px;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.hero-kicker::before,.hero-kicker::after{content:'';width:24px;height:1px;background:var(--lime);}
+.hero-h1{
+  font-family:var(--ff);font-weight:800;
+  font-size:clamp(52px,8vw,100px);
+  line-height:.85;letter-spacing:-4px;
+  margin-bottom:20px;
+}
+.hero-h1 .gold{color:var(--gold);}
+.hero-h1 .dim{color:rgba(240,232,213,.4);}
+.hero-serif{
+  font-family:var(--fs);font-style:italic;
+  font-size:clamp(17px,2.5vw,22px);color:var(--ivd);
+  line-height:1.55;margin-bottom:32px;max-width:580px;margin-left:auto;margin-right:auto;
+}
+.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:48px;}
+.btn-primary{
+  background:var(--gold);color:var(--navy);
+  font-family:var(--fu);font-weight:700;font-size:13px;letter-spacing:1.5px;
+  text-transform:uppercase;padding:16px 32px;
+  border:none;cursor:pointer;
+  transition:background .2s,transform .15s,box-shadow .2s;
+  text-decoration:none;display:inline-block;
+}
+.btn-primary:hover{background:var(--gl);transform:translateY(-2px);box-shadow:0 12px 32px rgba(201,168,76,.2);}
+.btn-outline{
+  background:transparent;color:var(--gold);
+  border:1.5px solid rgba(201,168,76,.4);
+  font-family:var(--fu);font-weight:700;font-size:13px;letter-spacing:1.5px;
+  text-transform:uppercase;padding:15px 32px;
+  cursor:pointer;transition:border-color .2s,color .2s,transform .15s;
+  text-decoration:none;display:inline-block;
+}
+.btn-outline:hover{border-color:var(--gold);transform:translateY(-1px);}
+
+/* Live counter strip */
+.hero-counter-strip{
+  display:flex;gap:0;border:1px solid rgba(201,168,76,.15);
+  animation:fadeUp .8s .3s var(--ease-out) both;
+}
+.counter-cell{
+  flex:1;padding:12px 20px;border-right:1px solid rgba(201,168,76,.1);
+  text-align:center;
+}
+.counter-cell:last-child{border-right:none;}
+.counter-n{
+  font-family:var(--ff);font-weight:800;font-size:26px;letter-spacing:-1px;
+  color:var(--gold);line-height:1;margin-bottom:3px;
+}
+.counter-l{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ivdd);}
+
+/* ═══ MAP SECTION ═══ */
+.map-section{
+  position:relative;padding:0 40px 80px;
+  display:flex;flex-direction:column;align-items:center;
+}
+.map-title-row{
+  text-align:center;margin-bottom:32px;max-width:700px;
+}
+.map-title-row .kicker{
+  font-family:var(--fm);font-size:8.5px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--gold);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;
+}
+.map-title-row .kicker::before,.map-title-row .kicker::after{content:'';width:20px;height:1px;background:var(--gold);}
+.map-title-row h2{
+  font-family:var(--ff);font-weight:800;font-size:clamp(28px,4vw,44px);
+  letter-spacing:-1.5px;line-height:1;margin-bottom:10px;
+}
+.map-title-row p{font-size:13px;color:var(--ivd);max-width:480px;margin:0 auto;}
+
+/* THE PIXEL MAP */
+.map-container{
+  position:relative;width:100%;max-width:1000px;
+  background:var(--n4);border:1px solid rgba(201,168,76,.15);
+  padding:24px;
+}
+.map-label{
+  font-family:var(--fm);font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(201,168,76,.45);margin-bottom:12px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.map-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--green);
+  animation:blink 2s infinite;display:inline-block;margin-right:6px;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.pixel-grid{
+  display:grid;grid-template-columns:repeat(26,1fr);gap:3px;
+}
+.cell{
+  aspect-ratio:1;border-radius:2px;cursor:pointer;
+  position:relative;transition:transform .15s,box-shadow .2s;
+  outline:none;
+}
+/* Cell states */
+.cell-grey{
+  background:rgba(240,232,213,.06);
+  border:1px solid rgba(240,232,213,.08);
+}
+.cell-grey:hover{
+  background:rgba(201,168,76,.18);border-color:rgba(201,168,76,.4);
+  transform:scale(1.15);box-shadow:0 0 8px rgba(201,168,76,.3);
+  z-index:2;
+}
+.cell-water{background:rgba(72,149,239,.1);border:1px solid rgba(72,149,239,.08);cursor:default;}
+.cell-forest-bg{background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.06);cursor:default;}
+
+/* Kore states — different colours by KSS tier */
+.cell-seed{
+  background:rgba(240,232,213,.25);border:1px solid rgba(240,232,213,.3);
+  animation:pulse-s 3s infinite;
+}
+@keyframes pulse-s{0%,100%{box-shadow:0 0 4px rgba(240,232,213,.2);}50%{box-shadow:0 0 8px rgba(240,232,213,.4);}}
+.cell-root{
+  background:var(--gold);border:1px solid var(--gl);
+  animation:pulse-g 2.5s infinite;
+  box-shadow:0 0 6px rgba(201,168,76,.5);
+}
+@keyframes pulse-g{0%,100%{box-shadow:0 0 4px rgba(201,168,76,.4);}50%{box-shadow:0 0 12px rgba(201,168,76,.7);}}
+.cell-branch{background:var(--blue);border:1px solid rgba(72,149,239,.8);box-shadow:0 0 5px rgba(72,149,239,.4);}
+.cell-canopy{background:var(--teal);border:1px solid rgba(107,191,181,.8);box-shadow:0 0 6px rgba(107,191,181,.5);}
+.cell-forest{
+  background:var(--orange);border:1px solid var(--orange);
+  box-shadow:0 0 10px rgba(255,107,53,.6);
+  animation:pulse-f 2s infinite;
+}
+@keyframes pulse-f{0%,100%{box-shadow:0 0 6px rgba(255,107,53,.5);}50%{box-shadow:0 0 16px rgba(255,107,53,.8);}}
+.cell-issue{background:var(--red);border:1px solid rgba(230,57,70,.8);animation:pulse-r 1.5s infinite;}
+@keyframes pulse-r{0%,100%{opacity:1;}50%{opacity:.5;}}
+.cell-solved{background:var(--green);border:1px solid rgba(76,175,80,.8);}
+
+/* selected state */
+.cell-selected{
+  background:var(--gold)!important;border:2px solid var(--gl)!important;
+  box-shadow:0 0 0 3px rgba(201,168,76,.3),0 0 16px rgba(201,168,76,.5)!important;
+  transform:scale(1.2)!important;z-index:5!important;animation:none!important;
+}
+/* Multi-kore split */
+.cell-dual{
+  background:conic-gradient(var(--gold) 0deg 180deg,var(--blue) 180deg 360deg);
+  border:1px solid rgba(201,168,76,.3);
+}
+.cell-triple{
+  background:conic-gradient(var(--gold) 0deg 120deg,var(--blue) 120deg 240deg,var(--teal) 240deg 360deg);
+  border:1px solid rgba(201,168,76,.3);
+}
+
+/* Map legend */
+.map-legend{
+  display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;
+  font-size:9px;color:var(--ivd);
+}
+.legend-item{display:flex;align-items:center;gap:5px;}
+.legend-dot{width:10px;height:10px;border-radius:1px;flex-shrink:0;}
+
+/* Click hint overlay */
+.click-hint{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  pointer-events:none;z-index:3;opacity:0;
+  transition:opacity .3s;text-align:center;
+}
+.map-container:hover .click-hint{opacity:1;}
+.click-hint-text{
+  font-family:var(--fm);font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--gold);background:rgba(6,13,22,.8);padding:8px 16px;
+  border:1px solid rgba(201,168,76,.3);white-space:nowrap;
+}
+
+/* ═══ KORE CREATION WIZARD ═══ */
+.wizard-panel{
+  width:100%;max-width:1000px;margin-top:16px;
+  background:var(--n2);border:1px solid rgba(201,168,76,.25);
+  border-top:3px solid var(--gold);
+  overflow:hidden;
+  max-height:0;transition:max-height .6s var(--ease-out),opacity .4s;
+  opacity:0;
+}
+.wizard-panel.open{max-height:800px;opacity:1;}
+.wizard-inner{padding:32px 36px;}
+.wizard-steps{
+  display:flex;gap:0;margin-bottom:32px;border-bottom:1px solid rgba(201,168,76,.1);
+  padding-bottom:0;
+}
+.wstep{
+  flex:1;text-align:center;padding:14px 8px 12px;
+  position:relative;cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:border-color .2s;
+}
+.wstep.active{border-bottom-color:var(--gold);}
+.wstep-num{
+  width:24px;height:24px;border-radius:50%;
+  background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);
+  color:var(--gold);font-family:var(--fm);font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 6px;transition:background .2s,border-color .2s;
+}
+.wstep.active .wstep-num,.wstep.done .wstep-num{background:var(--gold);border-color:var(--gold);color:var(--navy);}
+.wstep-label{font-family:var(--fu);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ivdd);transition:color .2s;}
+.wstep.active .wstep-label{color:var(--ivory);}
+
+/* Step content */
+.wstep-content{display:none;}
+.wstep-content.active{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;}
+.wstep-content.full{display:block!important;}
+.wstep-content.single{display:block!important;}
+
+.wfield{margin-bottom:20px;}
+.wlabel{
+  font-family:var(--fm);font-size:8.5px;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--gold);display:block;margin-bottom:8px;
+}
+.winput,.wselect,.wtextarea{
+  width:100%;background:rgba(240,232,213,.05);
+  border:1px solid rgba(201,168,76,.2);
+  color:var(--ivory);font-family:var(--fm);font-size:12px;
+  padding:12px 14px;
+  transition:border-color .2s,background .2s;
+  outline:none;
+}
+.winput:focus,.wselect:focus,.wtextarea:focus{
+  border-color:rgba(201,168,76,.6);background:rgba(201,168,76,.06);
+}
+.winput::placeholder,.wtextarea::placeholder{color:var(--ivdd);}
+.wselect{cursor:pointer;}
+option{background:var(--n2);}
+.wtextarea{resize:vertical;min-height:80px;}
+.wchar-count{font-size:10px;color:var(--ivdd);text-align:right;margin-top:4px;}
+
+/* Gathering day picker */
+.day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.day-btn{
+  background:rgba(240,232,213,.04);border:1px solid rgba(201,168,76,.15);
+  color:var(--ivdd);font-family:var(--fu);font-size:12px;font-weight:600;
+  padding:10px 4px;text-align:center;cursor:pointer;
+  transition:background .2s,border-color .2s,color .2s;
+}
+.day-btn:hover{background:rgba(201,168,76,.1);border-color:rgba(201,168,76,.3);color:var(--ivory);}
+.day-btn.selected{background:var(--gold);border-color:var(--gold);color:var(--navy);}
+
+/* Invite flow */
+.invite-section{margin-top:20px;}
+.invite-link-box{
+  background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);
+  padding:14px 16px;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;margin-bottom:16px;
+}
+.invite-link-url{font-family:var(--fm);font-size:11px;color:var(--ivd);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.copy-btn{
+  background:transparent;border:1px solid rgba(201,168,76,.3);color:var(--gold);
+  font-family:var(--fu);font-size:10px;letter-spacing:1px;text-transform:uppercase;
+  padding:6px 14px;cursor:pointer;flex-shrink:0;
+  transition:background .2s;
+}
+.copy-btn:hover{background:rgba(201,168,76,.1);}
+.copy-btn.copied{border-color:var(--green);color:var(--green);}
+
+/* Member invite row */
+.invite-row{
+  display:flex;gap:8px;align-items:center;margin-bottom:8px;
+}
+.invite-member{
+  display:flex;align-items:center;gap:10px;flex:1;
+  background:rgba(240,232,213,.04);border:1px solid rgba(201,168,76,.1);
+  padding:10px 14px;
+}
+.member-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--teal),var(--blue));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff);font-weight:700;font-size:13px;color:#fff;
+  flex-shrink:0;
+}
+.member-name{font-family:var(--fu);font-weight:700;font-size:13px;color:var(--ivory);}
+.member-status{font-size:10px;color:var(--ivdd);margin-top:1px;}
+.member-status.pending{color:var(--gold);}
+.member-status.joined{color:var(--green);}
+.invite-remove{
+  background:transparent;border:none;color:var(--ivdd);cursor:pointer;
+  font-size:16px;padding:8px;transition:color .2s;
+}
+.invite-remove:hover{color:var(--red);}
+
+/* Add member input */
+.add-member-row{display:flex;gap:8px;margin-top:12px;}
+.add-member-input{
+  flex:1;background:rgba(240,232,213,.04);border:1px solid rgba(201,168,76,.2);
+  color:var(--ivory);font-family:var(--fm);font-size:12px;padding:11px 14px;
+  outline:none;transition:border-color .2s;
+}
+.add-member-input:focus{border-color:rgba(201,168,76,.5);}
+.add-member-input::placeholder{color:var(--ivdd);}
+.add-btn{
+  background:var(--gold);color:var(--navy);
+  font-family:var(--fu);font-weight:700;font-size:11px;letter-spacing:1px;
+  text-transform:uppercase;padding:0 18px;border:none;cursor:pointer;
+  transition:background .2s;
+}
+.add-btn:hover{background:var(--gl);}
+
+/* Zone info sidebar */
+.zone-info{
+  background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.2);
+  padding:20px;position:sticky;top:80px;
+}
+.zi-title{
+  font-family:var(--fm);font-size:8px;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.zi-title::before{content:'';width:14px;height:1px;background:var(--gold);}
+.zone-pixel{
+  width:60px;height:60px;margin:0 auto 14px;
+  background:var(--gold);border:2px solid var(--gl);
+  box-shadow:0 0 20px rgba(201,168,76,.4);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;
+}
+.zi-stat{padding:9px 0;border-bottom:1px solid rgba(201,168,76,.1);}
+.zi-stat:last-of-type{border-bottom:none;}
+.zi-stat-l{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ivdd);margin-bottom:2px;}
+.zi-stat-v{font-family:var(--fu);font-weight:700;font-size:15px;color:var(--ivory);}
+
+/* Wizard nav */
+.wizard-nav{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:28px;padding-top:20px;
+  border-top:1px solid rgba(201,168,76,.1);
+}
+.wbtn-back{
+  background:transparent;border:1px solid rgba(201,168,76,.2);color:var(--ivd);
+  font-family:var(--fu);font-size:11px;letter-spacing:1px;text-transform:uppercase;
+  padding:10px 22px;cursor:pointer;transition:border-color .2s,color .2s;
+}
+.wbtn-back:hover{border-color:rgba(201,168,76,.4);color:var(--ivory);}
+.wbtn-next{
+  background:var(--gold);color:var(--navy);
+  font-family:var(--fu);font-weight:700;font-size:11px;letter-spacing:1.5px;
+  text-transform:uppercase;padding:11px 28px;border:none;cursor:pointer;
+  transition:background .2s,transform .15s;
+}
+.wbtn-next:hover{background:var(--gl);transform:translateY(-1px);}
+
+/* Success screen */
+.success-screen{
+  text-align:center;padding:40px 20px;display:none;
+}
+.success-pixel{
+  width:80px;height:80px;margin:0 auto 24px;
+  background:var(--gold);border:2px solid var(--gl);
+  box-shadow:0 0 30px rgba(201,168,76,.5),0 0 60px rgba(201,168,76,.2);
+  animation:celebratePx 1s var(--ease-spring) both;
+}
+@keyframes celebratePx{from{transform:scale(0) rotate(-20deg);opacity:0;}to{transform:scale(1) rotate(0);opacity:1;}}
+.success-h{
+  font-family:var(--ff);font-weight:800;font-size:36px;letter-spacing:-1.5px;
+  color:var(--gold);margin-bottom:10px;
+}
+.success-p{font-size:13px;color:var(--ivd);max-width:440px;margin:0 auto 28px;}
+.success-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
+/* ═══ WHAT IS A KORE ═══ */
+.what-section{
+  padding:100px 40px;max-width:1200px;margin:0 auto;
+}
+.section-header{margin-bottom:56px;}
+.section-header .kicker{
+  font-family:var(--fm);font-size:8.5px;letter-spacing:3.5px;text-transform:uppercase;
+  color:var(--teal);display:flex;align-items:center;gap:10px;margin-bottom:14px;
+}
+.section-header .kicker::before{content:'';width:20px;height:1px;background:var(--teal);}
+.section-header h2{
+  font-family:var(--ff);font-weight:800;font-size:clamp(32px,5vw,56px);
+  letter-spacing:-2px;line-height:.9;margin-bottom:14px;
+}
+.section-header p{font-size:14px;color:var(--ivd);max-width:540px;line-height:1.75;}
+
+/* Kore anatomy diagram */
+.kore-anatomy{
+  display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;
+}
+.anatomy-visual{
+  position:relative;aspect-ratio:1;max-width:440px;
+}
+.anatomy-map{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:4px;
+  background:var(--n4);border:1px solid rgba(201,168,76,.15);
+  padding:16px;
+}
+.anatomy-cell{aspect-ratio:1;border-radius:2px;}
+
+/* Rings indicating zone levels */
+.zone-ring{
+  position:absolute;inset:0;
+  border-radius:0;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+.zone-label{
+  position:absolute;font-family:var(--fm);font-size:8px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--gold);white-space:nowrap;
+}
+
+/* Feature cards */
+.feature-stack{display:flex;flex-direction:column;gap:12px;}
+.feature-card{
+  background:var(--n2);border:1px solid rgba(201,168,76,.12);
+  border-left:3px solid var(--gold);padding:18px 20px;
+  transition:border-left-color .2s,background .2s;
+}
+.feature-card:hover{background:rgba(201,168,76,.03);}
+.feature-card.t{border-left-color:var(--teal);}
+.feature-card.r{border-left-color:var(--red);}
+.feature-card.b{border-left-color:var(--blue);}
+.feature-card.g{border-left-color:var(--green);}
+.feature-card.o{border-left-color:var(--orange);}
+.fc-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.fc-icon{font-size:16px;}
+.fc-title{font-family:var(--fu);font-weight:700;font-size:13px;color:var(--ivory);}
+.fc-body{font-size:11.5px;color:var(--ivd);line-height:1.65;}
+
+/* ═══ TIER SYSTEM ═══ */
+.tiers-section{
+  background:var(--n3);border-top:1px solid rgba(201,168,76,.1);border-bottom:1px solid rgba(201,168,76,.1);
+  padding:80px 40px;
+}
+.tiers-inner{max-width:1200px;margin:0 auto;}
+.tiers-header{text-align:center;margin-bottom:56px;}
+.tiers-header .kicker{
+  font-family:var(--fm);font-size:8.5px;letter-spacing:3.5px;text-transform:uppercase;
+  color:var(--orange);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;
+}
+.tiers-header .kicker::before,.tiers-header .kicker::after{content:'';width:20px;height:1px;background:var(--orange);}
+.tiers-header h2{
+  font-family:var(--ff);font-weight:800;font-size:clamp(28px,4vw,48px);
+  letter-spacing:-2px;line-height:1;margin-bottom:10px;
+}
+.tiers-header p{font-size:13px;color:var(--ivd);max-width:480px;margin:0 auto;}
+
+/* Tier cards */
+.tiers-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:0;
+  border:1px solid rgba(201,168,76,.15);
+}
+.tier-card{
+  padding:24px 18px;border-right:1px solid rgba(201,168,76,.1);
+  transition:background .25s;position:relative;
+  overflow:hidden;
+}
+.tier-card:last-child{border-right:none;}
+.tier-card::before{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
+}
+.tc-seed::before{background:rgba(240,232,213,.25);}
+.tc-root::before{background:var(--gold);}
+.tc-branch::before{background:var(--blue);}
+.tc-canopy::before{background:var(--teal);}
+.tc-forest::before{background:var(--orange);}
+.tier-card:hover{background:rgba(201,168,76,.03);}
+
+.tier-pixel{
+  width:36px;height:36px;border-radius:3px;margin-bottom:14px;
+  display:flex;align-items:center;justify-content:center;
+}
+.tp-seed{background:rgba(240,232,213,.2);border:1px solid rgba(240,232,213,.3);}
+.tp-root{background:var(--gold);border:1px solid var(--gl);box-shadow:0 0 8px rgba(201,168,76,.4);}
+.tp-branch{background:var(--blue);box-shadow:0 0 8px rgba(72,149,239,.3);}
+.tp-canopy{background:var(--teal);box-shadow:0 0 8px rgba(107,191,181,.4);}
+.tp-forest{background:var(--orange);box-shadow:0 0 12px rgba(255,107,53,.5);}
+
+.tier-name{font-family:var(--ff);font-weight:800;font-size:18px;letter-spacing:-.5px;margin-bottom:4px;}
+.tier-range{
+  font-family:var(--fm);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--gold);margin-bottom:14px;
+}
+.tc-branch .tier-range{color:var(--blue);}
+.tc-canopy .tier-range{color:var(--teal);}
+.tc-forest .tier-range{color:var(--orange);}
+
+.tier-unlocks{margin-bottom:16px;}
+.tier-unlock{
+  font-size:10.5px;color:var(--ivd);padding:5px 0;
+  border-bottom:1px solid rgba(201,168,76,.06);
+  display:flex;align-items:flex-start;gap:6px;line-height:1.5;
+}
+.tier-unlock:last-child{border-bottom:none;}
+.tier-unlock::before{content:'→';color:var(--gold);flex-shrink:0;font-size:9px;margin-top:2px;}
+.tc-branch .tier-unlock::before{color:var(--blue);}
+.tc-canopy .tier-unlock::before{color:var(--teal);}
+.tc-forest .tier-unlock::before{color:var(--orange);}
+
+.tier-earn{
+  font-family:var(--fu);font-weight:700;font-size:15px;color:var(--green);
+  margin-top:12px;padding-top:10px;border-top:1px solid rgba(201,168,76,.1);
+}
+.tier-earn-l{font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ivdd);margin-bottom:2px;}
+
+/* KSS progress bar */
+.kss-bar-container{
+  margin-top:32px;background:var(--n4);border:1px solid rgba(201,168,76,.12);padding:20px 24px;
+}
+.kss-track{
+  height:8px;background:rgba(240,232,213,.06);position:relative;margin:12px 0;
+  display:flex;
+}
+.kss-segment{height:100%;position:relative;}
+.kss-s1{width:20%;background:rgba(240,232,213,.2);}
+.kss-s2{width:20%;background:var(--gold);}
+.kss-s3{width:20%;background:var(--blue);}
+.kss-s4{width:20%;background:var(--teal);}
+.kss-s5{width:20%;background:var(--orange);}
+.kss-labels{display:flex;justify-content:space-between;font-family:var(--fm);font-size:8.5px;color:var(--ivdd);}
+.kss-progress-dot{
+  position:absolute;top:50%;transform:translate(-50%,-50%);
+  width:14px;height:14px;border-radius:50%;border:2px solid var(--gold);
+  background:var(--navy);
+  left:5%;/* Adjustable via JS */
+  animation:kss-pulse 2s infinite;
+}
+@keyframes kss-pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.4);}50%{box-shadow:0 0 0 5px rgba(201,168,76,0);}}
+
+/* ═══ BENEFITS ═══ */
+.benefits-section{padding:100px 40px;max-width:1200px;margin:0 auto;}
+.benefits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid rgba(201,168,76,.12);}
+.benefit{
+  padding:32px 28px;border-right:1px solid rgba(201,168,76,.1);
+  border-bottom:1px solid rgba(201,168,76,.1);
+  transition:background .2s;
+}
+.benefit:nth-child(3n){border-right:none;}
+.benefit:nth-child(4),.benefit:nth-child(5),.benefit:nth-child(6){border-bottom:none;}
+.benefit:hover{background:rgba(201,168,76,.02);}
+.benefit-num{
+  font-family:var(--ff);font-weight:800;font-size:52px;letter-spacing:-2px;
+  color:rgba(201,168,76,.12);line-height:1;margin-bottom:10px;
+}
+.benefit-icon{font-size:28px;margin-bottom:12px;display:block;}
+.benefit-title{
+  font-family:var(--ff);font-weight:700;font-size:20px;letter-spacing:-.5px;
+  margin-bottom:8px;color:var(--ivory);
+}
+.benefit-body{font-size:11.5px;color:var(--ivd);line-height:1.7;}
+.benefit-tag{
+  display:inline-block;font-family:var(--fm);font-size:8px;letter-spacing:2px;
+  text-transform:uppercase;padding:3px 10px;border:1px solid;
+  margin-top:12px;
+}
+.bt-gold{border-color:rgba(201,168,76,.35);color:var(--gold);}
+.bt-teal{border-color:rgba(107,191,181,.35);color:var(--teal);}
+.bt-green{border-color:rgba(76,175,80,.35);color:var(--green);}
+.bt-red{border-color:rgba(230,57,70,.35);color:var(--red);}
+.bt-blue{border-color:rgba(72,149,239,.35);color:var(--blue);}
+.bt-orange{border-color:rgba(255,107,53,.35);color:var(--orange);}
+
+/* ═══ EARNINGS CALCULATOR ═══ */
+.earnings-section{
+  background:var(--n4);border-top:1px solid rgba(201,168,76,.1);
+  padding:80px 40px;
+}
+.earnings-inner{max-width:1000px;margin:0 auto;}
+.earnings-layout{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;}
+.earnings-header .kicker{
+  font-family:var(--fm);font-size:8.5px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--green);display:flex;align-items:center;gap:8px;margin-bottom:12px;
+}
+.earnings-header .kicker::before{content:'';width:14px;height:1px;background:var(--green);}
+.earnings-header h2{
+  font-family:var(--ff);font-weight:800;font-size:clamp(28px,4vw,44px);
+  letter-spacing:-1.5px;line-height:1;margin-bottom:12px;
+}
+.earnings-header p{font-size:13px;color:var(--ivd);max-width:400px;line-height:1.7;}
+
+/* Earnings table */
+.earnings-table{border:1px solid rgba(201,168,76,.15);}
+.et-head{
+  display:grid;grid-template-columns:1fr 80px 80px 80px;
+  background:rgba(201,168,76,.07);border-bottom:2px solid rgba(201,168,76,.15);
+}
+.et-cell{
+  padding:9px 12px;font-family:var(--fm);font-size:8px;
+  letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);
+}
+.et-row{
+  display:grid;grid-template-columns:1fr 80px 80px 80px;
+  border-bottom:1px solid rgba(201,168,76,.07);
+}
+.et-row:last-child{border-bottom:none;}
+.et-row:hover{background:rgba(201,168,76,.02);}
+.et-cell-body{padding:10px 12px;font-size:11px;color:var(--ivd);}
+.et-cell-body.ivory{color:var(--ivory);font-weight:700;}
+.et-cell-body.green{color:var(--green);font-family:var(--fm);font-size:12px;font-weight:700;}
+
+/* ═══ CTA SECTION ═══ */
+.cta-section{
+  padding:120px 40px;text-align:center;position:relative;overflow:hidden;
+}
+.cta-section::before{
+  content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:600px;height:400px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(201,168,76,.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.cta-inner{position:relative;z-index:1;max-width:640px;margin:0 auto;}
+.cta-inner .kicker{
+  font-family:var(--fm);font-size:8.5px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--gold);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;
+}
+.cta-inner .kicker::before,.cta-inner .kicker::after{content:'';width:20px;height:1px;background:var(--gold);}
+.cta-h{
+  font-family:var(--ff);font-weight:800;font-size:clamp(40px,6vw,72px);
+  letter-spacing:-3px;line-height:.88;margin-bottom:16px;
+}
+.cta-h em{font-style:italic;color:var(--gold);}
+.cta-serif{
+  font-family:var(--fs);font-style:italic;font-size:18px;
+  color:var(--ivd);margin-bottom:36px;line-height:1.55;
+}
+.cta-fine{font-size:10.5px;color:var(--ivdd);margin-top:16px;}
+.cta-fine a{color:var(--gold);text-decoration:underline;}
+
+/* ═══ FOOTER STRIP ═══ */
+.footer-strip{
+  background:var(--n4);border-top:1px solid rgba(201,168,76,.12);
+  padding:28px 40px;display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:12px;
+}
+.footer-logo{display:flex;align-items:center;gap:8px;}
+.footer-logo-text{font-family:var(--ff);font-weight:800;font-size:16px;color:var(--gold);}
+.footer-links{display:flex;gap:20px;}
+.footer-link{
+  font-size:10.5px;color:var(--ivdd);text-decoration:none;
+  transition:color .2s;font-family:var(--fu);letter-spacing:.5px;
+}
+.footer-link:hover{color:var(--ivory);}
+.footer-right{font-size:10px;color:var(--ivdd);}
+
+/* ═══ SCROLL REVEAL ═══ */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s var(--ease-out),transform .7s var(--ease-out);}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ═══ TOOLTIP ═══ */
+.cell-tooltip{
+  position:fixed;z-index:300;
+  background:rgba(11,24,40,.96);border:1px solid rgba(201,168,76,.3);
+  padding:10px 14px;pointer-events:none;
+  font-size:10.5px;color:var(--ivory);
+  white-space:nowrap;backdrop-filter:blur(8px);
+  transform:translate(-50%,-110%);
+  transition:opacity .15s;opacity:0;
+}
+.cell-tooltip.show{opacity:1;}
+.tt-zone{font-family:var(--fm);font-size:8px;color:var(--gold);margin-bottom:3px;letter-spacing:1px;}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:1024px){
+  .tiers-grid{grid-template-columns:repeat(3,1fr);}
+  .tier-card:nth-child(3){border-right:none;}
+  .tier-card:nth-child(4),.tier-card:nth-child(5){border-top:1px solid rgba(201,168,76,.1);}
+}
+@media(max-width:768px){
+  .nav-links{display:none;}
+  .hero h1{font-size:48px;}
+  .kore-anatomy,.earnings-layout,.wstep-content.active{grid-template-columns:1fr;}
+  .tiers-grid{grid-template-columns:1fr 1fr;}
+  .benefits-grid{grid-template-columns:1fr;}
+  .benefit:nth-child(n){border-right:none;}
+  .hero-counter-strip{flex-direction:column;}
+  .counter-cell{border-right:none;border-bottom:1px solid rgba(201,168,76,.1);}
+  .pixel-grid{grid-template-columns:repeat(16,1fr);}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAVIGATION ═══ -->
+<nav class="nav">
+  <a class="nav-logo" href="/">
+    <div class="nav-sunflower">🌻</div>
+    <div class="nav-wordmark">Kommu<span class="ni">ni</span><span class="t">t</span><span class="ni">i</span></div>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link t" href="/kommute">🗺 Kommute</a>
+    <a class="nav-link o" href="/konnect">🎓 Konnect</a>
+    <a class="nav-link active" href="/kreate">⚡ Kreate</a>
+    <a class="nav-link" href="/kores">Kores</a>
+    <a class="nav-link" href="/about">About</a>
+  </div>
+  <div class="nav-right">
+    <div class="ko-badge"><div class="ko-coin">🪙</div>840</div>
+    <a class="nav-cta" href="#create">Start a Kore</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-kicker">The Movement Starts Here · One Zone at a Time</div>
+    <h1 class="hero-h1">
+      <span class="dim">Your zone</span><br>
+      <span class="gold">is grey.</span><br>
+      <span>Fix that.</span>
+    </h1>
+    <p class="hero-serif">
+      Every grey pixel on this map is a neighbourhood that hasn't found its Kore yet. 
+      Communities that could be earning together, solving problems together, governing themselves — but aren't. 
+      Yet.
+    </p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="#create">Claim Your Zone →</a>
+      <a class="btn-outline" href="#what-is-kore">What is a Kore?</a>
+    </div>
+    <div class="hero-counter-strip">
+      <div class="counter-cell">
+        <div class="counter-n" id="live-kores">0</div>
+        <div class="counter-l"><span class="map-dot"></span>Kores Active</div>
+      </div>
+      <div class="counter-cell">
+        <div class="counter-n" id="live-zones">25,254</div>
+        <div class="counter-l">Zones in Kerala</div>
+      </div>
+      <div class="counter-cell">
+        <div class="counter-n" id="live-grey">25,209</div>
+        <div class="counter-l">Still Grey</div>
+      </div>
+      <div class="counter-cell">
+        <div class="counter-n">₹4.2L</div>
+        <div class="counter-l">Earned This Month</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MAP + WIZARD ═══ -->
+<section class="map-section" id="create">
+  <div class="map-title-row reveal">
+    <div class="kicker">Choose Your Zone</div>
+    <h2>Click any grey cell<br>to light it up.</h2>
+    <p>This is the Fort Kochi map. 51 zones, 102 initial Kore slots. Every click you make is real — it starts the process of claiming a zone for your community.</p>
+  </div>
+
+  <div class="map-container" id="mapContainer">
+    <div class="map-label">
+      <span><span class="map-dot"></span>Fort Kochi · 5km Radius · Live Map</span>
+      <span>51 playable L6 zones · 5 Kores founded · 46 grey</span>
+    </div>
+    <div class="pixel-grid" id="pixelGrid">
+      <!-- Generated by JS -->
+    </div>
+    <div class="map-legend">
+      <span class="legend-item"><span class="legend-dot" style="background:rgba(240,232,213,.08);border:1px solid rgba(240,232,213,.15);"></span>Available Zone</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--gold);"></span>Root Kore</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--teal);"></span>Canopy Kore</span>
+      <span class="legend-item"><span class="legend-dot" style="background:rgba(72,149,239,.2);border:1px solid rgba(72,149,239,.2);"></span>Water / Backwater</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--red);"></span>Active Issue</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--green);"></span>Solved</span>
+    </div>
+  </div>
+
+  <!-- WIZARD PANEL -->
+  <div class="wizard-panel" id="wizardPanel">
+    <div class="wizard-inner">
+      <div class="wizard-steps">
+        <div class="wstep active" data-step="1" onclick="goStep(1)">
+          <div class="wstep-num">1</div>
+          <div class="wstep-label">Name Your Kore</div>
+        </div>
+        <div class="wstep" data-step="2" onclick="goStep(2)">
+          <div class="wstep-num">2</div>
+          <div class="wstep-label">Set Gathering</div>
+        </div>
+        <div class="wstep" data-step="3" onclick="goStep(3)">
+          <div class="wstep-num">3</div>
+          <div class="wstep-label">Write Charter</div>
+        </div>
+        <div class="wstep" data-step="4" onclick="goStep(4)">
+          <div class="wstep-num">4</div>
+          <div class="wstep-label">Invite Members</div>
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="wstep-content active" id="step-1">
+        <div>
+          <div style="margin-bottom:6px;font-family:var(--fm);font-size:8.5px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);">Selected Zone</div>
+          <div style="font-family:var(--ff);font-weight:700;font-size:22px;color:var(--ivory);margin-bottom:20px;" id="selectedZoneDisplay">Click a grey cell above to select your zone</div>
+          <div class="wfield">
+            <label class="wlabel">Your Kore Name</label>
+            <input class="winput" type="text" placeholder="e.g. Fort Kochi Heritage Kore" maxlength="40" id="koreName" oninput="updateCharCount(this,'koreNameCount',40)">
+            <div class="wchar-count"><span id="koreNameCount">0</span> / 40</div>
+          </div>
+          <div class="wfield">
+            <label class="wlabel">What will your Kore focus on?</label>
+            <select class="wselect">
+              <option>Community commerce & KOKO Store</option>
+              <option>Civic action & issue tagging</option>
+              <option>Heritage & culture preservation</option>
+              <option>Sustainable living & agriculture</option>
+              <option>Education & skills exchange</option>
+              <option>Artisan crafts & traditional skills</option>
+              <option>Health & wellness</option>
+              <option>General community — all of the above</option>
+            </select>
+          </div>
+          <div class="wfield">
+            <label class="wlabel">Kore Description (shown publicly)</label>
+            <textarea class="wtextarea" placeholder="Tell people what your Kore is about and why they should join..." maxlength="200" id="koreDesc" oninput="updateCharCount(this,'koreDescCount',200)"></textarea>
+            <div class="wchar-count"><span id="koreDescCount">0</span> / 200</div>
+          </div>
+        </div>
+        <div class="zone-info" id="zoneInfo">
+          <div class="zi-title">Your Zone</div>
+          <div class="zone-pixel" id="zonePixel">🗺</div>
+          <div id="zoneDetails" style="font-size:11px;color:var(--ivd);text-align:center;margin-bottom:14px;">Select a grey zone on the map</div>
+          <div class="zi-stat">
+            <div class="zi-stat-l">Available Slots</div>
+            <div class="zi-stat-v" id="slotCount">— / 2</div>
+          </div>
+          <div class="zi-stat">
+            <div class="zi-stat-l">Existing Kores</div>
+            <div class="zi-stat-v" id="existingKores">—</div>
+          </div>
+          <div class="zi-stat">
+            <div class="zi-stat-l">Zone Population</div>
+            <div class="zi-stat-v" id="zonePop">—</div>
+          </div>
+          <div class="zi-stat">
+            <div class="zi-stat-l">KSS Potential</div>
+            <div class="zi-stat-v" style="color:var(--gold);">800+ (Forest)</div>
+          </div>
+          <div style="margin-top:14px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.18);padding:10px;font-size:10px;color:var(--ivd);line-height:1.6;">
+            Being the <strong style="color:var(--ivory);">first Kore</strong> in a zone earns you permanent Pioneer status and 2× KSS bonus for your first 90 days.
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="wstep-content" id="step-2">
+        <div>
+          <div style="font-family:var(--ff);font-weight:700;font-size:20px;color:var(--ivory);margin-bottom:20px;">When will your Kore meet weekly?</div>
+          <div class="wfield">
+            <label class="wlabel">Choose Gathering Day</label>
+            <div class="day-grid">
+              <div class="day-btn" onclick="selectDay(this)">Mon</div>
+              <div class="day-btn" onclick="selectDay(this)">Tue</div>
+              <div class="day-btn" onclick="selectDay(this)">Wed</div>
+              <div class="day-btn" onclick="selectDay(this)">Thu</div>
+              <div class="day-btn selected" onclick="selectDay(this)">Fri</div>
+              <div class="day-btn" onclick="selectDay(this)">Sat</div>
+              <div class="day-btn" onclick="selectDay(this)">Sun</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div class="wfield">
+              <label class="wlabel">Start Time</label>
+              <input class="winput" type="time" value="18:00">
+            </div>
+            <div class="wfield">
+              <label class="wlabel">Duration</label>
+              <select class="wselect">
+                <option>60 minutes</option>
+                <option>90 minutes</option>
+                <option selected>2 hours</option>
+                <option>Half day</option>
+              </select>
+            </div>
+          </div>
+          <div class="wfield">
+            <label class="wlabel">Gathering Mode</label>
+            <select class="wselect">
+              <option>Physical only (Strongest KSS)</option>
+              <option selected>Hybrid (Physical + Online)</option>
+              <option>Online for now (until we grow)</option>
+            </select>
+          </div>
+          <div class="wfield">
+            <label class="wlabel">L7 Gathering Point Address</label>
+            <input class="winput" type="text" placeholder="e.g. Princess Street, Fort Kochi · DigiPin: 4J6C-52M-PK8F">
+            <div style="font-size:10px;color:var(--ivd);margin-top:6px;">Your meeting location (250m L7 zone). You'll pin this on the map in the app.</div>
+          </div>
+        </div>
+        <div>
+          <div style="background:var(--n4);border:1px solid rgba(201,168,76,.15);padding:20px;">
+            <div style="font-family:var(--fm);font-size:8.5px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;">Why Gathering Matters</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;gap:10px;align-items:flex-start;font-size:11px;color:var(--ivd);">
+                <div style="width:20px;height:20px;background:var(--gold);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--navy);">+10</div>
+                <div><strong style="color:var(--ivory);">Physical gathering</strong> = 10 KSS points per week. The backbone of your Kore's strength score.</div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;font-size:11px;color:var(--ivd);">
+                <div style="width:20px;height:20px;background:var(--blue);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;">+4</div>
+                <div><strong style="color:var(--ivory);">Online check-in</strong> = 4 KSS points. Valid when travelling or abroad — keeps your streak alive.</div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;font-size:11px;color:var(--ivd);">
+                <div style="width:20px;height:20px;background:var(--teal);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;">+5</div>
+                <div><strong style="color:var(--ivory);">Async contribution</strong> = 5 Global Reach points. Tag issues remotely, they count for your home Kore.</div>
+              </div>
+            </div>
+            <div style="margin-top:16px;padding:12px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);font-size:10.5px;color:var(--ivd);">
+              <strong style="color:var(--gold);">30-day streak multiplier:</strong> After 30 consecutive weeks of gathering, your KO Coin earning rate increases by 1.5×.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="wstep-content single" id="step-3">
+        <div style="max-width:680px;">
+          <div style="font-family:var(--ff);font-weight:700;font-size:20px;color:var(--ivory);margin-bottom:8px;">Write your Kore Charter</div>
+          <p style="font-size:12px;color:var(--ivd);margin-bottom:24px;">A charter is a short public document that tells the world what your Kore stands for. It becomes the founding document of your community — visible on the KO Universe map to anyone who clicks your zone.</p>
+          <div class="wfield">
+            <label class="wlabel">Our Community Stands For</label>
+            <textarea class="wtextarea" style="min-height:120px;" placeholder="We believe that our neighbourhood deserves better. We gather every week to..."></textarea>
+          </div>
+          <div class="wfield">
+            <label class="wlabel">We Commit To (3 principles)</label>
+            <input class="winput" type="text" placeholder="Principle 1: e.g. Show up. Every week, rain or shine." style="margin-bottom:8px;">
+            <input class="winput" type="text" placeholder="Principle 2: e.g. Tag and solve — no issue goes unnamed." style="margin-bottom:8px;">
+            <input class="winput" type="text" placeholder="Principle 3: e.g. Earnings shared equitably through the Kore.">
+          </div>
+          <div class="wfield">
+            <label class="wlabel">Our First Campaign Goal</label>
+            <input class="winput" type="text" placeholder="e.g. Document and fix 10 road issues in Fort Kochi by June 2026">
+          </div>
+          <div style="background:rgba(107,191,181,.06);border:1px solid rgba(107,191,181,.2);border-left:3px solid var(--teal);padding:14px 16px;margin-top:4px;">
+            <div style="font-size:8.5px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:5px;">Charter Tip</div>
+            <p style="font-size:11px;color:var(--ivd);margin:0;">The most successful Kores write charters that are specific, personal, and bold. Don't write what you think sounds good — write what you actually believe. The community will join because of your authenticity, not your polish.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="wstep-content single" id="step-4">
+        <div style="font-family:var(--ff);font-weight:700;font-size:20px;color:var(--ivory);margin-bottom:8px;">Invite your founding members</div>
+        <p style="font-size:12px;color:var(--ivd);margin-bottom:8px;">A Kore needs at least 5 members to activate. Invite 4 people you trust to show up every week. These are your founding circle — they help shape the Kore's direction in the first 90 days.</p>
+        <div style="font-family:var(--fm);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;">Your Invite Link</div>
+        <div class="invite-link-box">
+          <div class="invite-link-url">thekommuniti.org/join/kore/fort-kochi-heritage?ref=founder&token=K7X9M2P</div>
+          <button class="copy-btn" onclick="copyLink(this)">Copy Link</button>
+        </div>
+        <div style="font-family:var(--fm);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;">Members Invited</div>
+        <div id="membersList">
+          <div class="invite-row">
+            <div class="invite-member">
+              <div class="member-avatar">PK</div>
+              <div>
+                <div class="member-name">Priya Kumar</div>
+                <div class="member-status joined">✓ Joined · Seed Member</div>
+              </div>
+            </div>
+          </div>
+          <div class="invite-row">
+            <div class="invite-member">
+              <div class="member-avatar" style="background:linear-gradient(135deg,#FF6B35,#C9A84C);">AM</div>
+              <div>
+                <div class="member-name">Arun Menon</div>
+                <div class="member-status pending">⏳ Invited · Awaiting response</div>
+              </div>
+            </div>
+            <button class="invite-remove" onclick="this.parentElement.remove()">×</button>
+          </div>
+        </div>
+        <div class="add-member-row" style="margin-top:12px;">
+          <input class="add-member-input" type="text" placeholder="Phone number or Kommuniti username..." id="newMember">
+          <button class="add-btn" onclick="addMember()">+ Invite</button>
+        </div>
+        <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn-outline" style="font-size:11px;padding:10px 18px;" onclick="shareWhatsApp()">Share via WhatsApp</button>
+          <button class="btn-outline" style="font-size:11px;padding:10px 18px;" onclick="copyLink2()">Copy QR Code</button>
+        </div>
+        <div style="margin-top:18px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);padding:14px;font-size:11px;color:var(--ivd);">
+          <strong style="color:var(--ivory);">Minimum to activate:</strong> 5 members. You (1) + 4 invitees. Once your 5th member joins, your Kore becomes a <span style="color:var(--gold);">Seed Kore</span> — your zone lights up on the map and KO Coin minting begins.
+        </div>
+      </div>
+
+      <!-- Wizard nav buttons -->
+      <div class="wizard-nav" id="wizardNav">
+        <button class="wbtn-back" onclick="wizardBack()" id="backBtn" style="visibility:hidden;">← Back</button>
+        <div style="font-family:var(--fm);font-size:9px;color:var(--ivdd);letter-spacing:1.5px;">STEP <span id="stepIndicator">1</span> OF 4</div>
+        <button class="wbtn-next" onclick="wizardNext()" id="nextBtn">Continue →</button>
+      </div>
+
+      <!-- Success screen (hidden initially) -->
+      <div class="success-screen" id="successScreen">
+        <div class="success-pixel"></div>
+        <div class="success-h">Your Kore is born. 🌱</div>
+        <p class="success-p">Your zone just lit up on the KoKo map. Share your invite link, get 4 more members to join, and you'll be a Seed Kore — earning KO Coins and KSS points from Week 1.</p>
+        <div class="success-actions">
+          <a class="btn-primary" href="/kore/dashboard">Go to My Kore →</a>
+          <a class="btn-outline" href="/app">Download the App</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ WHAT IS A KORE ═══ -->
+<section class="what-section" id="what-is-kore">
+  <div class="section-header reveal">
+    <div class="kicker">What is a Kore?</div>
+    <h2>A Kore is your<br>neighbourhood<br><em style="font-family:var(--fs);font-style:italic;color:var(--gold);">as it should be.</em></h2>
+    <p>Not a WhatsApp group. Not a resident association. Not a NGO. A Kore is a community of 5–20 people who gather weekly, act together, earn together, and govern their 1km² zone of the world.</p>
+  </div>
+
+  <div class="kore-anatomy reveal">
+    <div>
+      <!-- Visual: Anatomy of a zone -->
+      <div style="background:var(--n4);border:1px solid rgba(201,168,76,.15);padding:20px;margin-bottom:20px;">
+        <div style="font-family:var(--fm);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;">Anatomy of a Kore Zone</div>
+        <div style="display:grid;grid-template-columns:repeat(9,1fr);gap:3px;margin-bottom:14px;">
+          <!-- Zone pixels showing different states within one L6 zone -->
+          <div style="aspect-ratio:1;background:rgba(240,232,213,.05);border:1px solid rgba(240,232,213,.06);"></div>
+          <div style="aspect-ratio:1;background:rgba(240,232,213,.05);border:1px solid rgba(240,232,213,.06);"></div>
+          <div style="aspect-ratio:1;background:rgba(240,232,213,.05);border:1px solid rgba(240,232,213,.06);"></div>
+          <div style="aspect-ratio:1;background:var(--red);animation:pulse-r 1.5s infinite;"></div>
+          <div style="aspect-ratio:1;background:rgba(240,232,213,.05);border:1px solid rgba(240,232,213,.06);"></div>
+          <div style="aspect-ratio:1;background:rgba(240,232,213,.05);border:1px solid rgba(240,232,213,.06);"></div>
+          <div style="aspect-ratio:1;background:rgba(240,232,213,.05);border:1px solid rgba(240,232,213,.06);"></div>
+          <div style="aspect-ratio:1;background:rgba(240,232,213,.05);border:1px solid rgba(240,232,213,.06);"></div>
+          <div style="aspect-ratio:1;background:rgba(240,232,213,.05);border:1px solid rgba(240,232,213,.06);"></div>
+
+          <div style="aspect-ratio:1;background:rgba(240,232,213,.05);"></div>
+          <div style="grid-column:span 7;grid-row:span 5;background:rgba(201,168,76,.06);border:2px solid rgba(201,168,76,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;text-align:center;">
+            <div style="font-size:22px;margin-bottom:6px;">🌀</div>
+            <div style="font-family:var(--ff);font-weight:700;font-size:14px;color:var(--gold);margin-bottom:3px;">Kore Gathering Point</div>
+            <div style="font-size:9.5px;color:var(--ivd);">L7 zone · 250m radius<br>Where the Kore meets weekly</div>
+          </div>
+          <div style="aspect-ratio:1;background:rgba(240,232,213,.05);"></div>
+          <div style="aspect-ratio:1;background:rgba(240,232,213,.05);"></div>
+          <div style="aspect-ratio:1;background:rgba(72,149,239,.15);"></div>
+          <div style="aspect-ratio:1;background:var(--green);"></div>
+          <div style="aspect-ratio:1;background:rgba(240,232,213,.05);"></div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:9.5px;color:var(--ivd);">
+          <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;background:var(--red);display:inline-block;border-radius:1px;"></span>Issue tagged</span>
+          <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;background:var(--green);display:inline-block;border-radius:1px;"></span>Issue solved</span>
+          <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;background:rgba(201,168,76,.06);border:2px solid rgba(201,168,76,.3);display:inline-block;border-radius:1px;"></span>Gathering point</span>
+          <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;background:rgba(72,149,239,.15);display:inline-block;border-radius:1px;"></span>Water body</span>
+        </div>
+      </div>
+
+      <!-- DigiPin zone info -->
+      <div style="background:var(--n2);border:1px solid rgba(201,168,76,.12);padding:16px;">
+        <div style="font-family:var(--fm);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:12px;">Powered by DigiPin</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:11px;color:var(--ivd);">
+          <div><div style="color:var(--gold);font-weight:700;margin-bottom:3px;">L6 = Kore Territory</div>~1km × 1km zone</div>
+          <div><div style="color:var(--teal);font-weight:700;margin-bottom:3px;">L7 = Gathering Point</div>250m radius</div>
+          <div><div style="color:var(--blue);font-weight:700;margin-bottom:3px;">L9 = Issue Tag</div>15m precision</div>
+          <div><div style="color:var(--orange);font-weight:700;margin-bottom:3px;">L8 = Store Address</div>60m precision</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-stack">
+      <div class="feature-card">
+        <div class="fc-head"><span class="fc-icon">🗓</span><span class="fc-title">Weekly Gatherings — The Heartbeat</span></div>
+        <div class="fc-body">Every Kore meets once a week at its L7 gathering point. Physical, online, or hybrid. Missing gathering = losing KSS points. Consistent gathering = the foundation of everything that follows — KO Coins, KOKO Store, campaigns.</div>
+      </div>
+      <div class="feature-card t">
+        <div class="fc-head"><span class="fc-icon">🏛</span><span class="fc-title">6 Rotating Roles — Democratic Governance</span></div>
+        <div class="fc-body">Koordinator · Kreator · Keeper · Kare Lead · Kronicler · Konnector. Every 6 months, roles rotate. No permanent leaders. Everyone leads. Everyone serves. This is what makes a Kore different from every other group chat or resident association you've been in.</div>
+      </div>
+      <div class="feature-card r">
+        <div class="fc-head"><span class="fc-icon">📍</span><span class="fc-title">Issue Tagging — Your Zone, Your Responsibility</span></div>
+        <div class="fc-body">Members photograph civic problems — waste, water, roads, power. Every tag is pinned to a DigiPin L9 cell on the map. 3 co-tags = Heating. 10+ = Campaign. Campaign solved = permanent green pixel. Yours forever.</div>
+      </div>
+      <div class="feature-card g">
+        <div class="fc-head"><span class="fc-icon">💰</span><span class="fc-title">Real Earnings — Not Points, Not Badges</span></div>
+        <div class="fc-body">KO Coins earned through gathering, tagging, and deliveries are real money — withdrawable via UPI to your bank account. Your Kore's KSS score determines your minting rate. Forest Kores earn up to 500 KO Coins per member per day.</div>
+      </div>
+      <div class="feature-card b">
+        <div class="fc-head"><span class="fc-icon">🛒</span><span class="fc-title">KOKO Store — Your Kore's Marketplace</span></div>
+        <div class="fc-body">Every Kore member can list products and services on the KOKO Store — artisan goods, organic produce, skills, experiences. Sellers earn 75–80% of every sale. Buyers use KO Coins for up to 40% off. Your neighbourhood becomes an economy.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TIER SYSTEM ═══ -->
+<section class="tiers-section">
+  <div class="tiers-inner">
+    <div class="tiers-header reveal">
+      <div class="kicker">The Game Mechanics</div>
+      <h2>Grow your Kore.<br>Light up your zone.</h2>
+      <p>Your Kore earns a KSS score every week based on 11 dimensions of community health. As your score grows, your zone changes colour on the map — and so do your earnings.</p>
+    </div>
+    <div class="tiers-grid reveal">
+      <!-- Seed -->
+      <div class="tier-card tc-seed">
+        <div class="tier-pixel tp-seed"></div>
+        <div class="tier-name">Seed</div>
+        <div class="tier-range">0 – 199 KSS</div>
+        <div class="tier-unlocks">
+          <div class="tier-unlock">Register your Kore and get your zone on the map</div>
+          <div class="tier-unlock">Basic KOKO Store listing access</div>
+          <div class="tier-unlock">Issue tagging and campaign participation</div>
+          <div class="tier-unlock">Weekly gathering check-in (physical + online)</div>
+        </div>
+        <div class="tier-earn-l">KO Coins / member / day</div>
+        <div class="tier-earn">20 KO / day</div>
+      </div>
+      <!-- Root -->
+      <div class="tier-card tc-root">
+        <div class="tier-pixel tp-root"></div>
+        <div class="tier-name">Root</div>
+        <div class="tier-range">200 – 399 KSS</div>
+        <div class="tier-unlocks">
+          <div class="tier-unlock">Zone pixel turns Gold on the map</div>
+          <div class="tier-unlock">Unlock 3rd Kore slot in your L6 zone</div>
+          <div class="tier-unlock">Appear in Circle leaderboard</div>
+          <div class="tier-unlock">First-right to approve new Kore in your zone</div>
+        </div>
+        <div class="tier-earn-l">KO Coins / member / day</div>
+        <div class="tier-earn">50 KO / day</div>
+      </div>
+      <!-- Branch -->
+      <div class="tier-card tc-branch">
+        <div class="tier-pixel tp-branch"></div>
+        <div class="tier-name">Branch</div>
+        <div class="tier-range">400 – 599 KSS</div>
+        <div class="tier-unlocks">
+          <div class="tier-unlock">Blue pixel on map — visible from city view</div>
+          <div class="tier-unlock">Cross-Kore Alliance quests unlock</div>
+          <div class="tier-unlock">Joint Kore Raids for 2× earnings</div>
+          <div class="tier-unlock">Expert Blueprint submissions enabled</div>
+        </div>
+        <div class="tier-earn-l">KO Coins / member / day</div>
+        <div class="tier-earn">100 KO / day</div>
+      </div>
+      <!-- Canopy -->
+      <div class="tier-card tc-canopy">
+        <div class="tier-pixel tp-canopy"></div>
+        <div class="tier-name">Canopy</div>
+        <div class="tier-range">600 – 799 KSS</div>
+        <div class="tier-unlocks">
+          <div class="tier-unlock">Teal pixel with expanding ring animation</div>
+          <div class="tier-unlock">4th Kore slot unlocks in your zone</div>
+          <div class="tier-unlock">KO Pod hosting priority access</div>
+          <div class="tier-unlock">Chapter representation vote right</div>
+        </div>
+        <div class="tier-earn-l">KO Coins / member / day</div>
+        <div class="tier-earn">200 KO / day</div>
+      </div>
+      <!-- Forest -->
+      <div class="tier-card tc-forest">
+        <div class="tier-pixel tp-forest"></div>
+        <div class="tier-name">Forest</div>
+        <div class="tier-range">800+ KSS</div>
+        <div class="tier-unlocks">
+          <div class="tier-unlock">Orange aura — visible from Kerala state zoom</div>
+          <div class="tier-unlock">Spawn new Kore in adjacent grey zone (5,000 KO)</div>
+          <div class="tier-unlock">Global Council vote authority</div>
+          <div class="tier-unlock">KO Coin minting rate premium tier</div>
+        </div>
+        <div class="tier-earn-l">KO Coins / member / day</div>
+        <div class="tier-earn">500 KO / day</div>
+      </div>
+    </div>
+
+    <!-- KSS Track -->
+    <div class="kss-bar-container reveal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="font-family:var(--fm);font-size:8.5px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);">KSS Progression Track</div>
+        <div style="font-size:11px;color:var(--ivd);">11 dimensions · Calculated weekly · Visible to all</div>
+      </div>
+      <div class="kss-track">
+        <div class="kss-s1"></div>
+        <div class="kss-s2"></div>
+        <div class="kss-s3"></div>
+        <div class="kss-s4"></div>
+        <div class="kss-s5"></div>
+        <div class="kss-progress-dot" id="kssProgressDot"></div>
+      </div>
+      <div class="kss-labels">
+        <span>0 — Seed</span><span>200 — Root</span><span>400 — Branch</span><span>600 — Canopy</span><span>800 — Forest</span>
+      </div>
+      <div style="margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;font-size:10px;color:var(--ivd);">
+        <div><strong style="color:var(--ivory);display:block;">Gathering Consistency</strong>Max 100 pts/month</div>
+        <div><strong style="color:var(--ivory);display:block;">Member Diversity</strong>Max 150 pts/month</div>
+        <div><strong style="color:var(--ivory);display:block;">KOKO Store Listings</strong>Max 80 pts/month</div>
+        <div><strong style="color:var(--ivory);display:block;">Global Reach</strong>Max 80 pts/month (NEW)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ BENEFITS ═══ -->
+<section class="benefits-section" id="benefits">
+  <div class="section-header reveal">
+    <div class="kicker" style="color:var(--purple);">Why Join?</div>
+    <h2>Six reasons your<br>neighbourhood<br>needs a Kore.</h2>
+  </div>
+  <div class="benefits-grid reveal">
+    <div class="benefit">
+      <div class="benefit-num">01</div>
+      <span class="benefit-icon">💸</span>
+      <div class="benefit-title">Real Money, Not Points</div>
+      <div class="benefit-body">KO Coins are withdrawable to your UPI account. An active Kore member earns ₹1,800–₹4,200 per month through deliveries, store sales, and Konnect sessions. A Kore Koordinator can earn ₹5,000–₹15,000.</div>
+      <span class="benefit-tag bt-gold">UPI Withdrawal · Day 1</span>
+    </div>
+    <div class="benefit">
+      <div class="benefit-num">02</div>
+      <span class="benefit-icon">🗺</span>
+      <div class="benefit-title">Your Zone. Permanently.</div>
+      <div class="benefit-body">Every issue your Kore solves becomes a permanent green pixel on the map. The work your Kore does today is visible forever. You are literally rewriting your neighbourhood's history in a publicly verifiable way.</div>
+      <span class="benefit-tag bt-teal">Irreversible · Permanent</span>
+    </div>
+    <div class="benefit">
+      <div class="benefit-num">03</div>
+      <span class="benefit-icon">🏛</span>
+      <div class="benefit-title">Democratic Leadership</div>
+      <div class="benefit-body">6 rotating roles. Nobody leads forever. Nobody is left out. A Kore is the only community structure where the Koordinator becomes the Keeper next season, and the newest member becomes the Kreator. Real governance.</div>
+      <span class="benefit-tag bt-green">6 Roles · Rotates Every 6 Months</span>
+    </div>
+    <div class="benefit">
+      <div class="benefit-num">04</div>
+      <span class="benefit-icon">🌐</span>
+      <div class="benefit-title">Global Reach, Local Roots</div>
+      <div class="benefit-body">If you travel to Mumbai, you can guest at a Mumbai Kore and earn Presence Tokens for both your home Kore and the host. Your Kore's Global Reach KSS score grows when members contribute from anywhere in the world.</div>
+      <span class="benefit-tag bt-red">Roaming Hero Mechanic</span>
+    </div>
+    <div class="benefit">
+      <div class="benefit-num">05</div>
+      <span class="benefit-icon">📦</span>
+      <div class="benefit-title">Your Own Marketplace</div>
+      <div class="benefit-body">Every Kore member gets a KOKO Store listing — honey, crafts, organic produce, services, experiences. 75–80% of every sale goes directly to you. Buyers from across Kerala and the world discover your products through the map.</div>
+      <span class="benefit-tag bt-blue">75–80% Revenue Share</span>
+    </div>
+    <div class="benefit">
+      <div class="benefit-num">06</div>
+      <span class="benefit-icon">🕷</span>
+      <div class="benefit-title">Anya, Your Personal AI</div>
+      <div class="benefit-body">Anya is your AI task master. She knows your zone, your Kore's needs, your earnings potential, and the nearest quests. She sends you a morning brief at 7:30 AM with exactly what you can do today to advance your Kore's KSS score.</div>
+      <span class="benefit-tag bt-orange">Claude API · Personalised Daily</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ EARNINGS ═══ -->
+<section class="earnings-section">
+  <div class="earnings-inner">
+    <div class="earnings-layout">
+      <div class="earnings-header reveal">
+        <div class="kicker">The Economics</div>
+        <h2>What a Kore<br>actually earns.</h2>
+        <p>Based on real data from similar community commerce models. Your actual earnings depend on your Kore's KSS tier, activity level, and the products/services you list.</p>
+        <div style="margin-top:20px;font-family:var(--fm);font-size:8.5px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);">Unit Economics</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+          <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);padding:12px;">
+            <div style="font-family:var(--ff);font-weight:700;font-size:22px;color:var(--gold);">18×</div>
+            <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--ivdd);">LTV:CAC Ratio</div>
+          </div>
+          <div style="background:rgba(76,175,80,.06);border:1px solid rgba(76,175,80,.15);padding:12px;">
+            <div style="font-family:var(--ff);font-weight:700;font-size:22px;color:var(--green);">21d</div>
+            <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--ivdd);">CAC Payback Period</div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="earnings-table">
+          <div class="et-head">
+            <div class="et-cell">Member Type</div>
+            <div class="et-cell">₹ Cash</div>
+            <div class="et-cell">KO Coins</div>
+            <div class="et-cell">Total Value</div>
+          </div>
+          <div class="et-row">
+            <div class="et-cell-body ivory">Casual Witness</div>
+            <div class="et-cell-body">₹0</div>
+            <div class="et-cell-body">800–1,200</div>
+            <div class="et-cell-body green">₹320–480</div>
+          </div>
+          <div class="et-row">
+            <div class="et-cell-body ivory">Weekend Runner</div>
+            <div class="et-cell-body">₹600–900</div>
+            <div class="et-cell-body">600–900</div>
+            <div class="et-cell-body green">₹840–1,260</div>
+          </div>
+          <div class="et-row">
+            <div class="et-cell-body ivory">Active Player</div>
+            <div class="et-cell-body">₹1,800–2,800</div>
+            <div class="et-cell-body">2,000–3,500</div>
+            <div class="et-cell-body green">₹2,600–4,200</div>
+          </div>
+          <div class="et-row">
+            <div class="et-cell-body ivory">Kore Leader</div>
+            <div class="et-cell-body">₹3,500–6,000</div>
+            <div class="et-cell-body">5,000–8,000</div>
+            <div class="et-cell-body green">₹5,500–9,200</div>
+          </div>
+          <div class="et-row">
+            <div class="et-cell-body ivory">Forest Seller</div>
+            <div class="et-cell-body">₹4,000–12,000</div>
+            <div class="et-cell-body">3,000–5,000</div>
+            <div class="et-cell-body green">₹5,200–14,000</div>
+          </div>
+          <div class="et-row">
+            <div class="et-cell-body ivory">Kore Koordinator</div>
+            <div class="et-cell-body">₹5,000–15,000</div>
+            <div class="et-cell-body">2,000–5,000</div>
+            <div class="et-cell-body green">₹8,200–17,000</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:10px;color:var(--ivdd);">Monthly figures. KO Coin value calculated at ₹0.40/coin (current Circle Assembly rate). UPI withdrawal available from Day 1 — minimum ₹100.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="cta-section">
+  <div class="cta-inner reveal">
+    <div class="kicker">One Last Thing</div>
+    <h2 class="cta-h">The grey map<br>is not a feature.<br>It's a <em>question.</em></h2>
+    <p class="cta-serif">What kind of neighbourhood do you want to live in?<br>Grey — or gold?</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a class="btn-primary" href="#create" style="font-size:14px;padding:18px 36px;">Claim Your Zone. It's Free. →</a>
+    </div>
+    <div class="cta-fine">No payment required to found a Kore. App download required for full game access. <br><a href="/terms">Terms of Membership</a> · <a href="/privacy">Privacy Policy</a></div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer-strip">
+  <div class="footer-logo">
+    <div class="nav-sunflower" style="width:28px;height:28px;font-size:13px;">🌻</div>
+    <div class="footer-logo-text">Kommuniti</div>
+    <div style="font-family:var(--fs);font-style:italic;font-size:13px;color:rgba(201,168,76,.45);margin-left:8px;">"A Feeling of Home."</div>
+  </div>
+  <div class="footer-links">
+    <a class="footer-link" href="/kommute">Kommute</a>
+    <a class="footer-link" href="/konnect">Konnect</a>
+    <a class="footer-link" href="/kreate">Kreate</a>
+    <a class="footer-link" href="/app">Get the App</a>
+    <a class="footer-link" href="/about">About</a>
+  </div>
+  <div class="footer-right">© 2026 Kommuniti Private Limited · thekommuniti.org</div>
+</footer>
+
+<!-- TOOLTIP -->
+<div class="cell-tooltip" id="tooltip">
+  <div class="tt-zone" id="tt-zone">Zone L6-32J · Fort Kochi</div>
+  <div id="tt-status">Click to start a Kore here</div>
+</div>
+
+<script>
+/* ═══════ MAP GENERATION ═══════ */
+const COLS = 26, ROWS = 14;
+let selectedCell = null, currentStep = 1;
+
+// Map data: 0=grey, 1=water, 2=forest, 3=seed, 4=root, 5=branch, 6=canopy, 7=forest-kore, 8=issue, 9=solved
+const mapData = [
+  [1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1],
+  [1,1,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,1,1,1,1,1,1,1,1],
+  [0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
+  [0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+  [0,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [1,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [1,1,1,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+  [1,1,1,1,0,0,0,0,0,0,0,0,0,9,0,0,0,0,0,0,0,0,0,1,1,1],
+  [1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1],
+  [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1],
+  [1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
+];
+
+const zoneNames = ['Fort Kochi Heritage','Mattancherry','Jewish Quarter','Kochi Junction','Ernakulam Market','Kakkanad','Infopark North','Infopark South','Vyttila Hub','Marine Drive','Palluruthy','Mulavukad','Cheranallur','Thripunithura'];
+const zonePops = ['~1,400','~1,100','~950','~1,600','~1,800','~2,100','~1,950','~1,750','~2,400','~1,200','~800','~650','~900','~1,300'];
+
+function buildMap() {
+  const grid = document.getElementById('pixelGrid');
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const v = mapData[r][c];
+      const cell = document.createElement('div');
+      cell.className = 'cell ' + getCellClass(v);
+      cell.dataset.row = r; cell.dataset.col = c; cell.dataset.val = v;
+      cell.dataset.id = r * COLS + c;
+      if (v === 0) {
+        cell.addEventListener('click', () => selectZone(cell, r, c));
+        cell.addEventListener('mouseenter', (e) => showTooltip(e, cell, r, c));
+        cell.addEventListener('mouseleave', hideTooltip);
+      }
+      grid.appendChild(cell);
+    }
+  }
+}
+
+function getCellClass(v) {
+  const map = {0:'cell-grey',1:'cell-water',2:'cell-forest-bg',3:'cell-seed',4:'cell-root',5:'cell-branch',6:'cell-canopy',7:'cell-forest',8:'cell-issue',9:'cell-solved'};
+  return map[v] || 'cell-grey';
+}
+
+function selectZone(cell, r, c) {
+  if (selectedCell) selectedCell.classList.remove('cell-selected');
+  selectedCell = cell;
+  cell.classList.add('cell-selected');
+
+  const nameIdx = ((r * 3 + c * 7) % zoneNames.length);
+  const zoneName = zoneNames[nameIdx];
+  const zonePop = zonePops[nameIdx];
+  const digipinCode = `4J${Math.floor(r*10+c).toString(16).toUpperCase()}C-${(52+c)}M-PK${r}F`;
+
+  document.getElementById('selectedZoneDisplay').textContent = `Zone ${digipinCode} · ${zoneName}`;
+  document.getElementById('slotCount').textContent = '2 / 2 available';
+  document.getElementById('existingKores').textContent = 'None — you would be FIRST';
+  document.getElementById('zonePop').textContent = zonePop + ' residents';
+  document.getElementById('zoneDetails').textContent = zoneName;
+
+  const zp = document.getElementById('zonePixel');
+  zp.style.background = 'var(--gold)';
+  zp.style.boxShadow = '0 0 20px rgba(201,168,76,.5)';
+  zp.textContent = '';
+
+  openWizard();
+}
+
+function openWizard() {
+  const panel = document.getElementById('wizardPanel');
+  panel.classList.add('open');
+  panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+/* Tooltip */
+function showTooltip(e, cell, r, c) {
+  const tt = document.getElementById('tooltip');
+  const nameIdx = ((r*3+c*7) % zoneNames.length);
+  document.getElementById('tt-zone').textContent = 'L6 Zone · ' + zoneNames[nameIdx];
+  document.getElementById('tt-status').textContent = 'Click to start a Kore here → FREE';
+  tt.classList.add('show');
+  moveTip(e);
+}
+function hideTooltip() { document.getElementById('tooltip').classList.remove('show'); }
+document.addEventListener('mousemove', moveTip);
+function moveTip(e) {
+  const tt = document.getElementById('tooltip');
+  tt.style.left = e.clientX + 'px';
+  tt.style.top = e.clientY - 10 + 'px';
+}
+
+/* ═══════ WIZARD ═══════ */
+function goStep(n) {
+  if (n > currentStep && !selectedCell && n === 1) { alert('Please select a zone on the map first.'); return; }
+  const allContent = document.querySelectorAll('.wstep-content');
+  const allSteps = document.querySelectorAll('.wstep');
+  allContent.forEach(s => s.classList.remove('active'));
+  allSteps.forEach(s => { s.classList.remove('active'); if (parseInt(s.dataset.step) < n) s.classList.add('done'); });
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelector(`.wstep[data-step="${n}"]`).classList.add('active');
+  document.getElementById('stepIndicator').textContent = n;
+  document.getElementById('backBtn').style.visibility = n === 1 ? 'hidden' : 'visible';
+  document.getElementById('nextBtn').textContent = n === 4 ? 'Found My Kore 🌱' : 'Continue →';
+  currentStep = n;
+  document.getElementById('wizardPanel').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function wizardNext() {
+  if (currentStep < 4) goStep(currentStep + 1);
+  else foundKore();
+}
+function wizardBack() { if (currentStep > 1) goStep(currentStep - 1); }
+
+function foundKore() {
+  if (!selectedCell) { alert('Please select a zone on the map first.'); return; }
+  // Animate selected cell to gold permanently
+  selectedCell.classList.remove('cell-selected');
+  selectedCell.classList.remove('cell-grey');
+  selectedCell.classList.add('cell-root');
+  selectedCell.style.animation = 'pulse-g 2.5s infinite';
+
+  // Show all wizard steps as done
+  document.querySelectorAll('.wstep').forEach(s => s.classList.add('done'));
+  document.querySelectorAll('.wstep-content').forEach(s => s.classList.remove('active'));
+  document.getElementById('wizardNav').style.display = 'none';
+
+  // Show success
+  const ss = document.getElementById('successScreen');
+  ss.style.display = 'block';
+
+  // Update counter
+  animateCounter('live-kores', 0, 46);
+  animateCounter('live-grey', 25209, 25208);
+}
+
+/* ═══════ STEP HELPERS ═══════ */
+function selectDay(btn) {
+  document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function updateCharCount(el, countId, max) {
+  document.getElementById(countId).textContent = el.value.length;
+}
+
+function copyLink(btn) {
+  navigator.clipboard.writeText('thekommuniti.org/join/kore/fort-kochi-heritage?ref=founder&token=K7X9M2P').catch(()=>{});
+  btn.textContent = '✓ Copied!';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'Copy Link'; btn.classList.remove('copied'); }, 2000);
+}
+function copyLink2() { copyLink(document.querySelector('.copy-btn')); }
+function shareWhatsApp() {
+  window.open('https://wa.me/?text=Join%20my%20Kore%20on%20Kommuniti%3A%20thekommuniti.org%2Fjoin%2Fkore%2Ffort-kochi-heritage%3Fref%3Dfounder%26token%3DK7X9M2P', '_blank');
+}
+
+let memberCount = 2;
+function addMember() {
+  const val = document.getElementById('newMember').value.trim();
+  if (!val) return;
+  const initials = val.substring(0,2).toUpperCase();
+  const colors = ['var(--teal)','var(--blue)','var(--purple)','var(--orange)'];
+  const c = colors[memberCount % colors.length];
+  const row = document.createElement('div');
+  row.className = 'invite-row';
+  row.innerHTML = `<div class="invite-member"><div class="member-avatar" style="background:${c};">${initials}</div><div><div class="member-name">${val}</div><div class="member-status pending">⏳ Invite sent · Awaiting response</div></div></div><button class="invite-remove" onclick="this.parentElement.remove()">×</button>`;
+  document.getElementById('membersList').appendChild(row);
+  document.getElementById('newMember').value = '';
+  memberCount++;
+}
+
+/* ═══════ COUNTERS ═══════ */
+function animateCounter(id, from, to) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const dur = 1500, steps = 60;
+  const inc = (to - from) / steps;
+  let cur = from, step = 0;
+  const timer = setInterval(() => {
+    cur += inc; step++;
+    el.textContent = Math.round(cur).toLocaleString('en-IN');
+    if (step >= steps) { el.textContent = to.toLocaleString('en-IN'); clearInterval(timer); }
+  }, dur / steps);
+}
+
+/* ═══════ SCROLL REVEAL ═══════ */
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+/* ═══════ KSS DOT ANIMATION ═══════ */
+let kssPos = 0, kssDir = 1;
+function animateKSS() {
+  const dot = document.getElementById('kssProgressDot');
+  if (!dot) return;
+  kssPos += kssDir * 0.15;
+  if (kssPos > 95) kssDir = -1;
+  if (kssPos < 2) kssDir = 1;
+  dot.style.left = kssPos + '%';
+  requestAnimationFrame(animateKSS);
+}
+
+/* ═══════ INIT ═══════ */
+buildMap();
+animateCounter('live-kores', 0, 45);
+setTimeout(animateKSS, 500);
+</script>
+</body>
+</html>
