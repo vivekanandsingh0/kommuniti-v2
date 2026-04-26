@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
 
 const navLinks = [
   { label: "KOMMUTE", href: "#programs", color: "#6BBFB5", icon: "🗺️" },
@@ -13,11 +15,24 @@ const navLinks = [
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (
@@ -96,20 +111,24 @@ const Navbar = () => {
             >
               🪙 840
             </div>
-            <div 
+            <button 
+              onClick={() => user ? navigate("/profile") : navigate("/auth")}
               style={{
                 width: "34px",
                 height: "34px",
                 borderRadius: "50%",
-                background: "linear-gradient(135deg, #6BBFB5, #4895EF)",
+                background: user ? "linear-gradient(135deg, #FF6B35, #AAFF00)" : "linear-gradient(135deg, #6BBFB5, #4895EF)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 border: "2px solid rgba(201, 168, 76, 0.4)",
+                cursor: "pointer",
+                transition: "all 0.2s"
               }}
+              className="hover:scale-105 active:scale-95"
             >
-               👤
-            </div>
+               {user ? "👨‍🚀" : "👤"}
+            </button>
             <a 
               href="#app" 
               className="no-underline"

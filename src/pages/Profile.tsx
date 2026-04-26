@@ -1,0 +1,225 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
+import { LogOut, ArrowLeft, Trophy, Zap, Map, Coins, Wallet, Flame } from "lucide-react";
+
+const Profile = () => {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setUser(session.user);
+      }
+      setLoading(false);
+    });
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success("Logged out successfully");
+    navigate("/");
+  };
+
+  if (loading) return null;
+
+  const kssDimensions = [
+    { label: "Gathering Consistency", score: 88, max: 100, color: "#C9A84C" },
+    { label: "Member Diversity", score: 130, max: 150, color: "#6BBFB5" },
+    { label: "KOKO Store Listings", score: 65, max: 80, color: "#FF6B35" },
+    { label: "Kreate Impact", score: 120, max: 150, color: "#C77DFF" },
+    { label: "Konnect Sessions", score: 82, max: 100, color: "#4895EF" },
+    { label: "Kommute Events", score: 88, max: 100, color: "#6BBFB5" },
+    { label: "Role Rotation", score: 75, max: 80, color: "#AAFF00" },
+    { label: "Stories & Transparency", score: 70, max: 80, color: "#C9A84C" },
+  ];
+
+  const impactStats = [
+    { label: "This Month Earnings", value: "₹4,520", color: "#4CAF50" },
+    { label: "Deliveries Done", value: "34", color: "#6BBFB5" },
+    { label: "Issues Solved", value: "12", color: "#E63946" },
+    { label: "KO Reads Contributions", value: "3", color: "#C77DFF" },
+  ];
+
+  const achievements = [
+    { icon: "🏅", title: "Trusted Runner", desc: "5-star delivery streak", color: "#C9A84C" },
+    { icon: "🌱", title: "Campaign Pioneer", desc: "First-tagged 2 viral campaigns", color: "#6BBFB5" },
+    { icon: "📖", title: "KO Contributor", desc: "3 accepted KO Reads submissions", color: "#C77DFF" },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#0B1828] text-[#F0E8D5]">
+      {/* Profile Header Dashboard */}
+      <section className="pt-24 pb-12 px-6 lg:px-12 bg-gradient-to-br from-[#0A1F12] to-[#0B1828] border-b border-[rgba(76,175,80,0.2)]">
+        <div className="container mx-auto">
+          <div className="flex flex-col lg:flex-row items-center lg:items-start gap-12">
+            
+            {/* Avatar & Level */}
+            <div className="relative flex-shrink-0">
+              <div 
+                className="w-32 h-32 rounded-full flex items-center justify-center text-5xl border-[4px] border-[rgba(201,168,76,0.4)]"
+                style={{ background: "linear-gradient(135deg, #6BBFB5, #4895EF)" }}
+              >
+                🦸
+              </div>
+              <div className="absolute -bottom-2 right-0 bg-[#C9A84C] text-[#0B1828] px-3 py-1 font-bold text-xs border-2 border-[#0B1828]">
+                LVL 4
+              </div>
+            </div>
+
+            {/* Name & Quick Stats */}
+            <div className="flex-1 text-center lg:text-left">
+              <h1 
+                style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800 }}
+                className="text-4xl mb-2"
+              >
+                {user?.email?.split('@')[0].toUpperCase() || "COMMUNITY MEMBER"}
+              </h1>
+              <p className="text-[rgba(240,232,213,0.5)] mb-6 flex items-center justify-center lg:justify-start gap-2">
+                <span className="text-[#6BBFB5]">🌀 Mankulam Kore Zero</span> • Branch Level • Koordinator
+              </p>
+
+              <div className="flex flex-wrap justify-center lg:justify-start gap-4">
+                <div className="bg-[rgba(201,168,76,0.1)] border border-[rgba(201,168,76,0.3)] rounded-full px-4 py-2 flex items-center gap-2">
+                  <span className="text-xl">🪙</span>
+                  <span className="font-bold text-[#C9A84C]">4,200</span>
+                </div>
+                <div className="bg-[rgba(76,175,80,0.15)] border border-[#4CAF50] rounded-full px-4 py-2 flex items-center gap-2 text-[#4CAF50]">
+                  <span className="font-bold text-lg">₹2,840</span>
+                  <span className="text-[10px] opacity-70 uppercase tracking-widest">withdrawable</span>
+                </div>
+                <div className="bg-[rgba(230,57,70,0.1)] border border-[rgba(230,57,70,0.4)] rounded-full px-4 py-2 flex items-center gap-2 text-[#E63946]">
+                  <Flame size={18} />
+                  <span className="font-bold">14 weeks</span>
+                </div>
+              </div>
+            </div>
+
+            {/* KSS Score Ring */}
+            <div className="text-center flex-shrink-0">
+              <div className="w-32 h-32 rounded-full border-[6px] border-[rgba(201,168,76,0.1)] border-t-[#C9A84C] flex flex-col items-center justify-center relative">
+                <div 
+                  style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800 }}
+                  className="text-4xl text-[#F0E8D5]"
+                >
+                  847
+                </div>
+                <div className="text-[9px] uppercase tracking-widest text-[#C9A84C] mt-1">KSS Score</div>
+              </div>
+              <div className="mt-4 text-[10px] uppercase tracking-[2px] text-[#C9A84C]">Branch Kore</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 px-6 lg:px-12 bg-[#0B1828]">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            
+            {/* KSS Dimensions */}
+            <div>
+              <h3 className="text-[11px] uppercase tracking-[3px] text-[rgba(240,232,213,0.4)] mb-8">
+                Your KSS Dimensions — Kore Strength Score
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {kssDimensions.map((dim) => (
+                  <div key={dim.label} className="bg-[rgba(240,232,213,0.03)] border border-[rgba(201,168,76,0.1)] p-4">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-xs">{dim.label}</span>
+                      <span className="font-mono text-xs" style={{ color: dim.color }}>{dim.score}/{dim.max}</span>
+                    </div>
+                    <div className="h-[3px] bg-[rgba(240,232,213,0.05)] overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(dim.score / dim.max) * 100}%` }}
+                        className="h-full"
+                        style={{ backgroundColor: dim.color }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Earnings & Achievements */}
+            <div className="space-y-12">
+              {/* Earnings Grid */}
+              <div>
+                <h3 className="text-[11px] uppercase tracking-[3px] text-[rgba(240,232,213,0.4)] mb-8">
+                  Earnings & Impact
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {impactStats.map((stat) => (
+                    <div key={stat.label} className="bg-[rgba(240,232,213,0.03)] border border-[rgba(240,232,213,0.05)] p-6 text-center">
+                      <div 
+                        style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800 }}
+                        className="text-2xl mb-1"
+                        style={{ color: stat.color }}
+                      >
+                        {stat.value}
+                      </div>
+                      <div className="text-[9px] uppercase tracking-wider text-[rgba(240,232,213,0.5)]">
+                        {stat.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Achievements */}
+              <div>
+                <h3 className="text-[11px] uppercase tracking-[3px] text-[rgba(240,232,213,0.4)] mb-8">
+                  Recent Achievements
+                </h3>
+                <div className="flex flex-wrap gap-4">
+                  {achievements.map((ach) => (
+                    <div key={ach.title} className="flex items-center gap-4 bg-[rgba(240,232,213,0.03)] border border-[rgba(201,168,76,0.15)] p-4 pr-6">
+                      <span className="text-3xl">{ach.icon}</span>
+                      <div>
+                        <div className="text-[12px] font-bold" style={{ color: ach.color }}>{ach.title}</div>
+                        <div className="text-[10px] text-[rgba(240,232,213,0.4)]">{ach.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="mt-20 pt-12 border-t border-[rgba(201,168,76,0.1)] flex flex-col sm:flex-row gap-6 justify-between items-center">
+            <button 
+              onClick={() => navigate("/")}
+              className="flex items-center gap-2 text-[10px] uppercase tracking-[2px] text-[rgba(240,232,213,0.4)] hover:text-[#F0E8D5] transition-colors"
+            >
+              <ArrowLeft size={16} /> Back to Hub
+            </button>
+            <div className="flex gap-4">
+               <button 
+                className="bg-[#C9A84C] text-[#0B1828] font-bold px-8 py-3 text-[11px] tracking-[2px] uppercase hover:brightness-110"
+                style={{ fontFamily: "'Rajdhani', sans-serif" }}
+              >
+                KO Passport PDF
+              </button>
+              <button 
+                onClick={handleLogout}
+                className="border border-[#E63946] text-[#E63946] font-bold px-8 py-3 text-[11px] tracking-[2px] uppercase hover:bg-[rgba(230,57,70,0.1)]"
+                style={{ fontFamily: "'Rajdhani', sans-serif" }}
+              >
+                Log Out
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default Profile;
