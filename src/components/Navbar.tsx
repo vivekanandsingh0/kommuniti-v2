@@ -140,13 +140,29 @@ const Navbar = () => {
             </a>
           </div>
 
-          {/* Mobile Toggle */}
-          <div className="flex lg:hidden items-center ml-auto">
+          {/* Mobile Toggle & Profile */}
+          <div className="flex lg:hidden items-center ml-auto gap-3">
+             <button 
+                onClick={() => user ? navigate("/profile") : navigate("/auth")}
+                style={{
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "50%",
+                  background: user ? "linear-gradient(135deg, #FF6B35, #AAFF00)" : "linear-gradient(135deg, #6BBFB5, #4895EF)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "2px solid rgba(201, 168, 76, 0.4)",
+                  cursor: "pointer"
+                }}
+              >
+                {user ? "👨‍🚀" : "👤"}
+             </button>
              <button
                 className="text-[#F0E8D5] p-2"
                 onClick={() => setMobileOpen(!mobileOpen)}
               >
-                {mobileOpen ? <X size={28} /> : <Menu size={28} />}
+                {mobileOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
           </div>
         </div>
@@ -206,8 +222,12 @@ const Navbar = () => {
               </div>
               
               <div className="mt-auto pt-8 border-t border-[rgba(201,168,76,0.1)]">
-                  {user && (
-                    <div className="flex items-center justify-between mb-8">
+                  {user ? (
+                    <Link 
+                      to="/profile"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center justify-between mb-8 no-underline"
+                    >
                         <div>
                             <p 
                               style={{ 
@@ -240,7 +260,19 @@ const Navbar = () => {
                         >
                            👨‍🚀
                         </div>
-                    </div>
+                    </Link>
+                  ) : (
+                    <Link 
+                      to="/auth"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-4 mb-8 no-underline"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/20 flex items-center justify-center text-xl">👤</div>
+                      <div>
+                        <div className="text-sm font-bold text-[#F0E8D5]">Guest Mode</div>
+                        <div className="text-[10px] text-[#C9A84C] uppercase tracking-wider">Sign in to earn KO Coins</div>
+                      </div>
+                    </Link>
                   )}
                   
                   <div className="flex justify-center pb-12">

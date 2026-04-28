@@ -24,18 +24,33 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+import { useAuth } from "@/context/AuthContext";
+
 const Kreate = () => {
+  const { profile, user } = useAuth();
   const [selectedCell, setSelectedCell] = useState<number | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [charCounts, setCharCounts] = useState({ name: 0, desc: 0 });
   const [selectedDay, setSelectedDay] = useState("Fri");
-  const [invitees, setInvitees] = useState([
-    { name: "Priya Kumar", initials: "PK", status: "Joined · Seed Member", color: "linear-gradient(135deg, #6BBFB5, #4895EF)" },
-    { name: "Arun Menon", initials: "AM", status: "Invited · Awaiting response", color: "linear-gradient(135deg, #FF6B35, #C9A84C)", pending: true }
-  ]);
+  const [invitees, setInvitees] = useState<any[]>([]);
+
+  // Auto-fill founder as first member
+  useEffect(() => {
+    if (profile) {
+      setInvitees([{
+        name: profile.full_name || profile.username || "You",
+        initials: (profile.full_name || profile.username || "U").substring(0,2).toUpperCase(),
+        status: "FOUNDER · SEED MEMBER",
+        color: "linear-gradient(135deg, #6BBFB5, #4895EF)",
+        id: user?.id
+      }]);
+    }
+  }, [profile, user]);
+
   const [newMember, setNewMember] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const wizardRef = useRef<HTMLDivElement>(null);  // Map Data Simulation
   const COLS = 26;
@@ -452,33 +467,55 @@ const Kreate = () => {
                         </div>
                       )}
 
+                      {/* STEP 4: INVITE MEMBERS */}
                       {currentStep === 4 && (
                         <div className="space-y-8">
                           <h3 className="text-2xl font-bold mb-6">Founding Circle.</h3>
                           <div className="space-y-6">
                             <div className="bg-[#C9A84C]/5 border border-[#C9A84C]/30 p-6 flex items-center justify-between gap-4">
-                              <div className="text-[11px] font-mono text-[#F0E8D5]/60 truncate">thekommuniti.org/join/kore/fort-kochi-heritage?ref=founder</div>
-                              <button className="flex items-center gap-2 bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C] px-4 py-2 text-[10px] font-bold uppercase hover:bg-[#C9A84C] hover:text-[#0B1828] transition-all">
+                              <div className="text-[11px] font-mono text-[#F0E8D5]/60 truncate">
+                                thekommuniti.org/join/{koreForm.name.toLowerCase().replace(/\s+/g, '-') || 'your-kore'}?ref=founder
+                              </div>
+                              <button 
+                                onClick={() => {
+                                  const url = `thekommuniti.org/join/${koreForm.name.toLowerCase().replace(/\s+/g, '-') || 'your-kore'}?ref=founder`;
+                                  navigator.clipboard.writeText(url);
+                                  toast.success("Invite link copied!");
+                                }}
+                                className="flex items-center gap-2 bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C] px-4 py-2 text-[10px] font-bold uppercase hover:bg-[#C9A84C] hover:text-[#0B1828] transition-all"
+                              >
                                 <Copy size={12} /> Copy
                               </button>
                             </div>
                             
                             <div className="space-y-3">
                               <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Members Invited</label>
-                              {invitees.map((inv, i) => (
-                                <div key={i} className="flex items-center gap-4 bg-[#0B1828]/30 border border-[#C9A84C]/10 p-3">
-                                  <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style={{ background: inv.color }}>
-                                    {inv.initials}
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="text-sm font-bold">{inv.name}</div>
-                                    <div className={`text-[10px] uppercase tracking-wide ${inv.pending ? 'text-[#C9A84C]' : 'text-[#4CAF50]'}`}>{inv.status}</div>
-                                  </div>
-                                  <button className="text-[#F0E8D5]/20 hover:text-[#E63946] p-2">
-                                    <X size={16} />
-                                  </button>
-                                </div>
-                              ))}
+                              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                {invitees.map((inv, i) => (
+                                  <motion.div 
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    key={i} 
+                                    className="flex items-center gap-4 bg-[#0B1828]/30 border border-[#C9A84C]/10 p-3"
+                                  >
+                                    <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style={{ background: inv.color }}>
+                                      {inv.initials}
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="text-sm font-bold">{inv.name}</div>
+                                      <div className={`text-[10px] uppercase tracking-wide ${inv.pending ? 'text-[#C9A84C]' : 'text-[#4CAF50]'}`}>{inv.status}</div>
+                                    </div>
+                                    {i > 0 && (
+                                      <button 
+                                        onClick={() => setInvitees(invitees.filter((_, idx) => idx !== i))}
+                                        className="text-[#F0E8D5]/20 hover:text-[#E63946] p-2 transition-colors"
+                                      >
+                                        <X size={16} />
+                                      </button>
+                                    )}
+                                  </motion.div>
+                                ))}
+                              </div>
                             </div>
 
                             <div className="flex gap-2">
@@ -487,10 +524,45 @@ const Kreate = () => {
                                 value={newMember}
                                 onChange={(e) => setNewMember(e.target.value)}
                                 placeholder="Phone number or username..." 
-                                className="flex-1 bg-[#0B1828]/50 border border-[#C9A84C]/20 p-3 text-sm outline-none"
+                                className="flex-1 bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-sm outline-none focus:border-[#C9A84C]"
                               />
-                              <button onClick={addInvitee} className="bg-[#C9A84C] text-[#0B1828] px-6 font-bold text-[10px] uppercase tracking-widest hover:brightness-110">
-                                + Invite
+                              <button 
+                                onClick={async () => {
+                                  if (!newMember) return;
+                                  setLoading(true);
+                                  try {
+                                    const { data, error } = await supabase
+                                      .from('profiles')
+                                      .select('*')
+                                      .or(`username.eq.${newMember},phone_number.eq.${newMember}`)
+                                      .maybeSingle();
+                                    
+                                    if (data) {
+                                      if (invitees.find(m => m.name === (data.full_name || data.username))) {
+                                        toast.error("Already in circle");
+                                      } else {
+                                        setInvitees([...invitees, {
+                                          name: data.full_name || data.username,
+                                          initials: (data.full_name || data.username).substring(0,2).toUpperCase(),
+                                          status: "INVITED · AWAITING RESPONSE",
+                                          color: `linear-gradient(135deg, ${['#FF6B35', '#4895EF', '#6BBFB5'][Math.floor(Math.random()*3)]}, #C9A84C)`,
+                                          pending: true
+                                        }]);
+                                        setNewMember("");
+                                        toast.success("Member found and invited!");
+                                      }
+                                    } else {
+                                      toast.error("User not found on Kommuniti");
+                                    }
+                                  } catch (e) {
+                                    toast.error("Search failed");
+                                  } finally {
+                                    setLoading(false);
+                                  }
+                                }}
+                                className="bg-[#C9A84C] text-[#0B1828] px-6 font-bold text-[10px] uppercase tracking-widest hover:brightness-110 flex items-center gap-2"
+                              >
+                                {loading ? '...' : <Plus size={14} />} Invite
                               </button>
                             </div>
                           </div>
