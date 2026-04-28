@@ -14,7 +14,8 @@ import {
   RefreshCcw,
   Mail,
   Calendar,
-  Clock
+  Clock,
+  MapPin
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -70,9 +71,19 @@ const Admin = () => {
         </div>
 
         <nav className="space-y-2 flex-1">
-          <button className="w-full flex items-center gap-3 px-4 py-3 bg-[rgba(201,168,76,0.1)] text-[#C9A84C] rounded-sm transition-all">
+          <button 
+            onClick={() => navigate("/admin")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-sm transition-all ${window.location.pathname === '/admin' ? 'bg-[rgba(201,168,76,0.1)] text-[#C9A84C]' : 'text-[rgba(240,232,213,0.3)] hover:bg-white/5 hover:text-[#F0E8D5]'}`}
+          >
             <LayoutDashboard size={18} />
             <span className="text-xs font-bold uppercase tracking-widest">Real-time Users</span>
+          </button>
+          <button 
+            onClick={() => navigate("/admin/map")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-sm transition-all ${window.location.pathname === '/admin/map' ? 'bg-[rgba(201,168,76,0.1)] text-[#C9A84C]' : 'text-[rgba(240,232,213,0.3)] hover:bg-white/5 hover:text-[#F0E8D5]'}`}
+          >
+            <MapPin size={18} />
+            <span className="text-xs font-bold uppercase tracking-widest">Map Intelligence</span>
           </button>
           <button className="w-full flex items-center gap-3 px-4 py-3 text-[rgba(240,232,213,0.3)] cursor-not-allowed">
             <CircleDot size={18} />

@@ -27,21 +27,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .from('profiles')
         .select('*')
         .eq('id', currentUser.id)
-        .single();
+        .maybeSingle();
 
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("Timeout")), 3000)
+        setTimeout(() => reject(new Error("Timeout")), 10000)
       );
 
-      const result: any = await Promise.race([profilePromise, timeoutPromise]);
-      
-      if (result.error) {
-        console.warn("AuthContext: Profile fetch returned error:", result.error.message);
-        return null;
+      try {
+        const result: any = await Promise.race([profilePromise, timeoutPromise]);
+        
+        if (result.error) {
+          console.warn("AuthContext: Profile fetch returned error:", result.error.message);
+          return null;
+        }
+        return result.data;
+      } catch (timeoutErr) {
+        console.warn("AuthContext: Profile fetch timed out, proceeding with session only.");
+        return null; // Fallback to null profile but continue
       }
-      return result.data;
     } catch (e) {
-      console.error("AuthContext: Profile fetch failed or timed out:", e);
+      console.error("AuthContext: Critical profile fetch failure:", e);
       return null;
     }
   };

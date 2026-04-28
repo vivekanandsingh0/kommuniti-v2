@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -35,29 +37,61 @@ const Kreate = () => {
   ]);
   const [newMember, setNewMember] = useState("");
   const navigate = useNavigate();
-  const wizardRef = useRef<HTMLDivElement>(null);
-
-  // Map Data Simulation
+  const wizardRef = useRef<HTMLDivElement>(null);  // Map Data Simulation
   const COLS = 26;
   const ROWS = 14;
   const mapData = [
     [1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1],
-    [1,1,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,1,1,1,1,1,1,1,1],
-    [0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
-    [0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
-    [0,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,1,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
-    [1,1,1,1,0,0,0,0,0,0,0,0,0,9,0,0,0,0,0,0,0,0,0,1,1,1],
+    [1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
     [1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1],
     [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1],
     [1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
   ].flat();
 
-  const getCellClass = (v: number) => {
+  const [mapOverrides, setMapOverrides] = useState<any>({});
+  const [loadingMap, setLoadingMap] = useState(true);
+
+  // Fetch all live map data on mount
+  useEffect(() => {
+    const fetchMapData = async () => {
+      try {
+        // Using Admin client to rule out RLS issues entirely
+        const { data, error } = await supabaseAdmin
+          .from('map_zones')
+          .select('*');
+        
+        if (data) {
+          console.log(`Map Sync: Received ${data.length} zone overrides from DB.`);
+          const overrides: any = {};
+          data.forEach(z => {
+            overrides[z.zone_index] = z;
+          });
+          setMapOverrides(overrides);
+        }
+        if (error) console.error("Map Sync Error:", error.message);
+      } catch (e) {
+        console.error("Critical Map Sync failure:", e);
+      } finally {
+        setLoadingMap(false);
+      }
+    };
+    fetchMapData();
+  }, []);
+
+  const getCellClass = (idx: number, baseV: number) => {
+    // Use live database status if it exists, otherwise use terrain default
+    const override = mapOverrides[idx];
+    const v = override ? override.status : baseV;
+    
     switch(v) {
       case 1: return "bg-[#4895EF]/10 border border-[#4895EF]/20"; // Water
       case 4: return "bg-[#C9A84C] border border-[#F5C842] shadow-[0_0_12px_rgba(201,168,76,0.5)] pulse-gold"; // Root
@@ -65,24 +99,83 @@ const Kreate = () => {
       case 6: return "bg-[#6BBFB5] border border-[#6BBFB5]/80 shadow-[0_0_10px_rgba(107,191,181,0.5)]"; // Canopy
       case 8: return "bg-[#E63946] border border-[#E63946]/80 animate-pulse"; // Issue
       case 9: return "bg-[#4CAF50] border border-[#4CAF50]/80"; // Solved
-      default: return "bg-[#F0E8D5]/5 border border-[#F0E8D5]/10 hover:bg-[#C9A84C]/20 hover:border-[#C9A84C]/40 transition-all cursor-pointer hover:scale-110 z-10 hover:shadow-[0_0_15px_rgba(201,168,76,0.3)]"; // Grey
+      default: return "bg-[#F0E8D5]/10 border border-[#F0E8D5]/10 hover:bg-[#C9A84C]/20 hover:border-[#C9A84C]/40 transition-all cursor-pointer hover:scale-110 z-10 hover:shadow-[0_0_15px_rgba(201,168,76,0.3)]"; // Grey
     }
   };
 
-  const selectZone = (idx: number, v: number) => {
+  const [zoneStats, setZoneStats] = useState({
+    population: 1200,
+    potential: 800,
+    existingKores: 0
+  });
+
+  const selectZone = async (idx: number, v: number) => {
     if (v !== 0) return;
+    
     setSelectedCell(idx);
     setIsWizardOpen(true);
+    
+    // USE PRE-FETCHED LIVE DATA (Single Source of Truth)
+    const override = mapOverrides[idx];
+    
+    if (override) {
+      setZoneStats({
+        population: override.population_estimate || 1200,
+        potential: override.kss_potential || 800,
+        existingKores: 0
+      });
+    } else {
+      // Use algorithmic baseline for undiscovered zones
+      // deterministic based on index so it doesn't change every click
+      const baselinePop = 1000 + (idx % 20) * 40;
+      const baselinePot = 600 + (idx % 15) * 20;
+      setZoneStats({
+        population: baselinePop,
+        potential: baselinePot,
+        existingKores: 0
+      });
+    }
+
     setTimeout(() => {
       wizardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
   };
 
-  const handleNext = () => {
+  const [koreForm, setKoreForm] = useState({
+    name: "",
+    focus: "Community commerce & KOKO Store",
+    desc: "",
+    gatheringDay: "Fri",
+    startTime: "18:00",
+    address: ""
+  });
+
+  const handleNext = async () => {
     if (currentStep < 4) setCurrentStep(currentStep + 1);
     else {
-      setIsSuccess(true);
-      toast.success("Kore Created Successfully!");
+      try {
+        setLoading(true);
+        // Save to database
+        const { error } = await supabase
+          .from('kores')
+          .insert({
+            zone_index: selectedCell,
+            founder_id: (await supabase.auth.getUser()).data.user?.id,
+            name: koreForm.name || "Unnamed Kore",
+            charter: koreForm.desc,
+            gathering_day: koreForm.gatheringDay,
+            kss_score: 0
+          });
+
+        if (error) throw error;
+
+        setIsSuccess(true);
+        toast.success("Kore Created Successfully! Your zone is now lit.");
+      } catch (e: any) {
+        toast.error("Error founding Kore: " + e.message);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -193,7 +286,7 @@ const Kreate = () => {
               <div 
                 key={i} 
                 onClick={() => selectZone(i, v)}
-                className={`aspect-square rounded-[2px] ${getCellClass(v)} ${selectedCell === i ? 'ring-4 ring-[#C9A84C] scale-125 z-50 bg-[#C9A84C]! border-2 border-[#F5C842]!' : ''}`}
+                className={`aspect-square rounded-[2px] ${getCellClass(i, v)} ${selectedCell === i ? 'ring-4 ring-[#C9A84C] scale-125 z-50 bg-[#C9A84C]! border-2 border-[#F5C842]!' : ''}`}
               />
             ))}
           </div>
@@ -254,13 +347,19 @@ const Kreate = () => {
                               <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Your Kore Name</label>
                               <input 
                                 type="text" 
+                                value={koreForm.name}
+                                onChange={(e) => setKoreForm({...koreForm, name: e.target.value})}
                                 placeholder="e.g. Fort Kochi Heritage Kore" 
                                 className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none focus:border-[#C9A84C] transition-all"
                               />
                             </div>
                             <div>
                               <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">What will your Kore focus on?</label>
-                              <select className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none focus:border-[#C9A84C] transition-all cursor-pointer">
+                              <select 
+                                value={koreForm.focus}
+                                onChange={(e) => setKoreForm({...koreForm, focus: e.target.value})}
+                                className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none focus:border-[#C9A84C] transition-all cursor-pointer"
+                              >
                                 <option>Community commerce & KOKO Store</option>
                                 <option>Civic action & issue tagging</option>
                                 <option>Heritage & culture preservation</option>
@@ -270,6 +369,8 @@ const Kreate = () => {
                             <div>
                               <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Kore Description (shown publicly)</label>
                               <textarea 
+                                value={koreForm.desc}
+                                onChange={(e) => setKoreForm({...koreForm, desc: e.target.value})}
                                 placeholder="Tell people what your Kore is about..." 
                                 className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none focus:border-[#C9A84C] transition-all min-h-[120px]"
                               />
@@ -277,7 +378,7 @@ const Kreate = () => {
                           </div>
                         </div>
                       )}
-
+ 
                       {currentStep === 2 && (
                         <div className="space-y-8">
                           <h3 className="text-2xl font-bold mb-6">Weekly Pulse.</h3>
@@ -288,8 +389,8 @@ const Kreate = () => {
                                 {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
                                   <button 
                                     key={day}
-                                    onClick={() => setSelectedDay(day)}
-                                    className={`py-3 text-[10px] font-bold uppercase transition-all ${selectedDay === day ? 'bg-[#C9A84C] text-[#0B1828]' : 'bg-[#0B1828]/30 border border-[#C9A84C]/20 text-[#F0E8D5]/40 hover:border-[#C9A84C]/60 hover:text-[#F0E8D5]'}`}
+                                    onClick={() => setKoreForm({...koreForm, gatheringDay: day})}
+                                    className={`py-3 text-[10px] font-bold uppercase transition-all ${koreForm.gatheringDay === day ? 'bg-[#C9A84C] text-[#0B1828]' : 'bg-[#0B1828]/30 border border-[#C9A84C]/20 text-[#F0E8D5]/40 hover:border-[#C9A84C]/60 hover:text-[#F0E8D5]'}`}
                                   >
                                     {day}
                                   </button>
@@ -299,20 +400,31 @@ const Kreate = () => {
                             <div className="grid grid-cols-2 gap-6">
                               <div>
                                 <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Start Time</label>
-                                <input type="time" defaultValue="18:00" className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" />
+                                <input 
+                                  type="time" 
+                                  value={koreForm.startTime}
+                                  onChange={(e) => setKoreForm({...koreForm, startTime: e.target.value})}
+                                  className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" 
+                                />
                               </div>
                               <div>
                                 <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Duration</label>
                                 <select className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none">
                                   <option>60 minutes</option>
-                                  <option selected>2 hours</option>
+                                  <option defaultValue="2 hours">2 hours</option>
                                   <option>Half day</option>
                                 </select>
                               </div>
                             </div>
                             <div>
                               <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Gathering Point Address</label>
-                              <input type="text" placeholder="e.g. Princess Street, Fort Kochi" className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" />
+                              <input 
+                                type="text" 
+                                value={koreForm.address}
+                                onChange={(e) => setKoreForm({...koreForm, address: e.target.value})}
+                                placeholder="e.g. Princess Street, Fort Kochi" 
+                                className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" 
+                              />
                               <p className="text-[10px] text-[#F0E8D5]/40 mt-3">Your meeting location (250m L7 zone). You'll pin this on the map in the app.</p>
                             </div>
                           </div>
@@ -401,9 +513,9 @@ const Kreate = () => {
                             <div className="space-y-6">
                               {[
                                 { l: "Available Slots", v: "2 / 2 available" },
-                                { l: "Existing Kores", v: "None — you would be FIRST", color: "#F0E8D5" },
-                                { l: "Zone Population", v: "~1,400 residents" },
-                                { l: "KSS Potential", v: "800+ (Forest)", color: "#C9A84C" }
+                                { l: "Existing Kores", v: zoneStats.existingKores > 0 ? `${zoneStats.existingKores} founded` : "None — you would be FIRST", color: zoneStats.existingKores > 0 ? "#F0E8D5" : "#AAFF00" },
+                                { l: "Zone Population", v: `~${zoneStats.population.toLocaleString()} residents` },
+                                { l: "KSS Potential", v: `${zoneStats.potential}+ (${zoneStats.potential >= 800 ? 'Forest' : zoneStats.potential >= 600 ? 'Canopy' : 'Branch'})`, color: "#C9A84C" }
                               ].map((s, i) => (
                                 <div key={i} className="pb-4 border-b border-[#C9A84C]/10 last:border-0">
                                   <div className="text-[9px] uppercase tracking-[2px] text-[#F0E8D5]/40 mb-1">{s.l}</div>

@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import AdminMemberDetail from "./pages/AdminMemberDetail";
+import AdminMap from "./pages/AdminMap";
 import Kreate from "./pages/Kreate";
 import NotFound from "./pages/NotFound";
 
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/users/:id" element={<AdminMemberDetail />} />
+            <Route path="/admin/map" element={<AdminMap />} />
             <Route path="/kreate" element={<Kreate />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
