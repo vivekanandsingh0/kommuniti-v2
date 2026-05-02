@@ -23,8 +23,8 @@ import { supabase } from "@/lib/supabase";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
 import { useAuth } from "@/context/AuthContext";
+import { MapGeoService } from "@/utils/map-geo-service";
 
 const Kreate = () => {
   const { profile, user } = useAuth();
@@ -35,6 +35,16 @@ const Kreate = () => {
   const [charCounts, setCharCounts] = useState({ name: 0, desc: 0 });
   const [selectedDay, setSelectedDay] = useState("Fri");
   const [invitees, setInvitees] = useState<any[]>([]);
+
+  // Map Configuration (Dynamic from DB)
+  const [mapConfig, setMapConfig] = useState({
+    lat: 9.9658,
+    lng: 76.2421,
+    radius: 10
+  });
+
+  const { cols: COLS, rows: ROWS } = MapGeoService.calculateGridBounds(mapConfig.radius);
+  const gridCells = Array.from({ length: COLS * ROWS }, (_, i) => 0);
 
   // Auto-fill founder as first member
   useEffect(() => {
@@ -52,69 +62,88 @@ const Kreate = () => {
   const [newMember, setNewMember] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const wizardRef = useRef<HTMLDivElement>(null);  // Map Data Simulation
-  const COLS = 26;
-  const ROWS = 14;
-  const mapData = [
-    [1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1],
-    [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
-    [1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
-    [1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1],
-    [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1],
-    [1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
-  ].flat();
+  const wizardRef = useRef<HTMLDivElement>(null); 
 
   const [mapOverrides, setMapOverrides] = useState<any>({});
   const [loadingMap, setLoadingMap] = useState(true);
 
   // Fetch all live map data on mount
   useEffect(() => {
-    const fetchMapData = async () => {
+    const fetchLiveMap = async () => {
       try {
-        // Using Admin client to rule out RLS issues entirely
+        // 1. Fetch Map Config
+        const { data: config } = await supabase
+          .from('map_config')
+          .select('*')
+          .eq('city_name', 'Fort Kochi')
+          .maybeSingle();
+        
+        if (config) {
+          setMapConfig({
+            lat: config.center_lat,
+            lng: config.center_lng,
+            radius: config.radius_km
+          });
+        }
+
+        // 2. Fetch Overrides
         const { data, error } = await supabaseAdmin
           .from('map_zones')
           .select('*');
         
         if (data) {
-          console.log(`Map Sync: Received ${data.length} zone overrides from DB.`);
           const overrides: any = {};
           data.forEach(z => {
             overrides[z.zone_index] = z;
           });
           setMapOverrides(overrides);
         }
-        if (error) console.error("Map Sync Error:", error.message);
       } catch (e) {
-        console.error("Critical Map Sync failure:", e);
+        console.error("Map Sync failure:", e);
       } finally {
         setLoadingMap(false);
       }
     };
-    fetchMapData();
+    fetchLiveMap();
   }, []);
 
+  // AUTO-LOCATE USER
+  useEffect(() => {
+    if (!loadingMap && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const { latitude, longitude } = pos.coords;
+        const index = MapGeoService.getGridIndex(
+          latitude, 
+          longitude, 
+          COLS, 
+          ROWS, 
+          { lat: mapConfig.lat, lng: mapConfig.lng }
+        );
+        
+        if (index !== null) {
+          setSelectedCell(index);
+          toast.success("Current zone identified! 📍", {
+            description: "We've highlighted your 1km community block."
+          });
+        }
+      }, (err) => {
+        console.warn("Location access denied or unavailable.");
+      });
+    }
+  }, [loadingMap, COLS, ROWS, mapConfig.lat, mapConfig.lng]);
+
   const getCellClass = (idx: number, baseV: number) => {
-    // Use live database status if it exists, otherwise use terrain default
     const override = mapOverrides[idx];
     const v = override ? override.status : baseV;
     
     switch(v) {
-      case 1: return "bg-[#4895EF]/10 border border-[#4895EF]/20"; // Water
-      case 4: return "bg-[#C9A84C] border border-[#F5C842] shadow-[0_0_12px_rgba(201,168,76,0.5)] pulse-gold"; // Root
-      case 5: return "bg-[#4895EF] border border-[#4895EF]/80 shadow-[0_0_8px_rgba(72,149,239,0.4)]"; // Branch
-      case 6: return "bg-[#6BBFB5] border border-[#6BBFB5]/80 shadow-[0_0_10px_rgba(107,191,181,0.5)]"; // Canopy
-      case 8: return "bg-[#E63946] border border-[#E63946]/80 animate-pulse"; // Issue
-      case 9: return "bg-[#4CAF50] border border-[#4CAF50]/80"; // Solved
-      default: return "bg-[#F0E8D5]/10 border border-[#F0E8D5]/10 hover:bg-[#C9A84C]/20 hover:border-[#C9A84C]/40 transition-all cursor-pointer hover:scale-110 z-10 hover:shadow-[0_0_15px_rgba(201,168,76,0.3)]"; // Grey
+      case 1: return "bg-[#4895EF]/10 border border-[#4895EF]/20"; 
+      case 4: return "bg-[#C9A84C] border border-[#F5C842] shadow-[0_0_12px_rgba(201,168,76,0.5)] pulse-gold"; 
+      case 5: return "bg-[#4895EF] border border-[#4895EF]/80 shadow-[0_0_8px_rgba(72,149,239,0.4)]"; 
+      case 6: return "bg-[#6BBFB5] border border-[#6BBFB5]/80 shadow-[0_0_10px_rgba(107,191,181,0.5)]"; 
+      case 8: return "bg-[#E63946] border border-[#E63946]/80 animate-pulse"; 
+      case 9: return "bg-[#4CAF50] border border-[#4CAF50]/80"; 
+      default: return "bg-[#F0E8D5]/10 border border-[#F0E8D5]/10 hover:bg-[#C9A84C]/20 hover:border-[#C9A84C]/40 transition-all cursor-pointer hover:scale-110 z-10 hover:shadow-[0_0_15px_rgba(201,168,76,0.3)]"; 
     }
   };
 
@@ -124,11 +153,10 @@ const Kreate = () => {
     existingKores: 0
   });
 
-  const selectZone = async (idx: number, v: number) => {
-    if (v !== 0) return;
-    
+  const selectZone = async (idx: number, baseV: number) => {
     setSelectedCell(idx);
     setIsWizardOpen(true);
+    setCurrentStep(1); // Reset to step 1 on every new selection
     
     // USE PRE-FETCHED LIVE DATA (Single Source of Truth)
     const override = mapOverrides[idx];
@@ -137,11 +165,10 @@ const Kreate = () => {
       setZoneStats({
         population: override.population_estimate || 1200,
         potential: override.kss_potential || 800,
-        existingKores: 0
+        existingKores: override.status === 4 || override.status === 6 ? 1 : 0
       });
     } else {
       // Use algorithmic baseline for undiscovered zones
-      // deterministic based on index so it doesn't change every click
       const baselinePop = 1000 + (idx % 20) * 40;
       const baselinePot = 600 + (idx % 15) * 20;
       setZoneStats({
@@ -296,8 +323,13 @@ const Kreate = () => {
             <span>51 playable L6 zones · 0 Kores founded</span>
           </div>
 
-          <div className="grid grid-cols-26 gap-[3px]">
-            {mapData.map((v, i) => (
+          <div 
+            className="grid gap-[3px]"
+            style={{ 
+              gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` 
+            }}
+          >
+            {gridCells.map((v, i) => (
               <div 
                 key={i} 
                 onClick={() => selectZone(i, v)}
@@ -325,250 +357,304 @@ const Kreate = () => {
 
         {/* Wizard Panel */}
         <AnimatePresence>
-          {isWizardOpen && (
+          {isWizardOpen && selectedCell !== null && (
             <motion.div 
-              ref={wizardRef}
+              key={`wizard-${selectedCell}`}
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               className="bg-[#12243A] border border-[#C9A84C]/40 border-t-4 border-t-[#C9A84C] overflow-hidden"
             >
-              {!isSuccess ? (
-                <div className="p-8 md:p-12">
-                  {/* Wizard Tabs */}
-                  <div className="flex border-b border-[#C9A84C]/10 mb-12">
-                    {["Name Your Kore", "Set Gathering", "Write Charter", "Invite Members"].map((step, i) => (
-                      <button 
-                        key={i}
-                        className={`flex-1 pb-4 text-[10px] uppercase tracking-widest transition-all ${currentStep === i + 1 ? 'text-[#F0E8D5] border-b-2 border-b-[#C9A84C]' : 'text-[#F0E8D5]/30 hover:text-[#F0E8D5]/60'}`}
-                        onClick={() => setCurrentStep(i + 1)}
-                      >
-                        <div className={`w-6 h-6 rounded-full mx-auto mb-2 flex items-center justify-center font-bold ${currentStep >= i + 1 ? 'bg-[#C9A84C] text-[#0B1828]' : 'bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C]'}`}>
-                          {i + 1}
+              {(() => {
+                const effectiveStatus = mapOverrides[selectedCell]?.status ?? gridCells[selectedCell];
+                const isAvailable = effectiveStatus === 0;
+                return (
+                  <div className="wizard-content">
+                    {!isSuccess ? (
+                      <div className="p-8 md:p-12">
+                        {isAvailable ? (
+                          <div className="flex border-b border-[#C9A84C]/10 mb-12">
+                        {["Name Your Kore", "Set Gathering", "Write Charter", "Invite Members"].map((step, i) => (
+                          <button 
+                            key={i}
+                            className={`flex-1 pb-4 text-[10px] uppercase tracking-widest transition-all ${currentStep === i + 1 ? 'text-[#F0E8D5] border-b-2 border-b-[#C9A84C]' : 'text-[#F0E8D5]/30 hover:text-[#F0E8D5]/60'}`}
+                            onClick={() => setCurrentStep(i + 1)}
+                          >
+                            <div className={`w-6 h-6 rounded-full mx-auto mb-2 flex items-center justify-center font-bold ${currentStep >= i + 1 ? 'bg-[#C9A84C] text-[#0B1828]' : 'bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C]'}`}>
+                              {i + 1}
+                            </div>
+                            <span className="hidden md:inline">{step}</span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-6 mb-12 pb-6 border-b border-[#C9A84C]/10">
+                        <div className="w-16 h-16 bg-[#C9A84C]/10 border border-[#C9A84C]/30 flex items-center justify-center text-3xl">
+                          {effectiveStatus === 4 ? "👑" : effectiveStatus === 6 ? "🍃" : effectiveStatus === 2 ? "💧" : "🔍"}
                         </div>
-                        <span className="hidden md:inline">{step}</span>
-                      </button>
-                    ))}
-                  </div>
+                        <div>
+                          <h3 className="text-2xl font-bold text-[#F0E8D5] tracking-tight">Zone Insights.</h3>
+                          <p className="text-[#C9A84C] text-[10px] uppercase tracking-[3px] font-bold">
+                            {effectiveStatus === 4 ? "Root Kore Territory" : 
+                             effectiveStatus === 6 ? "Canopy Kore Active" : 
+                             effectiveStatus === 2 ? "Protected Water Body" : 
+                             effectiveStatus === 8 ? "Active Community Issue" : "Special Zone"}
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                   {/* Step Content */}
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                     <div className="lg:col-span-7">
-                      {currentStep === 1 && (
-                        <div className="space-y-8">
-                          <h3 className="text-2xl font-bold mb-6">Claim your territory.</h3>
-                          <div className="space-y-6">
-                            <div>
-                              <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Your Kore Name</label>
-                              <input 
-                                type="text" 
-                                value={koreForm.name}
-                                onChange={(e) => setKoreForm({...koreForm, name: e.target.value})}
-                                placeholder="e.g. Fort Kochi Heritage Kore" 
-                                className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none focus:border-[#C9A84C] transition-all"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">What will your Kore focus on?</label>
-                              <select 
-                                value={koreForm.focus}
-                                onChange={(e) => setKoreForm({...koreForm, focus: e.target.value})}
-                                className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none focus:border-[#C9A84C] transition-all cursor-pointer"
-                              >
-                                <option>Community commerce & KOKO Store</option>
-                                <option>Civic action & issue tagging</option>
-                                <option>Heritage & culture preservation</option>
-                                <option>Sustainable living & agriculture</option>
-                              </select>
-                            </div>
-                            <div>
-                              <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Kore Description (shown publicly)</label>
-                              <textarea 
-                                value={koreForm.desc}
-                                onChange={(e) => setKoreForm({...koreForm, desc: e.target.value})}
-                                placeholder="Tell people what your Kore is about..." 
-                                className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none focus:border-[#C9A84C] transition-all min-h-[120px]"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      )}
- 
-                      {currentStep === 2 && (
-                        <div className="space-y-8">
-                          <h3 className="text-2xl font-bold mb-6">Weekly Pulse.</h3>
-                          <div className="space-y-8">
-                            <div>
-                              <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-6">Choose Gathering Day</label>
-                              <div className="grid grid-cols-7 gap-2">
-                                {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
-                                  <button 
-                                    key={day}
-                                    onClick={() => setKoreForm({...koreForm, gatheringDay: day})}
-                                    className={`py-3 text-[10px] font-bold uppercase transition-all ${koreForm.gatheringDay === day ? 'bg-[#C9A84C] text-[#0B1828]' : 'bg-[#0B1828]/30 border border-[#C9A84C]/20 text-[#F0E8D5]/40 hover:border-[#C9A84C]/60 hover:text-[#F0E8D5]'}`}
+                      {isAvailable ? (
+                        <>
+                          {currentStep === 1 && (
+                            <div className="space-y-8">
+                              <h3 className="text-2xl font-bold mb-6">Claim your territory.</h3>
+                              <div className="space-y-6">
+                                <div>
+                                  <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Your Kore Name</label>
+                                  <input 
+                                    type="text" 
+                                    value={koreForm.name}
+                                    onChange={(e) => setKoreForm({...koreForm, name: e.target.value})}
+                                    placeholder="e.g. Fort Kochi Heritage Kore" 
+                                    className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none focus:border-[#C9A84C] transition-all"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">What will your Kore focus on?</label>
+                                  <select 
+                                    value={koreForm.focus}
+                                    onChange={(e) => setKoreForm({...koreFocus, focus: e.target.value})}
+                                    className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none focus:border-[#C9A84C] transition-all cursor-pointer"
                                   >
-                                    {day}
-                                  </button>
-                                ))}
+                                    <option>Community commerce & KOKO Store</option>
+                                    <option>Civic action & issue tagging</option>
+                                    <option>Heritage & culture preservation</option>
+                                    <option>Sustainable living & agriculture</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Kore Description (shown publicly)</label>
+                                  <textarea 
+                                    value={koreForm.desc}
+                                    onChange={(e) => setKoreForm({...koreForm, desc: e.target.value})}
+                                    placeholder="Tell people what your Kore is about..." 
+                                    className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none focus:border-[#C9A84C] transition-all min-h-[120px]"
+                                  />
+                                </div>
                               </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-6">
-                              <div>
-                                <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Start Time</label>
-                                <input 
-                                  type="time" 
-                                  value={koreForm.startTime}
-                                  onChange={(e) => setKoreForm({...koreForm, startTime: e.target.value})}
-                                  className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" 
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Duration</label>
-                                <select className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none">
-                                  <option>60 minutes</option>
-                                  <option defaultValue="2 hours">2 hours</option>
-                                  <option>Half day</option>
-                                </select>
-                              </div>
-                            </div>
-                            <div>
-                              <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Gathering Point Address</label>
-                              <input 
-                                type="text" 
-                                value={koreForm.address}
-                                onChange={(e) => setKoreForm({...koreForm, address: e.target.value})}
-                                placeholder="e.g. Princess Street, Fort Kochi" 
-                                className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" 
-                              />
-                              <p className="text-[10px] text-[#F0E8D5]/40 mt-3">Your meeting location (250m L7 zone). You'll pin this on the map in the app.</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {currentStep === 3 && (
-                        <div className="space-y-8">
-                          <h3 className="text-2xl font-bold mb-6">Founding Charter.</h3>
-                          <div className="space-y-6">
-                            <div>
-                              <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Our Community Stands For</label>
-                              <textarea 
-                                placeholder="We believe that our neighbourhood deserves better..." 
-                                className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none min-h-[140px]"
-                              />
-                            </div>
-                            <div className="space-y-3">
-                              <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">We Commit To (3 principles)</label>
-                              <input type="text" placeholder="Principle 1: e.g. Show up. Every week." className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" />
-                              <input type="text" placeholder="Principle 2: e.g. Tag and solve — no issue goes unnamed." className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" />
-                              <input type="text" placeholder="Principle 3: e.g. Earnings shared equitably." className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* STEP 4: INVITE MEMBERS */}
-                      {currentStep === 4 && (
-                        <div className="space-y-8">
-                          <h3 className="text-2xl font-bold mb-6">Founding Circle.</h3>
-                          <div className="space-y-6">
-                            <div className="bg-[#C9A84C]/5 border border-[#C9A84C]/30 p-6 flex items-center justify-between gap-4">
-                              <div className="text-[11px] font-mono text-[#F0E8D5]/60 truncate">
-                                thekommuniti.org/join/{koreForm.name.toLowerCase().replace(/\s+/g, '-') || 'your-kore'}?ref=founder
-                              </div>
-                              <button 
-                                onClick={() => {
-                                  const url = `thekommuniti.org/join/${koreForm.name.toLowerCase().replace(/\s+/g, '-') || 'your-kore'}?ref=founder`;
-                                  navigator.clipboard.writeText(url);
-                                  toast.success("Invite link copied!");
-                                }}
-                                className="flex items-center gap-2 bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C] px-4 py-2 text-[10px] font-bold uppercase hover:bg-[#C9A84C] hover:text-[#0B1828] transition-all"
-                              >
-                                <Copy size={12} /> Copy
-                              </button>
-                            </div>
-                            
-                            <div className="space-y-3">
-                              <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Members Invited</label>
-                              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                {invitees.map((inv, i) => (
-                                  <motion.div 
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    key={i} 
-                                    className="flex items-center gap-4 bg-[#0B1828]/30 border border-[#C9A84C]/10 p-3"
-                                  >
-                                    <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style={{ background: inv.color }}>
-                                      {inv.initials}
-                                    </div>
-                                    <div className="flex-1">
-                                      <div className="text-sm font-bold">{inv.name}</div>
-                                      <div className={`text-[10px] uppercase tracking-wide ${inv.pending ? 'text-[#C9A84C]' : 'text-[#4CAF50]'}`}>{inv.status}</div>
-                                    </div>
-                                    {i > 0 && (
+                          )}
+      
+                          {currentStep === 2 && (
+                            <div className="space-y-8">
+                              <h3 className="text-2xl font-bold mb-6">Weekly Pulse.</h3>
+                              <div className="space-y-8">
+                                <div>
+                                  <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-6">Choose Gathering Day</label>
+                                  <div className="grid grid-cols-7 gap-2">
+                                    {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
                                       <button 
-                                        onClick={() => setInvitees(invitees.filter((_, idx) => idx !== i))}
-                                        className="text-[#F0E8D5]/20 hover:text-[#E63946] p-2 transition-colors"
+                                        key={day}
+                                        onClick={() => setKoreForm({...koreForm, gatheringDay: day})}
+                                        className={`py-3 text-[10px] font-bold uppercase transition-all ${koreForm.gatheringDay === day ? 'bg-[#C9A84C] text-[#0B1828]' : 'bg-[#0B1828]/30 border border-[#C9A84C]/20 text-[#F0E8D5]/40 hover:border-[#C9A84C]/60 hover:text-[#F0E8D5]'}`}
                                       >
-                                        <X size={16} />
+                                        {day}
                                       </button>
-                                    )}
-                                  </motion.div>
-                                ))}
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-6">
+                                  <div>
+                                    <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Start Time</label>
+                                    <input 
+                                      type="time" 
+                                      value={koreForm.startTime}
+                                      onChange={(e) => setKoreForm({...koreForm, startTime: e.target.value})}
+                                      className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" 
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Duration</label>
+                                    <select className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none">
+                                      <option>60 minutes</option>
+                                      <option defaultValue="2 hours">2 hours</option>
+                                      <option>Half day</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Gathering Point Address</label>
+                                  <input 
+                                    type="text" 
+                                    value={koreForm.address}
+                                    onChange={(e) => setKoreForm({...koreForm, address: e.target.value})}
+                                    placeholder="e.g. Princess Street, Fort Kochi" 
+                                    className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" 
+                                  />
+                                  <p className="text-[10px] text-[#F0E8D5]/40 mt-3">Your meeting location (250m L7 zone). You'll pin this on the map in the app.</p>
+                                </div>
                               </div>
                             </div>
-
-                            <div className="flex gap-2">
-                              <input 
-                                type="text" 
-                                value={newMember}
-                                onChange={(e) => setNewMember(e.target.value)}
-                                placeholder="Phone number or username..." 
-                                className="flex-1 bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-sm outline-none focus:border-[#C9A84C]"
-                              />
-                              <button 
-                                onClick={async () => {
-                                  if (!newMember) return;
-                                  setLoading(true);
-                                  try {
-                                    const { data, error } = await supabase
-                                      .from('profiles')
-                                      .select('*')
-                                      .or(`username.eq.${newMember},phone_number.eq.${newMember}`)
-                                      .maybeSingle();
-                                    
-                                    if (data) {
-                                      if (invitees.find(m => m.name === (data.full_name || data.username))) {
-                                        toast.error("Already in circle");
-                                      } else {
-                                        setInvitees([...invitees, {
-                                          name: data.full_name || data.username,
-                                          initials: (data.full_name || data.username).substring(0,2).toUpperCase(),
-                                          status: "INVITED · AWAITING RESPONSE",
-                                          color: `linear-gradient(135deg, ${['#FF6B35', '#4895EF', '#6BBFB5'][Math.floor(Math.random()*3)]}, #C9A84C)`,
-                                          pending: true
-                                        }]);
-                                        setNewMember("");
-                                        toast.success("Member found and invited!");
+                          )}
+    
+                          {currentStep === 3 && (
+                            <div className="space-y-8">
+                              <h3 className="text-2xl font-bold mb-6">Founding Charter.</h3>
+                              <div className="space-y-6">
+                                <div>
+                                  <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Our Community Stands For</label>
+                                  <textarea 
+                                    placeholder="We believe that our neighbourhood deserves better..." 
+                                    className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none min-h-[140px]"
+                                  />
+                                </div>
+                                <div className="space-y-3">
+                                  <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">We Commit To (3 principles)</label>
+                                  <input type="text" placeholder="Principle 1: e.g. Show up. Every week." className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" />
+                                  <input type="text" placeholder="Principle 2: e.g. Tag and solve — no issue goes unnamed." className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" />
+                                  <input type="text" placeholder="Principle 3: e.g. Earnings shared equitably." className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+    
+                          {currentStep === 4 && (
+                            <div className="space-y-8">
+                              <h3 className="text-2xl font-bold mb-6">Founding Circle.</h3>
+                              <div className="space-y-6">
+                                <div className="bg-[#C9A84C]/5 border border-[#C9A84C]/30 p-6 flex items-center justify-between gap-4">
+                                  <div className="text-[11px] font-mono text-[#F0E8D5]/60 truncate">
+                                    thekommuniti.org/join/{koreForm.name.toLowerCase().replace(/\s+/g, '-') || 'your-kore'}?ref=founder
+                                  </div>
+                                  <button 
+                                    onClick={() => {
+                                      const url = `thekommuniti.org/join/${koreForm.name.toLowerCase().replace(/\s+/g, '-') || 'your-kore'}?ref=founder`;
+                                      navigator.clipboard.writeText(url);
+                                      toast.success("Invite link copied!");
+                                    }}
+                                    className="flex items-center gap-2 bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C] px-4 py-2 text-[10px] font-bold uppercase hover:bg-[#C9A84C] hover:text-[#0B1828] transition-all"
+                                  >
+                                    <Copy size={12} /> Copy
+                                  </button>
+                                </div>
+                                
+                                <div className="space-y-3">
+                                  <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Members Invited</label>
+                                  <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {invitees.map((inv, i) => (
+                                      <motion.div 
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        key={i} 
+                                        className="flex items-center gap-4 bg-[#0B1828]/30 border border-[#C9A84C]/10 p-3"
+                                      >
+                                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm" style={{ background: inv.color }}>
+                                          {inv.initials}
+                                        </div>
+                                        <div className="flex-1">
+                                          <div className="text-sm font-bold">{inv.name}</div>
+                                          <div className={`text-[10px] uppercase tracking-wide ${inv.pending ? 'text-[#C9A84C]' : 'text-[#4CAF50]'}`}>{inv.status}</div>
+                                        </div>
+                                        {i > 0 && (
+                                          <button 
+                                            onClick={() => setInvitees(invitees.filter((_, idx) => idx !== i))}
+                                            className="text-[#F0E8D5]/20 hover:text-[#E63946] p-2 transition-colors"
+                                          >
+                                            <X size={16} />
+                                          </button>
+                                        )}
+                                      </motion.div>
+                                    ))}
+                                  </div>
+                                </div>
+    
+                                <div className="flex gap-2">
+                                  <input 
+                                    type="text" 
+                                    value={newMember}
+                                    onChange={(e) => setNewMember(e.target.value)}
+                                    placeholder="Phone number or username..." 
+                                    className="flex-1 bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-sm outline-none focus:border-[#C9A84C]"
+                                  />
+                                  <button 
+                                    onClick={async () => {
+                                      if (!newMember) return;
+                                      setLoading(true);
+                                      try {
+                                        const { data, error } = await supabase
+                                          .from('profiles')
+                                          .select('*')
+                                          .or(`username.eq.${newMember},phone_number.eq.${newMember}`)
+                                          .maybeSingle();
+                                        
+                                        if (data) {
+                                          if (invitees.find(m => m.name === (data.full_name || data.username))) {
+                                            toast.error("Already in circle");
+                                          } else {
+                                            setInvitees([...invitees, {
+                                              name: data.full_name || data.username,
+                                              initials: (data.full_name || data.username).substring(0,2).toUpperCase(),
+                                              status: "INVITED · AWAITING RESPONSE",
+                                              color: `linear-gradient(135deg, ${['#FF6B35', '#4895EF', '#6BBFB5'][Math.floor(Math.random()*3)]}, #C9A84C)`,
+                                              pending: true
+                                            }]);
+                                            setNewMember("");
+                                            toast.success("Member found and invited!");
+                                          }
+                                        } else {
+                                          toast.error("User not found on Kommuniti");
+                                        }
+                                      } catch (e) {
+                                        toast.error("Search failed");
+                                      } finally {
+                                        setLoading(false);
                                       }
-                                    } else {
-                                      toast.error("User not found on Kommuniti");
-                                    }
-                                  } catch (e) {
-                                    toast.error("Search failed");
-                                  } finally {
-                                    setLoading(false);
-                                  }
-                                }}
-                                className="bg-[#C9A84C] text-[#0B1828] px-6 font-bold text-[10px] uppercase tracking-widest hover:brightness-110 flex items-center gap-2"
-                              >
-                                {loading ? '...' : <Plus size={14} />} Invite
-                              </button>
+                                    }}
+                                    className="bg-[#C9A84C] text-[#0B1828] px-6 font-bold text-[10px] uppercase tracking-widest hover:brightness-110 flex items-center gap-2"
+                                  >
+                                    {loading ? '...' : <Plus size={14} />} Invite
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                          <div className="space-y-6">
+                            <h4 className="text-[10px] uppercase tracking-[3px] text-[#C9A84C] font-bold">Community Profile</h4>
+                            <div className="p-8 bg-[#0B1828]/40 border border-[#C9A84C]/10 rounded-2xl">
+                              <p className="text-[#F0E8D5]/70 leading-relaxed italic">
+                                {effectiveStatus === 4 ? "This zone is currently the Root of a growing community. It serves as the administrative and cultural anchor for the surrounding L6 zones." : 
+                                 effectiveStatus === 2 ? "This zone contains protected water bodies. Development is restricted to preserve the natural ecosystem and backwater heritage." : 
+                                 effectiveStatus === 8 ? "An active issue has been tagged in this zone. The community is currently coordinating resources to resolve it." : 
+                                 "This zone is an active part of the Fort Kochi ecosystem, with ongoing community operations and shared governance."}
+                              </p>
                             </div>
                           </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="p-6 bg-[#0B1828]/40 border border-[#C9A84C]/10 rounded-xl flex flex-col justify-between">
+                              <div className="text-[9px] uppercase tracking-[2px] text-[#F0E8D5]/40 mb-4">Activity Level</div>
+                              <div className="text-xl font-bold text-[#6BBFB5]">High · Weekly</div>
+                            </div>
+                            <div className="p-6 bg-[#0B1828]/40 border border-[#C9A84C]/10 rounded-xl flex flex-col justify-between">
+                              <div className="text-[9px] uppercase tracking-[2px] text-[#F0E8D5]/40 mb-4">Governance</div>
+                              <div className="text-xl font-bold text-[#4895EF]">Shared L7</div>
+                            </div>
+                          </div>
+
+                          <button className="w-full py-4 bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C] font-bold text-[11px] uppercase tracking-[2px] hover:bg-[#C9A84C] hover:text-[#0B1828] transition-all">
+                            View Full Community Details
+                          </button>
                         </div>
                       )}
                     </div>
+
 
                     {/* Sidebar Info */}
                     <div className="lg:col-span-5">
@@ -579,6 +665,24 @@ const Kreate = () => {
                               <div className="w-8 h-[1px] bg-[#C9A84C]" />
                               Zone Stats
                             </div>
+
+                            {selectedCell !== null && (() => {
+                              const cellGeo = MapGeoService.getLatLngForCell(selectedCell, COLS, ROWS, { lat: mapConfig.lat, lng: mapConfig.lng });
+                              return (
+                                <div className="mb-8 p-4 bg-[#0B1828]/60 border border-[#C9A84C]/20 flex justify-between items-center">
+                                  <div>
+                                    <p className="text-[8px] uppercase tracking-widest text-white/30 mb-1">Center GPS</p>
+                                    <div className="text-[11px] font-mono text-[#C9A84C]">
+                                      {cellGeo.lat.toFixed(4)}, {cellGeo.lng.toFixed(4)}
+                                    </div>
+                                  </div>
+                                  <div className="text-[10px] font-bold text-[#F0E8D5]/40 uppercase tracking-widest">
+                                    L6 Zone
+                                  </div>
+                                </div>
+                              );
+                            })()}
+
                             <div className="w-24 h-24 bg-[#C9A84C] border-2 border-[#F5C842] shadow-[0_0_30px_rgba(201,168,76,0.3)] mx-auto mb-8 flex items-center justify-center text-4xl">
                               🗺
                             </div>
@@ -638,21 +742,23 @@ const Kreate = () => {
                   </div>
 
                   {/* Wizard Nav */}
-                  <div className="mt-12 pt-8 border-t border-[#C9A84C]/10 flex justify-between items-center">
-                    <button 
-                      onClick={() => setCurrentStep(currentStep - 1)}
-                      className={`text-[10px] uppercase tracking-[2px] text-[#F0E8D5]/40 hover:text-[#F0E8D5] transition-all flex items-center gap-2 ${currentStep === 1 ? 'invisible' : ''}`}
-                    >
-                      <ArrowLeft size={14} /> Back
-                    </button>
-                    <div className="text-[9px] uppercase tracking-[3px] text-[#F0E8D5]/20">Step {currentStep} of 4</div>
-                    <button 
-                      onClick={handleNext}
-                      className="bg-[#C9A84C] text-[#0B1828] px-10 py-4 font-bold text-[11px] uppercase tracking-[2px] hover:brightness-110 transition-all flex items-center gap-2"
-                    >
-                      {currentStep === 4 ? 'Found My Kore 🌱' : 'Continue'} <ArrowRight size={14} />
-                    </button>
-                  </div>
+                  {isAvailable && (
+                    <div className="mt-12 pt-8 border-t border-[#C9A84C]/10 flex justify-between items-center">
+                      <button 
+                        onClick={() => setCurrentStep(currentStep - 1)}
+                        className={`text-[10px] uppercase tracking-[2px] text-[#F0E8D5]/40 hover:text-[#F0E8D5] transition-all flex items-center gap-2 ${currentStep === 1 ? 'invisible' : ''}`}
+                      >
+                        <ArrowLeft size={14} /> Back
+                      </button>
+                      <div className="text-[9px] uppercase tracking-[3px] text-[#F0E8D5]/20">Step {currentStep} of 4</div>
+                      <button 
+                        onClick={handleNext}
+                        className="bg-[#C9A84C] text-[#0B1828] px-10 py-4 font-bold text-[11px] uppercase tracking-[2px] hover:brightness-110 transition-all flex items-center gap-2"
+                      >
+                        {currentStep === 4 ? 'Found My Kore 🌱' : 'Continue'} <ArrowRight size={14} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="p-20 text-center space-y-8">
@@ -674,11 +780,14 @@ const Kreate = () => {
                       Back to Hub
                     </button>
                   </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+              );
+            })()}
+          </motion.div>
+        )}
+          </AnimatePresence>
       </section>
 
       {/* What is a Kore Section */}

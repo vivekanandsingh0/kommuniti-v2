@@ -19,6 +19,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { MapGeoService } from "@/utils/map-geo-service";
 
 const AdminMap = () => {
   const [selectedCell, setSelectedCell] = useState<number | null>(null);
@@ -28,37 +29,46 @@ const AdminMap = () => {
   const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
 
+  // Map Configuration (Dynamic)
+  const [mapConfig, setMapConfig] = useState({
+    lat: 9.9658,
+    lng: 76.2421,
+    radius: 10 // km
+  });
+
+  const { cols: COLS, rows: ROWS } = MapGeoService.calculateGridBounds(mapConfig.radius);
+  
   // Local State for the selected cell
   const [editStats, setEditStats] = useState({
     population: 1200,
     potential: 800,
     digipin: "",
-    status: 0 // 0: Available, 1: Terrain, 4: Root, etc.
+    status: 0,
+    lat: 0,
+    lng: 0
   });
 
-  // Map Constants (Must match Kreate.tsx)
-  const COLS = 26;
-  const ROWS = 14;
-  
-  // Base map data (Terrain logic)
-  const initialMap = [
-    [1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1],
-    [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
-    [1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
-    [1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1],
-    [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1],
-    [1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
-  ].flat();
+  // Base map data (Calculated Grid)
+  const gridCells = Array.from({ length: COLS * ROWS }, (_, i) => 0);
 
   useEffect(() => {
+    // Fetch live map config first
+    const fetchConfig = async () => {
+      const { data, error } = await supabaseAdmin
+        .from('map_config')
+        .select('*')
+        .eq('city_name', activeCity)
+        .maybeSingle();
+      
+      if (data) {
+        setMapConfig({
+          lat: data.center_lat,
+          lng: data.center_lng,
+          radius: data.radius_km
+        });
+      }
+    };
+
     // Fetch all overrides from DB for this city
     const fetchOverrides = async () => {
         setLoading(true);
@@ -81,17 +91,44 @@ const AdminMap = () => {
             setLoading(false);
         }
     };
+    fetchConfig();
     fetchOverrides();
   }, [activeCity]);
+
+  const handleDeploy = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabaseAdmin
+        .from('map_config')
+        .upsert({
+          city_name: activeCity,
+          center_lat: mapConfig.lat,
+          center_lng: mapConfig.lng,
+          radius_km: mapConfig.radius,
+          is_active: true
+        }, { onConflict: 'city_name' });
+      
+      if (error) throw error;
+      toast.success("Live Map Deployed! Syncing to user Kreate hub...");
+    } catch (e: any) {
+      toast.error("Deployment failed: " + e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCellClick = (idx: number, v: number) => {
     setSelectedCell(idx);
     const existing = zoneData[idx];
+    const cellGeo = MapGeoService.getLatLngForCell(idx, COLS, ROWS, { lat: mapConfig.lat, lng: mapConfig.lng });
+    
     setEditStats({
       population: existing?.population_estimate || 1200,
       potential: existing?.kss_potential || 800,
-      digipin: existing?.digipin_code || `Kochi-FP-${idx}`,
-      status: existing?.status || v
+      digipin: existing?.digipin_code || MapGeoService.generateDigiPin(cellGeo.lat, cellGeo.lng),
+      status: existing?.status || v,
+      lat: cellGeo.lat,
+      lng: cellGeo.lng
     });
   };
 
@@ -125,12 +162,9 @@ const AdminMap = () => {
     reader.onload = async (e: any) => {
       const text = e.target.result;
       const lines = text.split('\n');
-      const headers = lines[0].split(',');
       const rows = lines.slice(1).filter((l: string) => l.trim() !== "");
       
       setLoading(true);
-      let successCount = 0;
-      
       try {
         const payload = rows.map((row: string) => {
           const values = row.split(',');
@@ -150,7 +184,7 @@ const AdminMap = () => {
 
         if (error) throw error;
         toast.success(`Successfully imported ${payload.length} zones!`);
-        window.location.reload(); // Refresh to show new map
+        window.location.reload(); 
       } catch (err: any) {
         toast.error("Import failed: Check CSV format. " + err.message);
       } finally {
@@ -178,14 +212,12 @@ const AdminMap = () => {
 
         if (error) throw error;
         
-        // Update local state
         setZoneData({
             ...zoneData,
             [selectedCell]: { ...editStats, zone_index: selectedCell }
         });
         toast.success(`Zone ${selectedCell} updated successfully!`);
     } catch (e: any) {
-        console.error("Critical error saving zone:", e);
         toast.error("Save failed: " + (e.message || "Unknown error"));
     } finally {
         setIsSaving(false);
@@ -200,15 +232,14 @@ const AdminMap = () => {
     const selectionRing = isSelected ? 'ring-2 ring-white scale-110 z-50' : '';
 
     switch(v) {
-      case 1: return `bg-[#4895EF]/10 border border-[#4895EF]/20 ${selectionRing}`; // Water
-      case 4: return `bg-[#C9A84C] border border-[#F5C842] shadow-[0_0_8px_rgba(201,168,76,0.3)] ${selectionRing}`; // Root
-      default: return `bg-[#F0E8D5]/5 border border-[#F0E8D5]/10 hover:bg-[#C9A84C]/20 cursor-pointer ${selectionRing}`; // Grey
+      case 1: return `bg-[#4895EF]/10 border border-[#4895EF]/20 ${selectionRing}`; 
+      case 4: return `bg-[#C9A84C] border border-[#F5C842] shadow-[0_0_8px_rgba(201,168,76,0.3)] ${selectionRing}`; 
+      default: return `bg-[#F0E8D5]/5 border border-[#F0E8D5]/10 hover:bg-[#C9A84C]/20 cursor-pointer ${selectionRing}`; 
     }
   };
 
   return (
     <div className="min-h-screen bg-[#0B1828] text-[#F0E8D5] flex flex-col lg:flex-row">
-      {/* Admin Sidebar */}
       <aside className="w-full lg:w-80 border-r border-[rgba(201,168,76,0.15)] p-8 flex flex-col bg-[#060D16]">
         <div className="flex items-center gap-3 mb-10">
           <button onClick={() => navigate("/admin")} className="p-2 hover:bg-white/5 rounded-full transition-colors">
@@ -219,7 +250,58 @@ const AdminMap = () => {
           </h1>
         </div>
 
-        <div className="space-y-8 flex-1">
+        <div className="space-y-8 flex-1 overflow-y-auto custom-scrollbar pr-2">
+          <div className="p-6 bg-[#C9A84C]/5 border border-[#C9A84C]/10 rounded-sm">
+            <h3 className="text-xs font-bold uppercase tracking-widest mb-6 flex items-center gap-2">
+              <Globe size={14} className="text-[#C9A84C]" /> Grid Deployment
+            </h3>
+            <div className="space-y-4">
+               <div>
+                  <label className="text-[9px] uppercase tracking-widest text-white/40 mb-2 block">Center Anchor (GPS)</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="number" 
+                      value={mapConfig.lat}
+                      onChange={(e) => setMapConfig({...mapConfig, lat: parseFloat(e.target.value)})}
+                      className="w-1/2 bg-[#0B1828] border border-white/10 p-2 text-xs outline-none" 
+                      step="0.0001"
+                    />
+                    <input 
+                      type="number" 
+                      value={mapConfig.lng}
+                      onChange={(e) => setMapConfig({...mapConfig, lng: parseFloat(e.target.value)})}
+                      className="w-1/2 bg-[#0B1828] border border-white/10 p-2 text-xs outline-none" 
+                      step="0.0001"
+                    />
+                  </div>
+               </div>
+               <div>
+                  <label className="text-[9px] uppercase tracking-widest text-white/40 mb-2 block">Radius (km)</label>
+                  <input 
+                    type="number" 
+                    value={mapConfig.radius}
+                    onChange={(e) => setMapConfig({...mapConfig, radius: parseInt(e.target.value) || 1})}
+                    className="w-full bg-[#0B1828] border border-white/10 p-2 text-xs outline-none" 
+                  />
+               </div>
+               <div className="pt-2">
+                  <div className="flex justify-between text-[10px] text-white/60 mb-2">
+                    <span>Generated Grid:</span>
+                    <span className="text-[#C9A84C] font-bold">{COLS}x{ROWS}</span>
+                  </div>
+                  <p className="text-[9px] text-white/20 italic">Each cell is an L6 (1km x 1km) zone.</p>
+               </div>
+               <button 
+                 onClick={handleDeploy}
+                 disabled={loading}
+                 className="w-full mt-4 flex items-center justify-center gap-2 bg-[#C9A84C] text-[#0B1828] py-3 text-[10px] font-bold uppercase tracking-widest hover:brightness-110 transition-all disabled:opacity-50"
+               >
+                 {loading ? <RefreshCcw size={12} className="animate-spin" /> : <Globe size={12} />}
+                 Deploy Live Map
+               </button>
+            </div>
+          </div>
+
           <div>
             <label className="text-[10px] uppercase tracking-[3px] text-[#C9A84C] block mb-3">Active City</label>
             <select 
@@ -228,8 +310,8 @@ const AdminMap = () => {
               className="w-full bg-[#0B1828] border border-[#C9A84C]/20 p-3 text-sm outline-none focus:border-[#C9A84C]"
             >
               <option>Fort Kochi</option>
+              <option>Kochi Core</option>
               <option disabled>Mankulam (Soon)</option>
-              <option disabled>Varkala (Soon)</option>
             </select>
           </div>
 
@@ -286,8 +368,13 @@ const AdminMap = () => {
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 flex-1">
           {/* The Interactive Grid */}
           <div className="xl:col-span-8 bg-[#060D16] border border-[#C9A84C]/20 p-6 relative overflow-x-auto">
-            <div className="grid grid-cols-26 gap-[2px] min-w-[800px]">
-              {initialMap.map((v, i) => (
+            <div 
+              className="grid gap-[2px] min-w-[800px]"
+              style={{ 
+                gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` 
+              }}
+            >
+              {gridCells.map((v, i) => (
                 <div 
                   key={i} 
                   onClick={() => handleCellClick(i, v)}
@@ -320,6 +407,17 @@ const AdminMap = () => {
                   </div>
 
                   <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4 bg-[#0B1828] p-4 border border-white/5">
+                        <div>
+                          <label className="block text-[8px] uppercase tracking-[3px] text-white/30 mb-1">Latitude</label>
+                          <div className="text-xs font-mono text-[#C9A84C]">{editStats.lat.toFixed(4)}</div>
+                        </div>
+                        <div>
+                          <label className="block text-[8px] uppercase tracking-[3px] text-white/30 mb-1">Longitude</label>
+                          <div className="text-xs font-mono text-[#C9A84C]">{editStats.lng.toFixed(4)}</div>
+                        </div>
+                    </div>
+
                     <div>
                       <label className="block text-[9px] uppercase tracking-[3px] text-white/40 mb-2">Population Estimate</label>
                       <input 
