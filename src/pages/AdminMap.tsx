@@ -14,7 +14,8 @@ import {
   Plus,
   Trash2,
   Info,
-  RefreshCcw
+  RefreshCcw,
+  CircleDot
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -249,6 +250,30 @@ const AdminMap = () => {
             Map <span className="text-[#C9A84C]">Manager</span>
           </h1>
         </div>
+
+        <nav className="mb-10 space-y-1">
+          <button 
+            onClick={() => navigate("/admin")}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-sm text-[rgba(240,232,213,0.3)] hover:bg-white/5 hover:text-[#F0E8D5] transition-all"
+          >
+            <Users size={16} />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Real-time Users</span>
+          </button>
+          <button 
+            onClick={() => navigate("/admin/map")}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-sm bg-[rgba(201,168,76,0.1)] text-[#C9A84C] transition-all"
+          >
+            <MapPin size={16} />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Map Intelligence</span>
+          </button>
+          <button 
+            onClick={() => navigate("/admin/kores")}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-sm text-[rgba(240,232,213,0.3)] hover:bg-white/5 hover:text-[#F0E8D5] transition-all"
+          >
+            <CircleDot size={16} />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Kore Oversight</span>
+          </button>
+        </nav>
 
         <div className="space-y-8 flex-1 overflow-y-auto custom-scrollbar pr-2">
           <div className="p-6 bg-[#C9A84C]/5 border border-[#C9A84C]/10 rounded-sm">

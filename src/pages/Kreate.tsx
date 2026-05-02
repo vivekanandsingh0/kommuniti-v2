@@ -36,6 +36,11 @@ const Kreate = () => {
   const [selectedDay, setSelectedDay] = useState("Fri");
   const [invitees, setInvitees] = useState<any[]>([]);
 
+  // Form State
+  const [koreName, setKoreName] = useState("");
+  const [koreDescription, setKoreDescription] = useState("");
+  const [koreCharter, setKoreCharter] = useState("");
+
   // Map Configuration (Dynamic from DB)
   const [mapConfig, setMapConfig] = useState({
     lat: 9.9658,
@@ -186,35 +191,76 @@ const Kreate = () => {
   const [koreForm, setKoreForm] = useState({
     name: "",
     focus: "Community commerce & KOKO Store",
-    desc: "",
+    desc: "", // This maps to 'description'
+    charter: "",
     gatheringDay: "Fri",
     startTime: "18:00",
     address: ""
   });
 
   const handleNext = async () => {
-    if (currentStep < 4) setCurrentStep(currentStep + 1);
-    else {
+    if (currentStep < 4) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      // FINAL SUBMISSION: FOUND MY KORE
+      if (!user) {
+        toast.error("Authentication required!", {
+          description: "Please sign in to found a Kore and claim your zone."
+        });
+        navigate("/auth");
+        return;
+      }
+      
+      if (!koreForm.name) return toast.error("Your Kore needs a name!");
+      if (selectedCell === null) return;
+      
+      setLoading(true);
       try {
-        setLoading(true);
-        // Save to database
-        const { error } = await supabase
+        // 1. Create the Kore
+        const { data: newKore, error: koreError } = await supabase
           .from('kores')
           .insert({
-            zone_index: selectedCell,
-            founder_id: (await supabase.auth.getUser()).data.user?.id,
-            name: koreForm.name || "Unnamed Kore",
-            charter: koreForm.desc,
+            name: koreForm.name,
+            description: koreForm.desc,
             gathering_day: koreForm.gatheringDay,
-            kss_score: 0
+            charter: koreForm.charter,
+            zone_index: selectedCell,
+            founder_id: user?.id
+          })
+          .select()
+          .single();
+
+        if (koreError) throw koreError;
+
+        // 2. Add Founder as first member
+        const { error: memberError } = await supabase
+          .from('kore_members')
+          .insert({
+            kore_id: newKore.id,
+            profile_id: user?.id,
+            role: 'founder'
           });
 
-        if (error) throw error;
+        if (memberError) throw memberError;
+
+        // 3. Update Map Status to Root (4)
+        const { error: zoneError } = await supabaseAdmin
+          .from('map_zones')
+          .upsert({
+            zone_index: selectedCell,
+            city_name: 'Fort Kochi',
+            status: 4,
+            population_estimate: 1200, 
+            kss_potential: 800
+          }, { onConflict: 'zone_index' });
+
+        if (zoneError) throw zoneError;
 
         setIsSuccess(true);
-        toast.success("Kore Created Successfully! Your zone is now lit.");
-      } catch (e: any) {
-        toast.error("Error founding Kore: " + e.message);
+        toast.success("Congratulations! Your Kore is officially born. 🌱");
+      } catch (err: any) {
+        console.error("Founding failed:", err);
+        toast.error("Founding failed: " + err.message);
       } finally {
         setLoading(false);
       }
@@ -427,7 +473,7 @@ const Kreate = () => {
                                   <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">What will your Kore focus on?</label>
                                   <select 
                                     value={koreForm.focus}
-                                    onChange={(e) => setKoreForm({...koreFocus, focus: e.target.value})}
+                                    onChange={(e) => setKoreForm({...koreForm, focus: e.target.value})}
                                     className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none focus:border-[#C9A84C] transition-all cursor-pointer"
                                   >
                                     <option>Community commerce & KOKO Store</option>
@@ -508,15 +554,18 @@ const Kreate = () => {
                                 <div>
                                   <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">Our Community Stands For</label>
                                   <textarea 
+                                    value={koreForm.charter}
+                                    onChange={(e) => setKoreForm({...koreForm, charter: e.target.value})}
                                     placeholder="We believe that our neighbourhood deserves better..." 
                                     className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none min-h-[140px]"
                                   />
                                 </div>
                                 <div className="space-y-3">
                                   <label className="block text-[10px] uppercase tracking-[3px] text-[#C9A84C] mb-3">We Commit To (3 principles)</label>
-                                  <input type="text" placeholder="Principle 1: e.g. Show up. Every week." className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" />
-                                  <input type="text" placeholder="Principle 2: e.g. Tag and solve — no issue goes unnamed." className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" />
-                                  <input type="text" placeholder="Principle 3: e.g. Earnings shared equitably." className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none" />
+                                  <p className="text-[10px] text-[#F0E8D5]/40 italic mb-2">Include these in your main charter above.</p>
+                                  <input type="text" placeholder="Principle 1: e.g. Show up. Every week." className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none opacity-50 cursor-not-allowed" disabled />
+                                  <input type="text" placeholder="Principle 2: e.g. Tag and solve — no issue goes unnamed." className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none opacity-50 cursor-not-allowed" disabled />
+                                  <input type="text" placeholder="Principle 3: e.g. Earnings shared equitably." className="w-full bg-[#0B1828]/50 border border-[#C9A84C]/20 p-4 text-[#F0E8D5] outline-none opacity-50 cursor-not-allowed" disabled />
                                 </div>
                               </div>
                             </div>
