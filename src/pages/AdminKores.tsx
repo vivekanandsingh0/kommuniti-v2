@@ -19,6 +19,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import AdminSidebar from "@/components/admin/AdminSidebar";
 
 const AdminKores = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -64,50 +65,7 @@ const AdminKores = () => {
 
   return (
     <div className="min-h-screen bg-[#0B1828] text-[#F0E8D5] flex">
-      {/* Sidebar */}
-      <aside className="w-64 border-r border-[rgba(201,168,76,0.1)] hidden lg:flex flex-col p-6 sticky top-0 h-screen">
-        <div className="flex items-center gap-2 mb-12">
-          <span className="text-2xl">🌻</span>
-          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800 }} className="text-xl">
-            Admin <span className="text-[#C9A84C]">Hub</span>
-          </span>
-        </div>
-
-        <nav className="space-y-2 flex-1">
-          <button 
-            onClick={() => navigate("/admin")}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-sm text-[rgba(240,232,213,0.3)] hover:bg-white/5 hover:text-[#F0E8D5] transition-all"
-          >
-            <Users size={18} />
-            <span className="text-xs font-bold uppercase tracking-widest">Real-time Users</span>
-          </button>
-          <button 
-            onClick={() => navigate("/admin/map")}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-sm text-[rgba(240,232,213,0.3)] hover:bg-white/5 hover:text-[#F0E8D5] transition-all"
-          >
-            <MapPin size={18} />
-            <span className="text-xs font-bold uppercase tracking-widest">Map Intelligence</span>
-          </button>
-          <button 
-            onClick={() => navigate("/admin/kores")}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-sm bg-[rgba(201,168,76,0.1)] text-[#C9A84C] transition-all"
-          >
-            <CircleDot size={18} />
-            <span className="text-xs font-bold uppercase tracking-widest">Kore Oversight</span>
-          </button>
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-[rgba(240,232,213,0.3)] cursor-not-allowed">
-            <Settings size={18} />
-            <span className="text-xs font-bold uppercase tracking-widest">System Config (Soon)</span>
-          </button>
-        </nav>
-
-        <button 
-          onClick={() => navigate("/")}
-          className="mt-auto flex items-center gap-2 text-[10px] uppercase tracking-[2px] text-[rgba(240,232,213,0.3)] hover:text-[#F0E8D5] transition-colors"
-        >
-          <ArrowLeft size={14} /> Back to Site
-        </button>
-      </aside>
+      <AdminSidebar />
 
       {/* Main Content */}
       <main className="flex-1 p-6 lg:p-10 overflow-y-auto">

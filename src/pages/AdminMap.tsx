@@ -273,6 +273,13 @@ const AdminMap = () => {
             <CircleDot size={16} />
             <span className="text-[10px] font-bold uppercase tracking-widest">Kore Oversight</span>
           </button>
+          <button 
+            onClick={() => navigate("/admin/konnect")}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-sm text-[rgba(240,232,213,0.3)] hover:bg-white/5 hover:text-[#F0E8D5] transition-all"
+          >
+            <Zap size={16} />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Konnect CMS</span>
+          </button>
         </nav>
 
         <div className="space-y-8 flex-1 overflow-y-auto custom-scrollbar pr-2">
