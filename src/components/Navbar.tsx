@@ -8,6 +8,7 @@ const navLinks = [
   { label: "KOMMUTE", href: "/kommute", color: "#6BBFB5", icon: "🗺️" },
   { label: "KONNECT", href: "/konnect", color: "#FF6B35", icon: "🎓" },
   { label: "KREATE", href: "/kreate", color: "#AAFF00", icon: "⚡" },
+  { label: "KO READS", href: "/koreads", color: "#C77DFF", icon: "📖" },
   { label: "Kores", href: "/kores", color: "rgba(240, 232, 213, 0.5)", icon: null },
   { label: "About", href: "/about", color: "rgba(240, 232, 213, 0.5)", icon: null },
 ];

@@ -61,7 +61,7 @@ const KoreadsSection = () => {
                   for generations.
                 </p>
 
-                <a href="#" className="btn-pixel-primary inline-block">
+                <a href="/koreads" className="btn-pixel-primary inline-block">
                   EXPLORE
                 </a>
               </div>

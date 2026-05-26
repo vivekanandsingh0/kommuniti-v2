@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "setup:konnect": "node scripts/setup-konnect.mjs",
-    "seed:konnect": "node scripts/seed-konnect.mjs"
+    "seed:konnect": "node scripts/seed-konnect.mjs",
+    "setup:koreads": "node scripts/setup-koreads.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

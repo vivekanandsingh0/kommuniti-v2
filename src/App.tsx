@@ -11,8 +11,14 @@ import AdminMemberDetail from "./pages/AdminMemberDetail";
 import AdminMap from "./pages/AdminMap";
 import AdminKores from "./pages/AdminKores";
 import AdminKonnect from "./pages/AdminKonnect";
+import AdminKoreads from "./pages/AdminKoreads";
 import Kreate from "./pages/Kreate";
 import Konnect from "./pages/Konnect";
+import Koreads from "./pages/Koreads";
+import KoreadsBook from "./pages/KoreadsBook";
+import KoreadsReader from "./pages/KoreadsReader";
+import AuthorDashboard from "./pages/AuthorDashboard";
+import AuthorBookDetail from "./pages/AuthorBookDetail";
 import NotFound from "./pages/NotFound";
 
 import { AuthProvider } from "./context/AuthContext";
@@ -35,8 +41,14 @@ const App = () => (
             <Route path="/admin/map" element={<AdminMap />} />
             <Route path="/admin/kores" element={<AdminKores />} />
             <Route path="/admin/konnect" element={<AdminKonnect />} />
+            <Route path="/admin/koreads" element={<AdminKoreads />} />
             <Route path="/kreate" element={<Kreate />} />
             <Route path="/konnect" element={<Konnect />} />
+            <Route path="/koreads" element={<Koreads />} />
+            <Route path="/koreads/books/:bookId" element={<KoreadsBook />} />
+            <Route path="/koreads/books/:bookId/chapters/:chapterId" element={<KoreadsReader />} />
+            <Route path="/author" element={<AuthorDashboard />} />
+            <Route path="/author/books/:bookId" element={<AuthorBookDetail />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -1,4 +1,4 @@
-import { ArrowLeft, CircleDot, GraduationCap, MapPin, Users } from "lucide-react";
+import { ArrowLeft, BookOpen, CircleDot, GraduationCap, MapPin, Users } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const NAV_ITEMS = [
@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { path: "/admin/map", label: "Map Intelligence", icon: MapPin },
   { path: "/admin/kores", label: "Kore Oversight", icon: CircleDot },
   { path: "/admin/konnect", label: "Konnect CMS", icon: GraduationCap },
+  { path: "/admin/koreads", label: "KO Reads CMS", icon: BookOpen },
 ];
 
 const AdminSidebar = () => {

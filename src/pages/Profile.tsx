@@ -1,20 +1,26 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { LogOut, ArrowLeft, Trophy, Zap, Map, Coins, Wallet, Flame } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { fetchUserContributions } from "@/lib/koreads";
+import { KoreadsContribution } from "@/types/koreads";
 
 const Profile = () => {
   const { user, loading, refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const [koreadsContributions, setKoreadsContributions] = useState<KoreadsContribution[]>([]);
 
   useEffect(() => {
     if (!loading && !user) {
       navigate("/auth");
     } else if (user) {
       refreshProfile();
+      fetchUserContributions(user.id).then(({ contributions }) => {
+        setKoreadsContributions(contributions);
+      });
     }
   }, [user, loading, navigate]);
 
@@ -51,7 +57,7 @@ const Profile = () => {
     { label: "This Month Earnings", value: "₹0", color: "#4CAF50" },
     { label: "Deliveries Done", value: "0", color: "#6BBFB5" },
     { label: "Issues Solved", value: "0", color: "#E63946" },
-    { label: "KO Reads Contributions", value: "0", color: "#C77DFF" },
+    { label: "KO Reads Contributions", value: koreadsContributions.length.toString(), color: "#C77DFF" },
   ];
 
   const achievements: any[] = [];
@@ -161,9 +167,8 @@ const Profile = () => {
                   {impactStats.map((stat) => (
                     <div key={stat.label} className="bg-[rgba(240,232,213,0.03)] border border-[rgba(240,232,213,0.05)] p-6 text-center">
                       <div 
-                        style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800 }}
+                        style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, color: stat.color }}
                         className="text-2xl mb-1"
-                        style={{ color: stat.color }}
                       >
                         {stat.value}
                       </div>
@@ -192,6 +197,53 @@ const Profile = () => {
                   ))}
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div className="mt-16 bg-[rgba(240,232,213,0.025)] border border-[rgba(199,125,255,0.16)] p-6 lg:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <h3 className="text-[11px] uppercase tracking-[3px] text-[#C77DFF] mb-2">
+                  KO Reads Contributions
+                </h3>
+                <p className="text-sm text-[rgba(240,232,213,0.45)]">
+                  Track suggestions you sent to authors and rewards earned from valuable notes.
+                </p>
+              </div>
+              <button
+                onClick={() => navigate("/koreads")}
+                className="border border-[#C77DFF]/30 text-[#C77DFF] px-4 py-2 text-[10px] uppercase tracking-[2px]"
+              >
+                Read & Contribute
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {koreadsContributions.slice(0, 5).map((item) => (
+                <div key={item.id} className="border border-white/5 bg-[#0B1828]/60 p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                    <div className="font-bold text-sm">
+                      {item.book?.title || "KO Reads Book"} · {item.chapter?.title || "Chapter"}
+                    </div>
+                    <span className="text-[10px] uppercase tracking-[2px] text-[#C77DFF]">
+                      {item.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-[rgba(240,232,213,0.5)] line-clamp-2">
+                    “{item.selected_text}”
+                  </p>
+                  {item.ko_coins_rewarded > 0 && (
+                    <div className="mt-2 text-[10px] uppercase tracking-[2px] text-[#C9A84C]">
+                      Rewarded {item.ko_coins_rewarded} KO Coins
+                    </div>
+                  )}
+                </div>
+              ))}
+              {koreadsContributions.length === 0 && (
+                <div className="border border-dashed border-[rgba(199,125,255,0.2)] p-6 text-sm text-[rgba(240,232,213,0.4)]">
+                  No KO Reads contributions yet. Highlight text inside a chapter to send your first note.
+                </div>
+              )}
             </div>
           </div>
 
