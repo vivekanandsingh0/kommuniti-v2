@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { LogOut, ArrowLeft, Trophy, Zap, Map, Coins, Wallet, Flame } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { fetchUserContributions, fetchUserFollowedBooks, fetchUserTaskSubmissions } from "@/lib/koreads";
+import { computeReaderBadges } from "@/lib/koreads-phase2";
+import { ReaderBadge } from "@/types/koreads";
 import { KoreadsContribution, KoreadsTaskSubmission } from "@/types/koreads";
 
 const Profile = () => {
@@ -14,6 +16,7 @@ const Profile = () => {
   const [koreadsContributions, setKoreadsContributions] = useState<KoreadsContribution[]>([]);
   const [koreadsSubmissions, setKoreadsSubmissions] = useState<KoreadsTaskSubmission[]>([]);
   const [followedBooks, setFollowedBooks] = useState<any[]>([]);
+  const [badges, setBadges] = useState<ReaderBadge[]>([]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -24,10 +27,12 @@ const Profile = () => {
         fetchUserContributions(user.id),
         fetchUserTaskSubmissions(user.id),
         fetchUserFollowedBooks(user.id),
-      ]).then(([contribRes, subsRes, followsRes]) => {
+        computeReaderBadges(user.id),
+      ]).then(([contribRes, subsRes, followsRes, badgeList]) => {
         setKoreadsContributions(contribRes.contributions);
         setKoreadsSubmissions(subsRes.submissions);
         setFollowedBooks(followsRes.follows);
+        setBadges(badgeList);
       });
     }
   }, [user, loading, navigate]);
@@ -294,6 +299,27 @@ const Profile = () => {
                     >
                       {f.book?.title || "Book"}
                     </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {badges.length > 0 && (
+              <div className="mt-8">
+                <h4 className="text-[10px] uppercase tracking-[2px] text-[#C77DFF] mb-4">Reader reputation</h4>
+                <div className="flex flex-wrap gap-2">
+                  {badges.map((b) => (
+                    <span
+                      key={b.id}
+                      title={b.description}
+                      className={`text-[10px] uppercase tracking-[1.5px] px-3 py-2 border ${
+                        b.earned
+                          ? "border-[#C9A84C]/50 text-[#C9A84C] bg-[#C9A84C]/10"
+                          : "border-white/10 text-[rgba(240,232,213,0.25)]"
+                      }`}
+                    >
+                      {b.label}
+                    </span>
                   ))}
                 </div>
               </div>

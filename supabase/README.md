@@ -30,7 +30,8 @@ Public users can **read** published content (RLS). Admin panel uses the **servic
 1. Open [Supabase Dashboard](https://supabase.com/dashboard) → your project → **SQL Editor**
 2. Paste the contents of `koreads_schema.sql` and click **Run**
 3. Paste the contents of `koreads_phase1_schema.sql` and click **Run**
-4. From the project root:
+4. Paste the contents of `koreads_phase2_schema.sql` and click **Run**
+5. From the project root:
 
 ```bash
 npm run setup:koreads
@@ -47,6 +48,11 @@ npm run setup:koreads
 | `koreads_task_submissions` | User submissions on bounty tasks |
 | `koreads_contributions` | Reader highlights, comments, author/admin responses, statuses, rewards |
 | `koreads_book_follows` | Users following a book for updates |
+| `koreads_timeline_events` | Version evolution / activity log per book |
+| `koreads_polls` / `koreads_poll_votes` | Community decision polls |
+| `koreads_fan_theories` / `koreads_theory_upvotes` | Fan theory threads |
+| `koreads_behind_story` | Behind-the-story author posts |
+| `koreads_story_circles` / `koreads_circle_members` / `koreads_circle_posts` | Story circles |
 | `ko_coin_transactions` | Reward ledger for contributions, task bounties, and author grants |
 
 Public users can read published content and submit their own contributions. Authors manage assigned books through `/author`. Admins manage everything through `/admin/koreads`.

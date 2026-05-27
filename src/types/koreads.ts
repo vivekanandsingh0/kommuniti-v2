@@ -13,6 +13,7 @@ export type KoreadsTaskCategory =
   | "character_names"
   | "research"
   | "beta_read"
+  | "alternate_scene"
   | "other";
 
 export const TASK_CATEGORY_LABELS: Record<KoreadsTaskCategory, string> = {
@@ -26,6 +27,7 @@ export const TASK_CATEGORY_LABELS: Record<KoreadsTaskCategory, string> = {
   character_names: "Character names",
   research: "Research",
   beta_read: "Beta read",
+  alternate_scene: "Alternate scene",
   other: "Other",
 };
 
@@ -94,10 +96,113 @@ export interface KoreadsTask {
   deadline: string | null;
   contributor_limit: number | null;
   status: KoreadsTaskStatus;
+  is_challenge?: boolean;
+  challenge_ends_at?: string | null;
   created_at?: string;
   updated_at?: string;
   book?: KoreadsBook;
   chapter?: KoreadsChapter;
+}
+
+export type KoreadsTimelineEventType =
+  | "chapter_published"
+  | "chapter_updated"
+  | "contribution_accepted"
+  | "task_rewarded"
+  | "poll_opened"
+  | "poll_closed"
+  | "milestone"
+  | "behind_story";
+
+export interface KoreadsTimelineEvent {
+  id: string;
+  book_id: string;
+  chapter_id: string | null;
+  event_type: KoreadsTimelineEventType;
+  title: string;
+  description: string | null;
+  impact_count: number;
+  created_at?: string;
+}
+
+export interface PollOption {
+  id: string;
+  label: string;
+  description?: string;
+}
+
+export interface KoreadsPoll {
+  id: string;
+  book_id: string;
+  question: string;
+  poll_type: string;
+  options: PollOption[];
+  status: "open" | "closed";
+  ends_at: string | null;
+  winning_option_id: string | null;
+  created_at?: string;
+  vote_counts?: Record<string, number>;
+  user_vote_option_id?: string | null;
+}
+
+export interface KoreadsFanTheory {
+  id: string;
+  book_id: string;
+  user_id: string;
+  title: string;
+  body: string;
+  status: string;
+  created_at?: string;
+  upvote_count?: number;
+  user_has_upvoted?: boolean;
+  display_name?: string;
+}
+
+export interface KoreadsBehindStory {
+  id: string;
+  book_id: string;
+  author_id: string;
+  title: string;
+  body: string;
+  post_type: "process" | "deleted_scene" | "research_journey" | "other";
+  is_published: boolean;
+  created_at?: string;
+}
+
+export interface KoreadsStoryCircle {
+  id: string;
+  book_id: string;
+  name: string;
+  description: string;
+  circle_type: "beta" | "lore" | "editing" | "general";
+  is_invite_only: boolean;
+  member_count?: number;
+  is_member?: boolean;
+}
+
+export interface KoreadsCirclePost {
+  id: string;
+  circle_id: string;
+  user_id: string;
+  body: string;
+  created_at?: string;
+  display_name?: string;
+}
+
+export interface ReaderBadge {
+  id: string;
+  label: string;
+  description: string;
+  earned: boolean;
+}
+
+export interface BookMilestones {
+  follower_count: number;
+  contributor_count: number;
+  chapter_count: number;
+  open_task_count: number;
+  theory_count: number;
+  poll_count: number;
 }
 
 export interface KoreadsTaskSubmission {

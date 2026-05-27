@@ -11,6 +11,18 @@ import {
   updateTaskSubmissionResponse,
 } from "@/lib/koreads";
 import {
+  closePollAdmin,
+  createBehindStoryAdmin,
+  createCircleAdmin,
+  createPollAdmin,
+  fetchBookMilestones,
+  fetchBookPollsForAuthor,
+  logTimelineEvent,
+  maybeLogBookMilestones,
+  topVotedOptionId,
+} from "@/lib/koreads-phase2";
+import { BookMilestones, KoreadsPoll, PollOption } from "@/types/koreads";
+import {
   EMPTY_CHAPTER_CONTENT,
   KOREADS_COVER_COLORS,
   KoreadsAuthor,
@@ -24,7 +36,7 @@ import {
   TASK_CATEGORY_LABELS,
 } from "@/types/koreads";
 
-type Tab = "overview" | "chapters" | "tasks" | "contributions";
+type Tab = "overview" | "chapters" | "tasks" | "contributions" | "community";
 
 const inputClass =
   "w-full bg-[rgba(240,232,213,0.04)] border border-white/10 p-3 outline-none focus:border-[#C77DFF]";
@@ -60,6 +72,17 @@ const AuthorBookDetail = () => {
   const [rewardAmount, setRewardAmount] = useState(25);
   const [creditLabel, setCreditLabel] = useState("");
   const [loading, setLoading] = useState(true);
+  const [milestones, setMilestones] = useState<BookMilestones | null>(null);
+  const [pollQuestion, setPollQuestion] = useState("");
+  const [pollOptions, setPollOptions] = useState("Option A, Option B");
+  const [behindTitle, setBehindTitle] = useState("");
+  const [behindBody, setBehindBody] = useState("");
+  const [circleName, setCircleName] = useState("");
+  const [circleDesc, setCircleDesc] = useState("");
+  const [authorPolls, setAuthorPolls] = useState<KoreadsPoll[]>([]);
+  const [pollType, setPollType] = useState("plot_direction");
+  const [behindPostType, setBehindPostType] = useState("process");
+  const [pollWinnerPick, setPollWinnerPick] = useState<Record<string, string>>({});
 
   const load = async () => {
     if (!user || !bookId) return;
@@ -111,6 +134,21 @@ const AuthorBookDetail = () => {
 
     setContributions((contributionsRes.data as KoreadsContribution[] | null) ?? []);
     setTaskSubmissions((submissionsRes.data as KoreadsTaskSubmission[] | null) ?? []);
+    if (bookId) {
+      const m = await fetchBookMilestones(bookId);
+      setMilestones(m);
+      await maybeLogBookMilestones(bookId, m);
+      const { polls } = await fetchBookPollsForAuthor(bookId);
+      setAuthorPolls(polls);
+      const picks: Record<string, string> = {};
+      polls.forEach((p) => {
+        if (p.status === "open") {
+          const top = topVotedOptionId(p);
+          if (top) picks[p.id] = top;
+        }
+      });
+      setPollWinnerPick(picks);
+    }
     setLoading(false);
   };
 
@@ -164,6 +202,17 @@ const AuthorBookDetail = () => {
 
     if (error) toast.error(error.message);
     else {
+      if (book) {
+        await logTimelineEvent({
+          book_id: book.id,
+          chapter_id: activeChapter.id,
+          event_type: activeChapter.is_published ? "chapter_published" : "chapter_updated",
+          title: activeChapter.is_published
+            ? `Chapter ${activeChapter.chapter_number} published`
+            : `Chapter ${activeChapter.chapter_number} updated`,
+          description: activeChapter.title,
+        });
+      }
       toast.success("Chapter saved");
       await load();
     }
@@ -211,6 +260,8 @@ const AuthorBookDetail = () => {
       reward_ko_coins: taskForm.reward_ko_coins ?? 25,
       deadline: taskForm.deadline || null,
       status: taskForm.status || "open",
+      is_challenge: !!taskForm.is_challenge,
+      challenge_ends_at: taskForm.challenge_ends_at || null,
       updated_at: new Date().toISOString(),
     };
 
@@ -298,7 +349,7 @@ const AuthorBookDetail = () => {
         </h1>
 
         <div className="flex flex-wrap gap-2 mb-8">
-          {(["overview", "chapters", "tasks", "contributions"] as Tab[]).map((t) => (
+          {(["overview", "chapters", "tasks", "contributions", "community"] as Tab[]).map((t) => (
             <button
               key={t}
               type="button"
@@ -313,7 +364,25 @@ const AuthorBookDetail = () => {
         </div>
 
         {tab === "overview" && (
-          <div className="max-w-xl space-y-4 bg-[rgba(240,232,213,0.025)] border border-[rgba(199,125,255,0.16)] p-6">
+          <div className="max-w-xl space-y-4">
+            {milestones && (
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                {[
+                  ["Followers", milestones.follower_count],
+                  ["Contributors", milestones.contributor_count],
+                  ["Chapters", milestones.chapter_count],
+                  ["Open bounties", milestones.open_task_count],
+                  ["Theories", milestones.theory_count],
+                  ["Polls", milestones.poll_count],
+                ].map(([label, val]) => (
+                  <div key={label as string} className="border border-white/10 p-3 text-center">
+                    <div className="text-xl font-bold">{val as number}</div>
+                    <div className="text-[9px] uppercase tracking-[2px] text-[rgba(240,232,213,0.4)]">{label as string}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          <div className="space-y-4 bg-[rgba(240,232,213,0.025)] border border-[rgba(199,125,255,0.16)] p-6">
             <div>
               <label className={labelClass}>Title</label>
               <input className={inputClass} value={book.title} onChange={(e) => setBook({ ...book, title: e.target.value })} />
@@ -377,6 +446,7 @@ const AuthorBookDetail = () => {
             <button onClick={saveBook} className="w-full bg-[#C77DFF] text-[#0B1828] py-3 text-[10px] uppercase tracking-[2px] font-bold flex items-center justify-center gap-2">
               <Save size={14} /> Save Book
             </button>
+          </div>
           </div>
         )}
 
@@ -481,6 +551,26 @@ const AuthorBookDetail = () => {
                   <option value="archived">Archived</option>
                 </select>
               </div>
+              <label className="flex items-center gap-2 text-sm mb-2">
+                <input type="checkbox" checked={!!taskForm.is_challenge} onChange={(e) => setTaskForm({ ...taskForm, is_challenge: e.target.checked })} />
+                Creative challenge (timed)
+              </label>
+              {taskForm.is_challenge && (
+                <div className="mb-4">
+                  <label className={labelClass}>Challenge ends</label>
+                  <input
+                    type="datetime-local"
+                    className={inputClass}
+                    value={taskForm.challenge_ends_at ? taskForm.challenge_ends_at.slice(0, 16) : ""}
+                    onChange={(e) =>
+                      setTaskForm({
+                        ...taskForm,
+                        challenge_ends_at: e.target.value ? new Date(e.target.value).toISOString() : null,
+                      })
+                    }
+                  />
+                </div>
+              )}
               <button onClick={saveTask} className="w-full bg-[#C9A84C] text-[#0B1828] py-3 text-[10px] uppercase tracking-[2px] font-bold">
                 Save Task
               </button>
@@ -501,6 +591,155 @@ const AuthorBookDetail = () => {
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {tab === "community" && author && book && (
+          <div className="space-y-8">
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="bg-[rgba(240,232,213,0.025)] border border-white/10 p-5 space-y-3">
+              <h3 className="font-bold">Open a poll</h3>
+              <select className={inputClass} value={pollType} onChange={(e) => setPollType(e.target.value)}>
+                <option value="cover_choice">Cover choice</option>
+                <option value="plot_direction">Plot direction</option>
+                <option value="pacing">Pacing</option>
+                <option value="ending">Ending</option>
+                <option value="other">Other</option>
+              </select>
+              <input className={inputClass} placeholder="Question" value={pollQuestion} onChange={(e) => setPollQuestion(e.target.value)} />
+              <input className={inputClass} placeholder="Options (comma-separated)" value={pollOptions} onChange={(e) => setPollOptions(e.target.value)} />
+              <button
+                type="button"
+                onClick={async () => {
+                  const opts: PollOption[] = pollOptions.split(",").map((s, i) => ({
+                    id: `opt_${i}`,
+                    label: s.trim(),
+                  }));
+                  const { error } = await createPollAdmin({
+                    book_id: book.id,
+                    question: pollQuestion,
+                    poll_type: pollType,
+                    options: opts,
+                  });
+                  if (error) toast.error(error.message);
+                  else {
+                    toast.success("Poll created");
+                    setPollQuestion("");
+                    await load();
+                  }
+                }}
+                className="w-full bg-[#C77DFF] text-[#0B1828] py-2 text-[10px] uppercase font-bold"
+              >
+                Create poll
+              </button>
+            </div>
+            <div className="bg-[rgba(240,232,213,0.025)] border border-white/10 p-5 space-y-3">
+              <h3 className="font-bold">Behind the story</h3>
+              <select className={inputClass} value={behindPostType} onChange={(e) => setBehindPostType(e.target.value)}>
+                <option value="process">Writing process</option>
+                <option value="deleted_scene">Deleted scene</option>
+                <option value="research_journey">Research journey</option>
+                <option value="other">Other</option>
+              </select>
+              <input className={inputClass} placeholder="Title" value={behindTitle} onChange={(e) => setBehindTitle(e.target.value)} />
+              <textarea className={`${inputClass} min-h-[80px]`} placeholder="Body" value={behindBody} onChange={(e) => setBehindBody(e.target.value)} />
+              <button
+                type="button"
+                onClick={async () => {
+                  const { error } = await createBehindStoryAdmin({
+                    book_id: book.id,
+                    author_id: author.id,
+                    title: behindTitle,
+                    body: behindBody,
+                    post_type: behindPostType,
+                  });
+                  if (error) toast.error(error.message);
+                  else {
+                    toast.success("Post published");
+                    setBehindTitle("");
+                    setBehindBody("");
+                  }
+                }}
+                className="w-full bg-[#C9A84C] text-[#0B1828] py-2 text-[10px] uppercase font-bold"
+              >
+                Publish post
+              </button>
+            </div>
+            <div className="bg-[rgba(240,232,213,0.025)] border border-white/10 p-5 space-y-3">
+              <h3 className="font-bold">Story circle</h3>
+              <input className={inputClass} placeholder="Circle name" value={circleName} onChange={(e) => setCircleName(e.target.value)} />
+              <textarea className={`${inputClass} min-h-[60px]`} placeholder="Description" value={circleDesc} onChange={(e) => setCircleDesc(e.target.value)} />
+              <button
+                type="button"
+                onClick={async () => {
+                  const { error } = await createCircleAdmin({
+                    book_id: book.id,
+                    name: circleName,
+                    description: circleDesc,
+                    circle_type: "beta",
+                  });
+                  if (error) toast.error(error.message);
+                  else {
+                    toast.success("Circle created");
+                    setCircleName("");
+                    setCircleDesc("");
+                  }
+                }}
+                className="w-full border border-[#6BBFB5] text-[#6BBFB5] py-2 text-[10px] uppercase font-bold"
+              >
+                Create circle
+              </button>
+            </div>
+          </div>
+          {authorPolls.length > 0 && (
+            <div>
+              <h3 className="text-[11px] uppercase tracking-[3px] text-[rgba(240,232,213,0.45)] mb-4">Manage polls</h3>
+              <div className="space-y-3">
+                {authorPolls.map((poll) => (
+                  <div key={poll.id} className="border border-white/10 p-4 flex flex-wrap justify-between gap-3 items-center">
+                    <div>
+                      <div className="font-bold">{poll.question}</div>
+                      <div className="text-[10px] uppercase text-[rgba(240,232,213,0.4)]">{poll.status}</div>
+                    </div>
+                    {poll.status === "open" && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <select
+                          className={`${inputClass} w-auto min-w-[180px]`}
+                          value={pollWinnerPick[poll.id] ?? topVotedOptionId(poll) ?? ""}
+                          onChange={(e) =>
+                            setPollWinnerPick((prev) => ({ ...prev, [poll.id]: e.target.value }))
+                          }
+                        >
+                          {poll.options.map((opt) => (
+                            <option key={opt.id} value={opt.id}>
+                              {opt.label}
+                              {poll.vote_counts ? ` (${poll.vote_counts[opt.id] ?? 0} votes)` : ""}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const winner =
+                              pollWinnerPick[poll.id] ?? topVotedOptionId(poll) ?? poll.options[0]?.id;
+                            const { error } = await closePollAdmin(poll.id, book.id, winner);
+                            if (error) toast.error(error.message);
+                            else {
+                              toast.success("Poll closed");
+                              await load();
+                            }
+                          }}
+                          className="text-[10px] uppercase tracking-[2px] text-[#C9A84C] border border-[#C9A84C]/30 px-3 py-2"
+                        >
+                          Close poll
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           </div>
         )}
 

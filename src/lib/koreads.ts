@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { logTimelineEvent } from "@/lib/koreads-phase2";
 import {
   ContributorCredit,
   KoreadsAuthor,
@@ -32,11 +33,11 @@ async function profileNameMap(userIds: string[]) {
 
   const { data: profileRows } = await supabaseAdmin
     .from("profiles")
-    .select("id, full_name, username")
+    .select("id, full_name")
     .in("id", unique);
 
-  (profileRows ?? []).forEach((row: { id: string; full_name?: string; username?: string }) => {
-    const name = row.full_name?.trim() || row.username?.trim();
+  (profileRows ?? []).forEach((row: { id: string; full_name?: string }) => {
+    const name = row.full_name?.trim();
     if (name) map.set(row.id, name);
   });
 
@@ -500,6 +501,17 @@ export async function updateContributionResponse(payload: {
     });
   }
 
+  if (payload.status === "accepted" || payload.status === "valuable") {
+    await logTimelineEvent({
+      book_id: contribution.book_id,
+      chapter_id: contribution.chapter_id,
+      event_type: "contribution_accepted",
+      title: "A reader's note was woven into the draft",
+      description: payload.creditLabel || "Inline contribution accepted",
+      impact_count: 1,
+    });
+  }
+
   return { error: null };
 }
 
@@ -525,7 +537,7 @@ export async function updateTaskSubmissionResponse(payload: {
 
   const { data: submission, error: fetchError } = await supabaseAdmin
     .from("koreads_task_submissions")
-    .select("*, task:koreads_tasks(reward_ko_coins, book:koreads_books(author_id))")
+    .select("*, task:koreads_tasks(reward_ko_coins, book_id, book:koreads_books(author_id))")
     .eq("id", payload.submissionId)
     .maybeSingle();
 
@@ -576,6 +588,19 @@ export async function updateTaskSubmissionResponse(payload: {
       reason: "KO Reads bounty task reward",
       source: "koreads_task_submission",
     });
+  }
+
+  if (payload.status === "accepted" || payload.status === "valuable") {
+    const bookId = submission.task?.book_id;
+    if (bookId) {
+      await logTimelineEvent({
+        book_id: bookId,
+        event_type: "task_rewarded",
+        title: "A bounty contribution was accepted",
+        description: payload.creditLabel || "Community shaping reward",
+        impact_count: 1,
+      });
+    }
   }
 
   return { error: null };

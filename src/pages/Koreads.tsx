@@ -5,6 +5,7 @@ import { ArrowRight, BookOpen, Coins, Highlighter, Sparkles, Trophy, Users } fro
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { fetchOpenTasks, fetchPublishedBooks, fetchSpotlightAuthors } from "@/lib/koreads";
+import { fetchOpenChallenges } from "@/lib/koreads-phase2";
 import { KoreadsAuthor, KoreadsBook, KoreadsTask, TASK_CATEGORY_LABELS } from "@/types/koreads";
 import { useAuth } from "@/context/AuthContext";
 
@@ -71,19 +72,22 @@ const Koreads = () => {
   const [books, setBooks] = useState<KoreadsBook[]>([]);
   const [authors, setAuthors] = useState<KoreadsAuthor[]>([]);
   const [openTasks, setOpenTasks] = useState<KoreadsTask[]>([]);
+  const [challenges, setChallenges] = useState<KoreadsTask[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const [booksRes, authorsRes, tasksRes] = await Promise.all([
+      const [booksRes, authorsRes, tasksRes, challengeRes] = await Promise.all([
         fetchPublishedBooks(),
         fetchSpotlightAuthors(),
         fetchOpenTasks(12),
+        fetchOpenChallenges(6),
       ]);
       setBooks(booksRes.books);
       setAuthors(authorsRes.authors);
       setOpenTasks(tasksRes.tasks);
+      setChallenges(challengeRes.tasks);
       setLoading(false);
     };
     load();
@@ -232,6 +236,28 @@ const Koreads = () => {
             )}
           </div>
         </section>
+
+        {challenges.length > 0 && (
+          <section className="container mx-auto px-6 lg:px-12 pb-16">
+            <SectionLabel>Creative Challenges</SectionLabel>
+            <p className="text-[rgba(240,232,213,0.55)] mb-6 max-w-2xl">
+              Timed bounties — jump in before the clock runs out and help shape the story under pressure.
+            </p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {challenges.map((task) => (
+                <Link
+                  key={task.id}
+                  to={`/koreads/books/${task.book_id}/tasks/${task.id}`}
+                  className="border border-[#FF6B35]/30 bg-[#FF6B35]/5 p-5 hover:border-[#FF6B35]/60"
+                >
+                  <div className="text-[9px] uppercase tracking-[2px] text-[#FF6B35] mb-2">Challenge · ends soon</div>
+                  <div className="font-bold">{task.title}</div>
+                  <p className="text-xs text-[rgba(240,232,213,0.45)] mt-2">{task.book?.title}</p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="container mx-auto px-6 lg:px-12 py-16">
           <SectionLabel>Books Seeking Contributors</SectionLabel>

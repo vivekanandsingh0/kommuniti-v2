@@ -18,6 +18,9 @@ import Koreads from "./pages/Koreads";
 import KoreadsBook from "./pages/KoreadsBook";
 import KoreadsReader from "./pages/KoreadsReader";
 import KoreadsTask from "./pages/KoreadsTask";
+import KoreadsCredits from "./pages/KoreadsCredits";
+import KoreadsTimeline from "./pages/KoreadsTimeline";
+import KoreadsCommunity from "./pages/KoreadsCommunity";
 import AuthorDashboard from "./pages/AuthorDashboard";
 import AuthorBookDetail from "./pages/AuthorBookDetail";
 import NotFound from "./pages/NotFound";
@@ -48,6 +51,9 @@ const App = () => (
             <Route path="/koreads" element={<Koreads />} />
             <Route path="/koreads/books/:bookId" element={<KoreadsBook />} />
             <Route path="/koreads/books/:bookId/tasks/:taskId" element={<KoreadsTask />} />
+            <Route path="/koreads/books/:bookId/credits" element={<KoreadsCredits />} />
+            <Route path="/koreads/books/:bookId/timeline" element={<KoreadsTimeline />} />
+            <Route path="/koreads/books/:bookId/community" element={<KoreadsCommunity />} />
             <Route path="/koreads/books/:bookId/chapters/:chapterId" element={<KoreadsReader />} />
             <Route path="/author" element={<AuthorDashboard />} />
             <Route path="/author/books/:bookId" element={<AuthorBookDetail />} />

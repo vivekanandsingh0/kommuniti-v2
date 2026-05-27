@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight, BookOpen, Coins, Heart, MessageSquare, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Clock, Coins, Heart, MessageSquare, Users } from "lucide-react";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -10,6 +10,7 @@ import {
   isFollowingBook,
   toggleBookFollow,
 } from "@/lib/koreads";
+import { fetchNextChapterDrop } from "@/lib/koreads-phase2";
 import {
   ContributorCredit,
   KoreadsBook as KoreadsBookType,
@@ -27,6 +28,11 @@ const KoreadsBook = () => {
   const [tasks, setTasks] = useState<KoreadsTask[]>([]);
   const [credits, setCredits] = useState<ContributorCredit[]>([]);
   const [following, setFollowing] = useState(false);
+  const [nextDrop, setNextDrop] = useState<{
+    title: string;
+    chapter_number: number;
+    scheduled_at: string;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -37,6 +43,7 @@ const KoreadsBook = () => {
     setChapters(hub.chapters);
     setTasks(hub.tasks);
     setCredits(hub.credits);
+    setNextDrop(await fetchNextChapterDrop(bookId));
     if (user) {
       setFollowing(await isFollowingBook(bookId, user.id));
     }
@@ -46,6 +53,18 @@ const KoreadsBook = () => {
   useEffect(() => {
     load();
   }, [bookId, user?.id]);
+
+  const countdown = useMemo(() => {
+    if (!nextDrop?.scheduled_at) return null;
+    const diff = new Date(nextDrop.scheduled_at).getTime() - Date.now();
+    if (diff <= 0) return "Dropping soon";
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    if (d > 0) return `${d}d ${h}h until drop`;
+    if (h > 0) return `${h}h ${m}m until drop`;
+    return `${m}m until drop`;
+  }, [nextDrop?.scheduled_at]);
 
   const handleFollow = async () => {
     if (!user) {
@@ -167,6 +186,63 @@ const KoreadsBook = () => {
                 </div>
               )}
 
+              {nextDrop && (
+                <div className="mb-6 border border-[#4895EF]/30 bg-[#4895EF]/5 p-4 flex items-center gap-3">
+                  <Clock className="text-[#4895EF] shrink-0" size={20} />
+                  <div>
+                    <div className="text-[10px] uppercase tracking-[2px] text-[#4895EF]">Next chapter drop</div>
+                    <div className="font-bold">
+                      Ch. {nextDrop.chapter_number}: {nextDrop.title}
+                    </div>
+                    {countdown && (
+                      <div className="text-lg font-bold text-[#4895EF] mt-1">{countdown}</div>
+                    )}
+                    <div className="text-sm text-[rgba(240,232,213,0.5)]">
+                      {new Date(nextDrop.scheduled_at).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-2 mb-6">
+                <Link
+                  to={`/koreads/books/${book.id}/community?tab=polls`}
+                  className="text-[10px] uppercase tracking-[2px] border border-white/15 px-3 py-2 hover:border-[#C77DFF]/50"
+                >
+                  Polls
+                </Link>
+                <Link
+                  to={`/koreads/books/${book.id}/community?tab=theories`}
+                  className="text-[10px] uppercase tracking-[2px] border border-white/15 px-3 py-2 hover:border-[#C77DFF]/50"
+                >
+                  Theories
+                </Link>
+                <Link
+                  to={`/koreads/books/${book.id}/community?tab=circles`}
+                  className="text-[10px] uppercase tracking-[2px] border border-white/15 px-3 py-2 hover:border-[#C77DFF]/50"
+                >
+                  Circles
+                </Link>
+                <Link
+                  to={`/koreads/books/${book.id}/community?tab=behind`}
+                  className="text-[10px] uppercase tracking-[2px] border border-white/15 px-3 py-2 hover:border-[#C77DFF]/50"
+                >
+                  Behind the story
+                </Link>
+                <Link
+                  to={`/koreads/books/${book.id}/timeline`}
+                  className="text-[10px] uppercase tracking-[2px] border border-white/15 px-3 py-2 hover:border-[#C77DFF]/50"
+                >
+                  Timeline
+                </Link>
+                <Link
+                  to={`/koreads/books/${book.id}/credits`}
+                  className="text-[10px] uppercase tracking-[2px] border border-white/15 px-3 py-2 hover:border-[#C77DFF]/50"
+                >
+                  Full credits
+                </Link>
+              </div>
+
               <div className="flex flex-wrap gap-3 mb-4">
                 {firstChapter && (
                   <Link
@@ -217,6 +293,7 @@ const KoreadsBook = () => {
                     <div className="flex justify-between gap-2 mb-2">
                       <span className="text-[9px] uppercase tracking-[2px] text-[#C77DFF]">
                         {TASK_CATEGORY_LABELS[task.task_category]}
+                        {task.is_challenge && " · Challenge"}
                       </span>
                       <span className="text-[9px] uppercase tracking-[2px] text-[#C9A84C]">
                         {task.reward_ko_coins} KO Coins
@@ -263,9 +340,14 @@ const KoreadsBook = () => {
         {credits.length > 0 && (
           <section className="bg-[#060D16] border-t border-[rgba(199,125,255,0.12)]">
             <div className="container mx-auto px-6 lg:px-12 py-14">
-              <h3 className="text-[11px] uppercase tracking-[3px] text-[rgba(240,232,213,0.45)] mb-8">
-                People who shaped this book
-              </h3>
+              <div className="flex justify-between items-center mb-8">
+                <h3 className="text-[11px] uppercase tracking-[3px] text-[rgba(240,232,213,0.45)]">
+                  People who shaped this book
+                </h3>
+                <Link to={`/koreads/books/${book.id}/credits`} className="text-[10px] uppercase tracking-[2px] text-[#C77DFF]">
+                  View all credits
+                </Link>
+              </div>
               <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {credits.map((credit) => (
                   <div
