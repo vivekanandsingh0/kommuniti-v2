@@ -17,6 +17,7 @@ import Konnect from "./pages/Konnect";
 import Koreads from "./pages/Koreads";
 import KoreadsBook from "./pages/KoreadsBook";
 import KoreadsReader from "./pages/KoreadsReader";
+import KoreadsTask from "./pages/KoreadsTask";
 import AuthorDashboard from "./pages/AuthorDashboard";
 import AuthorBookDetail from "./pages/AuthorBookDetail";
 import NotFound from "./pages/NotFound";
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/konnect" element={<Konnect />} />
             <Route path="/koreads" element={<Koreads />} />
             <Route path="/koreads/books/:bookId" element={<KoreadsBook />} />
+            <Route path="/koreads/books/:bookId/tasks/:taskId" element={<KoreadsTask />} />
             <Route path="/koreads/books/:bookId/chapters/:chapterId" element={<KoreadsReader />} />
             <Route path="/author" element={<AuthorDashboard />} />
             <Route path="/author/books/:bookId" element={<AuthorBookDetail />} />

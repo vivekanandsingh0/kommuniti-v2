@@ -1,5 +1,33 @@
 export type KoreadsBookStatus = "draft" | "published" | "archived";
+export type KoreadsBookVisibility = "private" | "invite_only" | "public";
 export type KoreadsContributionStatus = "pending" | "accepted" | "rejected" | "valuable";
+export type KoreadsTaskStatus = "open" | "closed" | "archived";
+export type KoreadsTaskCategory =
+  | "title"
+  | "tagline"
+  | "cover_idea"
+  | "dialogue"
+  | "paragraph"
+  | "plot_direction"
+  | "lore"
+  | "character_names"
+  | "research"
+  | "beta_read"
+  | "other";
+
+export const TASK_CATEGORY_LABELS: Record<KoreadsTaskCategory, string> = {
+  title: "Title",
+  tagline: "Tagline",
+  cover_idea: "Cover idea",
+  dialogue: "Dialogue",
+  paragraph: "Paragraph",
+  plot_direction: "Plot direction",
+  lore: "Lore",
+  character_names: "Character names",
+  research: "Research",
+  beta_read: "Beta read",
+  other: "Other",
+};
 
 export interface KoreadsAuthor {
   id: string;
@@ -24,7 +52,10 @@ export interface KoreadsBook {
   tagline: string | null;
   genre: string | null;
   cover_color: string;
+  cover_image_url?: string | null;
   status: KoreadsBookStatus;
+  visibility?: KoreadsBookVisibility;
+  tags?: string[] | null;
   is_featured: boolean;
   is_spotlight: boolean;
   is_new: boolean;
@@ -33,8 +64,8 @@ export interface KoreadsBook {
   created_at?: string;
   updated_at?: string;
   author?: KoreadsAuthor;
-  chapter_count?: number;
-  contribution_count?: number;
+  follower_count?: number;
+  open_task_count?: number;
 }
 
 export interface KoreadsChapter {
@@ -44,8 +75,47 @@ export interface KoreadsChapter {
   title: string;
   content: string;
   is_published: boolean;
+  visibility?: string;
+  is_open_for_inline_contribution?: boolean;
+  scheduled_at?: string | null;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface KoreadsTask {
+  id: string;
+  book_id: string;
+  chapter_id: string | null;
+  task_category: KoreadsTaskCategory;
+  title: string;
+  description: string;
+  reference_text: string | null;
+  reward_ko_coins: number;
+  deadline: string | null;
+  contributor_limit: number | null;
+  status: KoreadsTaskStatus;
+  created_at?: string;
+  updated_at?: string;
+  book?: KoreadsBook;
+  chapter?: KoreadsChapter;
+}
+
+export interface KoreadsTaskSubmission {
+  id: string;
+  task_id: string;
+  user_id: string;
+  body: string;
+  status: KoreadsContributionStatus;
+  author_response: string | null;
+  is_valuable: boolean;
+  is_pinned_credit: boolean;
+  ko_coins_rewarded: number;
+  credit_label: string | null;
+  reviewed_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  task?: KoreadsTask;
+  profile?: { full_name?: string; username?: string };
 }
 
 export interface KoreadsContribution {
@@ -60,12 +130,30 @@ export interface KoreadsContribution {
   status: KoreadsContributionStatus;
   author_response: string | null;
   is_valuable: boolean;
+  is_pinned_credit?: boolean;
+  credit_label?: string | null;
   ko_coins_rewarded: number;
   created_at?: string;
   updated_at?: string;
   responded_at?: string | null;
   book?: KoreadsBook;
   chapter?: KoreadsChapter;
+  profile?: { full_name?: string; username?: string };
+}
+
+export interface ContributorCredit {
+  user_id: string;
+  display_name: string;
+  credit_label: string;
+  is_pinned: boolean;
+  source: "inline" | "task";
+}
+
+export interface KoreadsBookFollow {
+  book_id: string;
+  user_id: string;
+  created_at?: string;
+  book?: KoreadsBook;
 }
 
 export interface KoCoinTransaction {
@@ -74,9 +162,10 @@ export interface KoCoinTransaction {
   actor_user_id: string | null;
   author_id: string | null;
   contribution_id: string | null;
+  task_submission_id?: string | null;
   amount: number;
   reason: string;
-  source: "koreads_contribution" | "koreads_author_grant" | "manual_admin";
+  source: "koreads_contribution" | "koreads_task_submission" | "koreads_author_grant" | "manual_admin";
   created_at?: string;
 }
 
@@ -93,3 +182,16 @@ export const EMPTY_CHAPTER_CONTENT = `Start writing the chapter here.
 
 Keep paragraphs separated by blank lines. Readers will be able to highlight specific text and suggest improvements, sources, questions, or additions.`;
 
+export const EMPTY_BOOK = {
+  title: "Untitled Book",
+  tagline: "",
+  description: "",
+  genre: "",
+  cover_color: KOREADS_COVER_COLORS[0],
+  status: "draft" as KoreadsBookStatus,
+  visibility: "public" as KoreadsBookVisibility,
+  is_featured: false,
+  is_spotlight: false,
+  is_new: true,
+  is_open_for_contribution: true,
+};

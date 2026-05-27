@@ -3,7 +3,7 @@ import { BookOpen, Coins, Plus, RefreshCcw, Save, Trash2, Users } from "lucide-r
 import { toast } from "sonner";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { updateContributionResponse } from "@/lib/koreads";
+import { updateContributionResponse, updateTaskSubmissionResponse } from "@/lib/koreads";
 import {
   EMPTY_CHAPTER_CONTENT,
   KOREADS_COVER_COLORS,
@@ -12,9 +12,13 @@ import {
   KoreadsChapter,
   KoreadsContribution,
   KoreadsContributionStatus,
+  KoreadsTask,
+  KoreadsTaskCategory,
+  KoreadsTaskSubmission,
+  TASK_CATEGORY_LABELS,
 } from "@/types/koreads";
 
-type Tab = "authors" | "books" | "chapters" | "contributions" | "rewards";
+type Tab = "authors" | "books" | "chapters" | "tasks" | "contributions" | "rewards";
 
 const inputClass =
   "w-full bg-[rgba(240,232,213,0.04)] border border-[rgba(201,168,76,0.12)] p-3 outline-none focus:border-[#C77DFF]";
@@ -27,6 +31,8 @@ const AdminKoreads = () => {
   const [books, setBooks] = useState<KoreadsBook[]>([]);
   const [chapters, setChapters] = useState<KoreadsChapter[]>([]);
   const [contributions, setContributions] = useState<KoreadsContribution[]>([]);
+  const [tasks, setTasks] = useState<KoreadsTask[]>([]);
+  const [taskSubmissions, setTaskSubmissions] = useState<KoreadsTaskSubmission[]>([]);
   const [users, setUsers] = useState<any[]>([]);
 
   const [authorForm, setAuthorForm] = useState<Partial<KoreadsAuthor>>({
@@ -50,6 +56,15 @@ const AdminKoreads = () => {
   const [selectedBookId, setSelectedBookId] = useState("");
   const [activeChapter, setActiveChapter] = useState<Partial<KoreadsChapter> | null>(null);
   const [activeContribution, setActiveContribution] = useState<KoreadsContribution | null>(null);
+  const [activeTaskSubmission, setActiveTaskSubmission] = useState<KoreadsTaskSubmission | null>(null);
+  const [taskForm, setTaskForm] = useState<Partial<KoreadsTask>>({
+    task_category: "other",
+    title: "",
+    description: "",
+    reward_ko_coins: 25,
+    status: "open",
+    book_id: "",
+  });
   const [adminResponse, setAdminResponse] = useState("");
   const [rewardAmount, setRewardAmount] = useState(50);
   const [authorGrant, setAuthorGrant] = useState({ authorId: "", amount: 100, reason: "KO Reads author grant" });
@@ -57,7 +72,7 @@ const AdminKoreads = () => {
   const loadAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [authorsRes, booksRes, chaptersRes, contributionsRes, usersRes] = await Promise.all([
+      const [authorsRes, booksRes, chaptersRes, contributionsRes, tasksRes, usersRes] = await Promise.all([
         supabaseAdmin.from("koreads_authors").select("*").order("updated_at", { ascending: false }),
         supabaseAdmin.from("koreads_books").select("*, author:koreads_authors(*)").order("updated_at", { ascending: false }),
         supabaseAdmin.from("koreads_chapters").select("*").order("chapter_number", { ascending: true }),
@@ -65,8 +80,19 @@ const AdminKoreads = () => {
           .from("koreads_contributions")
           .select("*, book:koreads_books(title, cover_color), chapter:koreads_chapters(title, chapter_number)")
           .order("created_at", { ascending: false }),
+        supabaseAdmin.from("koreads_tasks").select("*, book:koreads_books(title)").order("created_at", { ascending: false }),
         supabaseAdmin.auth.admin.listUsers(),
       ]);
+
+      const taskIds = ((tasksRes.data as KoreadsTask[]) || []).map((t) => t.id);
+      const submissionsRes =
+        taskIds.length > 0
+          ? await supabaseAdmin
+              .from("koreads_task_submissions")
+              .select("*, task:koreads_tasks(title, task_category, book:koreads_books(title))")
+              .in("task_id", taskIds)
+              .order("created_at", { ascending: false })
+          : { data: [], error: null };
 
       if (authorsRes.error?.code === "PGRST205") {
         toast.error("Run supabase/koreads_schema.sql in Supabase SQL Editor first.");
@@ -82,6 +108,8 @@ const AdminKoreads = () => {
       setBooks((booksRes.data as KoreadsBook[]) || []);
       setChapters((chaptersRes.data as KoreadsChapter[]) || []);
       setContributions((contributionsRes.data as KoreadsContribution[]) || []);
+      setTasks((tasksRes.data as KoreadsTask[]) || []);
+      setTaskSubmissions((submissionsRes.data as KoreadsTaskSubmission[]) || []);
       setUsers(usersRes.data.users || []);
       if (!selectedBookId && booksRes.data?.[0]) setSelectedBookId(booksRes.data[0].id);
     } catch (error: any) {
@@ -146,6 +174,8 @@ const AdminKoreads = () => {
       is_spotlight: !!bookForm.is_spotlight,
       is_new: !!bookForm.is_new,
       is_open_for_contribution: bookForm.is_open_for_contribution !== false,
+      visibility: bookForm.visibility || "public",
+      tags: bookForm.tags || [],
       published_at:
         bookForm.status === "published" ? bookForm.published_at || new Date().toISOString() : bookForm.published_at || null,
       updated_at: new Date().toISOString(),
@@ -203,6 +233,52 @@ const AdminKoreads = () => {
     if (error) toast.error(error.message);
     else {
       toast.success("Chapter deleted");
+      await loadAll();
+    }
+  };
+
+  const saveTask = async () => {
+    if (!taskForm.title?.trim() || !taskForm.book_id) {
+      toast.error("Task title and book are required");
+      return;
+    }
+    const payload = {
+      book_id: taskForm.book_id,
+      chapter_id: taskForm.chapter_id || null,
+      task_category: taskForm.task_category || "other",
+      title: taskForm.title,
+      description: taskForm.description || "",
+      reference_text: taskForm.reference_text || null,
+      reward_ko_coins: taskForm.reward_ko_coins ?? 25,
+      status: taskForm.status || "open",
+      updated_at: new Date().toISOString(),
+    };
+    const query = taskForm.id
+      ? supabaseAdmin.from("koreads_tasks").update(payload).eq("id", taskForm.id)
+      : supabaseAdmin.from("koreads_tasks").insert(payload);
+    const { error } = await query;
+    if (error) toast.error(error.message);
+    else {
+      toast.success(taskForm.id ? "Task updated" : "Task created");
+      setTaskForm({ task_category: "other", title: "", description: "", reward_ko_coins: 25, status: "open", book_id: selectedBookId });
+      await loadAll();
+    }
+  };
+
+  const respondTaskSubmission = async (status: KoreadsContributionStatus) => {
+    if (!activeTaskSubmission) return;
+    const { error } = await updateTaskSubmissionResponse({
+      submissionId: activeTaskSubmission.id,
+      status,
+      authorResponse: adminResponse || null,
+      rewardAmount: status === "valuable" || status === "accepted" ? rewardAmount : 0,
+      actorUserId: null,
+    });
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Submission updated");
+      setActiveTaskSubmission(null);
+      setAdminResponse("");
       await loadAll();
     }
   };
@@ -282,11 +358,12 @@ const AdminKoreads = () => {
           </button>
         </header>
 
-        <div className="grid md:grid-cols-5 gap-3 mb-8">
+        <div className="grid md:grid-cols-6 gap-3 mb-8">
           {[
             ["authors", "Authors", Users],
             ["books", "Books", BookOpen],
             ["chapters", "Chapters", BookOpen],
+            ["tasks", "Tasks", Coins],
             ["contributions", "Contributions", Save],
             ["rewards", "Rewards", Coins],
           ].map(([id, label, Icon]) => (
@@ -416,6 +493,27 @@ const AdminKoreads = () => {
                     </div>
                     <input className={inputClass} value={bookForm.cover_color || ""} onChange={(e) => setBookForm({ ...bookForm, cover_color: e.target.value })} />
                   </div>
+                  <div>
+                    <label className={labelClass}>Visibility</label>
+                    <select className={inputClass} value={bookForm.visibility || "public"} onChange={(e) => setBookForm({ ...bookForm, visibility: e.target.value as KoreadsBook["visibility"] })}>
+                      <option value="public">Public</option>
+                      <option value="private">Private</option>
+                      <option value="invite_only">Invite only</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Tags (comma-separated)</label>
+                    <input
+                      className={inputClass}
+                      value={(bookForm.tags || []).join(", ")}
+                      onChange={(e) =>
+                        setBookForm({
+                          ...bookForm,
+                          tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean),
+                        })
+                      }
+                    />
+                  </div>
                   <div className="grid sm:grid-cols-2 gap-2 text-sm">
                     {[
                       ["is_featured", "Featured"],
@@ -510,8 +608,59 @@ const AdminKoreads = () => {
               </div>
             )}
 
+            {tab === "tasks" && (
+              <div className="grid lg:grid-cols-[0.4fr_0.6fr] gap-8">
+                <section className="bg-[rgba(240,232,213,0.025)] border border-white/10 p-6 space-y-4">
+                  <h2 className="font-bold text-xl">{taskForm.id ? "Edit Task" : "Create Task"}</h2>
+                  <div>
+                    <label className={labelClass}>Book</label>
+                    <select className={inputClass} value={taskForm.book_id || selectedBookId} onChange={(e) => setTaskForm({ ...taskForm, book_id: e.target.value })}>
+                      <option value="">Select book</option>
+                      {books.map((book) => (
+                        <option key={book.id} value={book.id}>{book.title}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Category</label>
+                    <select className={inputClass} value={taskForm.task_category || "other"} onChange={(e) => setTaskForm({ ...taskForm, task_category: e.target.value as KoreadsTaskCategory })}>
+                      {(Object.keys(TASK_CATEGORY_LABELS) as KoreadsTaskCategory[]).map((c) => (
+                        <option key={c} value={c}>{TASK_CATEGORY_LABELS[c]}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Title</label>
+                    <input className={inputClass} value={taskForm.title || ""} onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Description</label>
+                    <textarea className={`${inputClass} min-h-[100px]`} value={taskForm.description || ""} onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>KO Coin bounty</label>
+                    <input type="number" className={inputClass} value={taskForm.reward_ko_coins ?? 25} onChange={(e) => setTaskForm({ ...taskForm, reward_ko_coins: Number(e.target.value) })} />
+                  </div>
+                  <button onClick={saveTask} className="w-full bg-[#C77DFF] text-[#0B1828] py-3 text-[10px] uppercase tracking-[2px] font-bold">
+                    Save Task
+                  </button>
+                </section>
+                <section className="space-y-3">
+                  {tasks.map((task) => (
+                    <button key={task.id} onClick={() => setTaskForm({ ...task, book_id: task.book_id })} className="w-full text-left border border-white/10 p-4 hover:border-[#C77DFF]/50">
+                      <div className="text-[9px] uppercase text-[#C77DFF]">{TASK_CATEGORY_LABELS[task.task_category]}</div>
+                      <div className="font-bold">{task.title}</div>
+                      <div className="text-[10px] text-[rgba(240,232,213,0.35)]">{task.book?.title} · {task.status}</div>
+                    </button>
+                  ))}
+                </section>
+              </div>
+            )}
+
             {tab === "contributions" && (
-              <section className="space-y-4">
+              <section className="space-y-8">
+                <div>
+                  <h3 className="text-[11px] uppercase tracking-[3px] text-[rgba(240,232,213,0.45)] mb-4">Inline contributions</h3>
                 {contributions.map((item) => (
                   <div key={item.id} className="bg-[rgba(240,232,213,0.025)] border border-white/10 p-5">
                     <div className="flex justify-between gap-4 mb-3">
@@ -532,6 +681,28 @@ const AdminKoreads = () => {
                     </button>
                   </div>
                 ))}
+                </div>
+                <div>
+                  <h3 className="text-[11px] uppercase tracking-[3px] text-[rgba(240,232,213,0.45)] mb-4">Bounty submissions</h3>
+                  {taskSubmissions.map((item) => (
+                    <div key={item.id} className="bg-[rgba(240,232,213,0.025)] border border-white/10 p-5 mb-4">
+                      <div className="text-[10px] uppercase tracking-[2px] text-[#C9A84C] mb-1">
+                        {(item.task as any)?.book?.title} · {item.task?.title}
+                      </div>
+                      <p className="text-sm text-[rgba(240,232,213,0.55)] mb-4">{item.body}</p>
+                      <button
+                        onClick={() => {
+                          setActiveTaskSubmission(item);
+                          setAdminResponse(item.author_response || "");
+                          setRewardAmount(item.ko_coins_rewarded || 50);
+                        }}
+                        className="text-[10px] uppercase tracking-[2px] text-[#C77DFF]"
+                      >
+                        Moderate · {item.status}
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </section>
             )}
 
@@ -565,6 +736,22 @@ const AdminKoreads = () => {
           </>
         )}
       </main>
+
+      {activeTaskSubmission && (
+        <div className="fixed inset-0 bg-black/70 z-[120] flex items-center justify-center p-6">
+          <div className="w-full max-w-xl bg-[#0B1828] border border-[#C77DFF]/40 p-6">
+            <h3 className="text-xl font-bold mb-4">Moderate Bounty Submission</h3>
+            <textarea value={adminResponse} onChange={(e) => setAdminResponse(e.target.value)} className={`${inputClass} min-h-[120px] mb-4`} />
+            <input type="number" value={rewardAmount} onChange={(e) => setRewardAmount(Number(e.target.value))} className={`${inputClass} mb-5`} />
+            <div className="grid sm:grid-cols-4 gap-2">
+              <button onClick={() => respondTaskSubmission("accepted")} className="bg-[#6BBFB5] text-[#0B1828] py-3 text-[10px] uppercase font-bold">Accept</button>
+              <button onClick={() => respondTaskSubmission("valuable")} className="bg-[#C9A84C] text-[#0B1828] py-3 text-[10px] uppercase font-bold">Valuable</button>
+              <button onClick={() => respondTaskSubmission("rejected")} className="bg-[#E63946] text-white py-3 text-[10px] uppercase font-bold">Reject</button>
+              <button onClick={() => setActiveTaskSubmission(null)} className="border border-white/10 py-3 text-[10px] uppercase">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {activeContribution && (
         <div className="fixed inset-0 bg-black/70 z-[120] flex items-center justify-center p-6">

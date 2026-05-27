@@ -1,25 +1,33 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { LogOut, ArrowLeft, Trophy, Zap, Map, Coins, Wallet, Flame } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { fetchUserContributions } from "@/lib/koreads";
-import { KoreadsContribution } from "@/types/koreads";
+import { fetchUserContributions, fetchUserFollowedBooks, fetchUserTaskSubmissions } from "@/lib/koreads";
+import { KoreadsContribution, KoreadsTaskSubmission } from "@/types/koreads";
 
 const Profile = () => {
   const { user, loading, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [koreadsContributions, setKoreadsContributions] = useState<KoreadsContribution[]>([]);
+  const [koreadsSubmissions, setKoreadsSubmissions] = useState<KoreadsTaskSubmission[]>([]);
+  const [followedBooks, setFollowedBooks] = useState<any[]>([]);
 
   useEffect(() => {
     if (!loading && !user) {
       navigate("/auth");
     } else if (user) {
       refreshProfile();
-      fetchUserContributions(user.id).then(({ contributions }) => {
-        setKoreadsContributions(contributions);
+      Promise.all([
+        fetchUserContributions(user.id),
+        fetchUserTaskSubmissions(user.id),
+        fetchUserFollowedBooks(user.id),
+      ]).then(([contribRes, subsRes, followsRes]) => {
+        setKoreadsContributions(contribRes.contributions);
+        setKoreadsSubmissions(subsRes.submissions);
+        setFollowedBooks(followsRes.follows);
       });
     }
   }, [user, loading, navigate]);
@@ -57,7 +65,11 @@ const Profile = () => {
     { label: "This Month Earnings", value: "₹0", color: "#4CAF50" },
     { label: "Deliveries Done", value: "0", color: "#6BBFB5" },
     { label: "Issues Solved", value: "0", color: "#E63946" },
-    { label: "KO Reads Contributions", value: koreadsContributions.length.toString(), color: "#C77DFF" },
+    {
+      label: "KO Reads Activity",
+      value: (koreadsContributions.length + koreadsSubmissions.length).toString(),
+      color: "#C77DFF",
+    },
   ];
 
   const achievements: any[] = [];
@@ -239,11 +251,59 @@ const Profile = () => {
                   )}
                 </div>
               ))}
-              {koreadsContributions.length === 0 && (
+              {koreadsContributions.length === 0 && koreadsSubmissions.length === 0 && (
                 <div className="border border-dashed border-[rgba(199,125,255,0.2)] p-6 text-sm text-[rgba(240,232,213,0.4)]">
-                  No KO Reads contributions yet. Highlight text inside a chapter to send your first note.
+                  No KO Reads contributions yet. Highlight text inside a chapter or complete an open bounty.
                 </div>
               )}
+            </div>
+
+            {koreadsSubmissions.length > 0 && (
+              <div className="mt-8">
+                <h4 className="text-[10px] uppercase tracking-[2px] text-[#C9A84C] mb-4">Bounty submissions</h4>
+                <div className="space-y-3">
+                  {koreadsSubmissions.slice(0, 5).map((item) => (
+                    <div key={item.id} className="border border-white/5 bg-[#0B1828]/60 p-4">
+                      <div className="flex justify-between gap-2 mb-1">
+                        <span className="font-bold text-sm">{item.task?.title}</span>
+                        <span className="text-[10px] uppercase tracking-[2px] text-[#C77DFF]">{item.status}</span>
+                      </div>
+                      <p className="text-xs text-[rgba(240,232,213,0.45)]">
+                        {(item.task as any)?.book?.title}
+                      </p>
+                      {item.ko_coins_rewarded > 0 && (
+                        <div className="mt-2 text-[10px] uppercase tracking-[2px] text-[#C9A84C]">
+                          Rewarded {item.ko_coins_rewarded} KO Coins
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {followedBooks.length > 0 && (
+              <div className="mt-8">
+                <h4 className="text-[10px] uppercase tracking-[2px] text-[#6BBFB5] mb-4">Followed books</h4>
+                <div className="flex flex-wrap gap-3">
+                  {followedBooks.map((f: { book_id: string; book?: { id: string; title: string } }) => (
+                    <Link
+                      key={f.book_id}
+                      to={`/koreads/books/${f.book?.id || f.book_id}`}
+                      className="border border-[#6BBFB5]/30 px-3 py-2 text-sm hover:border-[#6BBFB5]"
+                    >
+                      {f.book?.title || "Book"}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-8 border border-[rgba(199,125,255,0.12)] p-5 bg-[#0B1828]/40">
+              <p className="text-sm text-[rgba(240,232,213,0.55)] leading-relaxed">
+                Interested in publishing on KO Reads? Contact the Kommuniti team — author profiles are
+                created by admin after review.
+              </p>
             </div>
           </div>
 

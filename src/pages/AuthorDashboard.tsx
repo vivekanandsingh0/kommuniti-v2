@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BookOpen, CheckCircle2, Coins, MessageSquare, RefreshCcw, Star } from "lucide-react";
+import { BookOpen, CheckCircle2, Coins, MessageSquare, Plus, RefreshCcw, Star } from "lucide-react";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/context/AuthContext";
-import { fetchAuthorForUser, fetchAuthorWorkspace, updateContributionResponse } from "@/lib/koreads";
+import { createAuthorBook, fetchAuthorForUser, fetchAuthorWorkspace, updateContributionResponse } from "@/lib/koreads";
 import { KoreadsAuthor, KoreadsBook, KoreadsContribution, KoreadsContributionStatus } from "@/types/koreads";
 
 const AuthorDashboard = () => {
@@ -17,6 +17,8 @@ const AuthorDashboard = () => {
   const [activeContribution, setActiveContribution] = useState<KoreadsContribution | null>(null);
   const [authorResponse, setAuthorResponse] = useState("");
   const [rewardAmount, setRewardAmount] = useState(25);
+  const [showCreateBook, setShowCreateBook] = useState(false);
+  const [newBookTitle, setNewBookTitle] = useState("");
 
   const load = async () => {
     if (!user) return;
@@ -35,6 +37,22 @@ const AuthorDashboard = () => {
     if (!authLoading && !user) navigate("/auth");
     if (user) load();
   }, [user, authLoading]);
+
+  const handleCreateBook = async () => {
+    if (!author || !newBookTitle.trim()) {
+      toast.error("Book title is required");
+      return;
+    }
+    const { data, error } = await createAuthorBook(author.id, { title: newBookTitle.trim() });
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Book created");
+    setShowCreateBook(false);
+    setNewBookTitle("");
+    navigate(`/author/books/${data.id}`);
+  };
 
   const respond = async (status: KoreadsContributionStatus) => {
     if (!activeContribution) return;
@@ -128,9 +146,18 @@ const AuthorDashboard = () => {
 
         <div className="grid lg:grid-cols-[0.42fr_0.58fr] gap-8">
           <section>
-            <h2 className="text-[11px] uppercase tracking-[3px] text-[rgba(240,232,213,0.45)] mb-5">
-              Your Books
-            </h2>
+            <div className="flex items-center justify-between gap-4 mb-5">
+              <h2 className="text-[11px] uppercase tracking-[3px] text-[rgba(240,232,213,0.45)]">
+                Your Books
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowCreateBook(true)}
+                className="flex items-center gap-1 border border-[#C77DFF]/40 text-[#C77DFF] px-3 py-2 text-[10px] uppercase tracking-[2px]"
+              >
+                <Plus size={14} /> New book
+              </button>
+            </div>
             <div className="space-y-3">
               {books.map((book) => (
                 <Link
@@ -199,6 +226,28 @@ const AuthorDashboard = () => {
           </section>
         </div>
       </main>
+
+      {showCreateBook && (
+        <div className="fixed inset-0 bg-black/70 z-[120] flex items-center justify-center p-6">
+          <div className="w-full max-w-md bg-[#0B1828] border border-[#C77DFF]/40 p-6">
+            <h3 className="text-xl font-bold mb-4">Create new book</h3>
+            <input
+              value={newBookTitle}
+              onChange={(e) => setNewBookTitle(e.target.value)}
+              placeholder="Book title"
+              className="w-full bg-[rgba(240,232,213,0.04)] border border-white/10 p-3 mb-4 outline-none focus:border-[#C77DFF]"
+            />
+            <div className="flex gap-2">
+              <button onClick={handleCreateBook} className="flex-1 bg-[#C77DFF] text-[#0B1828] py-3 text-[10px] uppercase font-bold">
+                Create
+              </button>
+              <button onClick={() => setShowCreateBook(false)} className="flex-1 border border-white/10 py-3 text-[10px] uppercase">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {activeContribution && (
         <div className="fixed inset-0 bg-black/70 z-[120] flex items-center justify-center p-6">

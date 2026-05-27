@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, BookOpen, Highlighter, Sparkles, Trophy, Users } from "lucide-react";
+import { ArrowRight, BookOpen, Coins, Highlighter, Sparkles, Trophy, Users } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { fetchPublishedBooks, fetchSpotlightAuthors } from "@/lib/koreads";
-import { KoreadsAuthor, KoreadsBook } from "@/types/koreads";
+import { fetchOpenTasks, fetchPublishedBooks, fetchSpotlightAuthors } from "@/lib/koreads";
+import { KoreadsAuthor, KoreadsBook, KoreadsTask, TASK_CATEGORY_LABELS } from "@/types/koreads";
 import { useAuth } from "@/context/AuthContext";
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
@@ -70,17 +70,20 @@ const Koreads = () => {
   const { user } = useAuth();
   const [books, setBooks] = useState<KoreadsBook[]>([]);
   const [authors, setAuthors] = useState<KoreadsAuthor[]>([]);
+  const [openTasks, setOpenTasks] = useState<KoreadsTask[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const [booksRes, authorsRes] = await Promise.all([
+      const [booksRes, authorsRes, tasksRes] = await Promise.all([
         fetchPublishedBooks(),
         fetchSpotlightAuthors(),
+        fetchOpenTasks(12),
       ]);
       setBooks(booksRes.books);
       setAuthors(authorsRes.authors);
+      setOpenTasks(tasksRes.tasks);
       setLoading(false);
     };
     load();
@@ -95,6 +98,12 @@ const Koreads = () => {
     () => books.filter((book) => book.is_open_for_contribution).slice(0, 4),
     [books]
   );
+  const booksSeekingContributors = useMemo(() => {
+    const bookIdsWithTasks = new Set(openTasks.map((t) => t.book_id));
+    return books
+      .filter((b) => b.is_open_for_contribution || bookIdsWithTasks.has(b.id))
+      .slice(0, 6);
+  }, [books, openTasks]);
   const heroBook = featuredBooks[0] || books[0];
 
   return (
@@ -130,10 +139,16 @@ const Koreads = () => {
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <a
-                    href="#featured-books"
+                    href="#open-bounties"
                     className="bg-[#C77DFF] text-[#0B1828] px-6 py-3 text-[11px] uppercase tracking-[2px] font-bold hover:brightness-110 transition-all"
                   >
-                    Start Reading
+                    See Open Bounties
+                  </a>
+                  <a
+                    href="#featured-books"
+                    className="border border-[rgba(199,125,255,0.3)] text-[#C77DFF] px-6 py-3 text-[11px] uppercase tracking-[2px] font-bold hover:bg-[#C77DFF]/10 transition-all"
+                  >
+                    Explore Books
                   </a>
                   <Link
                     to={user ? "/profile" : "/auth"}
@@ -177,6 +192,60 @@ const Koreads = () => {
               </motion.div>
             </div>
           </div>
+        </section>
+
+        <section id="open-bounties" className="bg-[#060D16] border-y border-[rgba(199,125,255,0.12)]">
+          <div className="container mx-auto px-6 lg:px-12 py-16">
+            <SectionLabel>Open Bounties</SectionLabel>
+            <p className="text-[rgba(240,232,213,0.58)] max-w-2xl mb-8 leading-relaxed">
+              Earn KO Coins by helping shape unreleased books — titles, taglines, research, dialogue, and more.
+            </p>
+            {loading ? (
+              <div className="text-[rgba(240,232,213,0.35)] uppercase tracking-[3px] text-xs">Loading bounties...</div>
+            ) : openTasks.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {openTasks.map((task) => (
+                  <Link
+                    key={task.id}
+                    to={`/koreads/books/${task.book_id}/tasks/${task.id}`}
+                    className="group bg-[rgba(240,232,213,0.025)] border border-[rgba(201,168,76,0.12)] hover:border-[#C9A84C]/50 p-5 transition-all"
+                  >
+                    <div className="flex justify-between gap-2 mb-2">
+                      <span className="text-[9px] uppercase tracking-[2px] text-[#C77DFF]">
+                        {TASK_CATEGORY_LABELS[task.task_category]}
+                      </span>
+                      <span className="text-[9px] uppercase tracking-[2px] text-[#C9A84C] flex items-center gap-1">
+                        <Coins size={12} /> {task.reward_ko_coins}
+                      </span>
+                    </div>
+                    <div className="font-bold text-lg group-hover:text-[#C9A84C]">{task.title}</div>
+                    <p className="text-xs text-[rgba(240,232,213,0.45)] mt-2">
+                      {task.book?.title} · {task.book?.author?.pen_name || task.book?.author?.name}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="border border-dashed border-[rgba(201,168,76,0.2)] p-8 text-[rgba(240,232,213,0.45)]">
+                Open bounties will appear when authors post tasks inside their books.
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="container mx-auto px-6 lg:px-12 py-16">
+          <SectionLabel>Books Seeking Contributors</SectionLabel>
+          {booksSeekingContributors.length > 0 ? (
+            <div className="grid md:grid-cols-2 gap-5">
+              {booksSeekingContributors.map((book) => (
+                <BookCard key={book.id} book={book} />
+              ))}
+            </div>
+          ) : (
+            <div className="border border-dashed border-[rgba(199,125,255,0.2)] p-8 text-[rgba(240,232,213,0.45)]">
+              No books open for contribution yet.
+            </div>
+          )}
         </section>
 
         <section id="featured-books" className="container mx-auto px-6 lg:px-12 py-16">
@@ -270,8 +339,8 @@ const Koreads = () => {
           <div className="grid md:grid-cols-3 gap-5">
             {[
               [BookOpen, "Read", "Open a draft and follow the author’s chapter flow."],
-              [Highlighter, "Highlight", "Select a sentence or paragraph and add a thoughtful suggestion."],
-              [Trophy, "Get Recognized", "Authors can accept, mark valuable, reply, and reward KO Coins."],
+              [Highlighter, "Contribute", "Highlight chapter text or complete a bounty task inside a book."],
+              [Trophy, "Get Recognized", "Authors accept work, pin credits on the book hub, and reward KO Coins."],
             ].map(([Icon, title, copy]) => (
               <div key={title as string} className="bg-[rgba(240,232,213,0.025)] border border-white/5 p-6">
                 <Icon className="text-[#C77DFF] mb-5" size={24} />

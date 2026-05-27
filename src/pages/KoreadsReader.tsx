@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, BookOpen, Highlighter, MessageSquare, Send } from "lucide-react";
+import { ArrowLeft, BookOpen, Coins, Highlighter, MessageSquare, Send } from "lucide-react";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/context/AuthContext";
 import { fetchChapterReader, submitContribution } from "@/lib/koreads";
-import { KoreadsBook, KoreadsChapter } from "@/types/koreads";
+import { KoreadsBook, KoreadsChapter, KoreadsTask, TASK_CATEGORY_LABELS } from "@/types/koreads";
 
 interface SelectionState {
   text: string;
@@ -21,6 +21,7 @@ const KoreadsReader = () => {
   const [book, setBook] = useState<KoreadsBook | null>(null);
   const [chapter, setChapter] = useState<KoreadsChapter | null>(null);
   const [chapters, setChapters] = useState<KoreadsChapter[]>([]);
+  const [openTasks, setOpenTasks] = useState<KoreadsTask[]>([]);
   const [selection, setSelection] = useState<SelectionState | null>(null);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -28,18 +29,22 @@ const KoreadsReader = () => {
   useEffect(() => {
     if (!bookId || !chapterId) return;
     const load = async () => {
-      const { book: nextBook, chapter: nextChapter, chapters: nextChapters } =
+      const { book: nextBook, chapter: nextChapter, chapters: nextChapters, openTasks: tasks } =
         await fetchChapterReader(bookId, chapterId);
       setBook(nextBook);
       setChapter(nextChapter);
       setChapters(nextChapters);
+      setOpenTasks(tasks ?? []);
       setSelection(null);
       setComment("");
     };
     load();
   }, [bookId, chapterId]);
 
+  const inlineOpen = chapter?.is_open_for_inline_contribution !== false;
+
   const captureSelection = () => {
+    if (!inlineOpen) return;
     const currentSelection = window.getSelection();
     const text = currentSelection?.toString().trim();
     if (!text || !chapter || !contentRef.current) return;
@@ -127,9 +132,9 @@ const KoreadsReader = () => {
 
               <div
                 ref={contentRef}
-                onMouseUp={captureSelection}
-                onTouchEnd={captureSelection}
-                className="prose prose-lg max-w-none select-text leading-8 whitespace-pre-wrap"
+                onMouseUp={inlineOpen ? captureSelection : undefined}
+                onTouchEnd={inlineOpen ? captureSelection : undefined}
+                className={`prose prose-lg max-w-none leading-8 whitespace-pre-wrap ${inlineOpen ? "select-text" : "select-none"}`}
                 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px" }}
               >
                 {chapter.content}
@@ -137,18 +142,45 @@ const KoreadsReader = () => {
             </article>
 
             <aside className="sticky top-24 space-y-5">
+              {openTasks.length > 0 && (
+                <div className="bg-[rgba(240,232,213,0.025)] border border-[rgba(201,168,76,0.12)] p-5">
+                  <div className="flex items-center gap-2 text-[#C9A84C] mb-3">
+                    <Coins size={16} />
+                    <span className="text-[10px] uppercase tracking-[2px] font-bold">Open bounties</span>
+                  </div>
+                  <div className="space-y-2">
+                    {openTasks.map((task) => (
+                      <Link
+                        key={task.id}
+                        to={`/koreads/books/${book.id}/tasks/${task.id}`}
+                        className="block text-sm hover:text-[#C9A84C] transition-colors"
+                      >
+                        {TASK_CATEGORY_LABELS[task.task_category]}: {task.title}
+                      </Link>
+                    ))}
+                  </div>
+                  <Link
+                    to={`/koreads/books/${book.id}`}
+                    className="mt-3 inline-block text-[10px] uppercase tracking-[2px] text-[#C77DFF]"
+                  >
+                    All bounties on this book
+                  </Link>
+                </div>
+              )}
+
               <div className="bg-[rgba(240,232,213,0.035)] border border-[rgba(199,125,255,0.18)] p-5">
                 <div className="flex items-center gap-2 text-[#C77DFF] mb-3">
                   <Highlighter size={18} />
                   <h2 className="text-[11px] uppercase tracking-[2px] font-bold">Contribute</h2>
                 </div>
                 <p className="text-sm text-[rgba(240,232,213,0.56)] leading-relaxed">
-                  Highlight a sentence or paragraph in the chapter. Add a useful note, question,
-                  correction, or example for the author.
+                  {inlineOpen
+                    ? "Highlight a sentence or paragraph in the chapter. Add a useful note, question, correction, or example for the author."
+                    : "Inline contributions are closed for this chapter. Check open bounties on the book hub."}
                 </p>
               </div>
 
-              {selection && (
+              {selection && inlineOpen && (
                 <div className="bg-[#060D16] border border-[#C77DFF]/40 p-5">
                   <div className="text-[10px] uppercase tracking-[2px] text-[#C77DFF] mb-3">
                     Selected text
