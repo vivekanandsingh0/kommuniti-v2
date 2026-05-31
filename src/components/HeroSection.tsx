@@ -1,12 +1,8 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { LIVE_LAUNCH_LINKS } from "@/config/comingSoonPages";
 
 const HeroSection = () => {
-  const stats = [
-    { value: "2,000+", label: "Kore Members", color: "#C9A84C" },
-    { value: "45", label: "Active Kores", color: "#6BBFB5" },
-    { value: "₹12L+", label: "Community Earned", color: "#FF6B35" },
-  ];
-
   // Exact pattern from design document (14 columns x 3 rows)
   const mapData = [
     // Row 1
@@ -31,26 +27,14 @@ const HeroSection = () => {
     color: pixel.active ? pixel.color : "rgba(240, 232, 213, 0.05)"
   }));
 
-  const pillars = [
-    {
-      icon: "🗺️",
-      title: "Kommute",
-      color: "#6BBFB5",
-      desc: "Stays, experiences, and community travel curated by Kores across Kerala and beyond.",
-    },
-    {
-      icon: "🎓",
-      title: "Konnect",
-      color: "#FF6B35",
-      desc: "Workshops, talks and intensives facilitated by community experts. Earn and spend KO Coins.",
-    },
-    {
-      icon: "⚡",
-      title: "Kreate",
-      color: "#AAFF00",
-      desc: "Community products, KO Reads — the democratic writing platform — and the KO Store.",
-    },
-  ];
+  const pillars = LIVE_LAUNCH_LINKS.map((item) => ({
+    icon: item.icon,
+    title: item.label,
+    color: item.color,
+    desc: item.subtitle ?? "",
+    href: item.href,
+    live: true,
+  }));
 
   const MapCard = ({ className }: { className?: string }) => (
     <div 
@@ -151,7 +135,7 @@ const HeroSection = () => {
               }}
             >
               <span style={{ width: "24px", height: "1px", background: "#C9A84C" }}></span>
-              Community · Commerce · Action
+              Phase 1 · Live now
             </div>
 
             {/* Heading */}
@@ -187,71 +171,42 @@ const HeroSection = () => {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 mb-8">
-              <a 
-                href="#kores" 
+              <Link
+                to="/konnect"
                 className="no-underline transition-all hover:brightness-110 active:scale-95 text-center"
                 style={{
-                  background: "#C9A84C",
+                  background: "#FF6B35",
                   color: "#0B1828",
                   fontFamily: "'Rajdhani', sans-serif",
                   fontWeight: 700,
                   fontSize: "12px",
-                  letterSpacing: "2px",
+                  letterSpacing: "1.5px",
                   textTransform: "uppercase",
                   padding: "14px 28px",
                 }}
               >
-                Find Your Kore →
-              </a>
-              <a 
-                href="#kommute" 
-                className="no-underline transition-all hover:bg-[#C9A84C]/10 active:scale-95 text-center"
+                Show Up & Learn →
+              </Link>
+              <Link
+                to="/koreads"
+                className="no-underline transition-all hover:bg-[#C77DFF]/10 active:scale-95 text-center"
                 style={{
-                  border: "1.5px solid rgba(201, 168, 76, 0.4)",
-                  color: "#C9A84C",
+                  border: "1.5px solid rgba(199, 125, 255, 0.5)",
+                  color: "#C77DFF",
                   fontFamily: "'Rajdhani', sans-serif",
                   fontWeight: 700,
                   fontSize: "12px",
-                  letterSpacing: "2px",
+                  letterSpacing: "1.5px",
                   textTransform: "uppercase",
                   padding: "14px 28px",
                 }}
               >
-                Explore Kommute
-              </a>
+                Co-Write a Book →
+              </Link>
             </div>
 
             {/* Mobile Map Card (Only on Mobile, Below Buttons) */}
             <MapCard className="mb-8 lg:hidden" />
-
-            {/* Stats */}
-            <div className="flex flex-wrap gap-8 lg:gap-10">
-              {stats.map((stat) => (
-                <div key={stat.label}>
-                  <div 
-                    style={{ 
-                      fontFamily: "'Syne', sans-serif", 
-                      fontWeight: 800, 
-                      fontSize: "28px",
-                      color: stat.color,
-                      lineHeight: 1
-                    }}
-                  >
-                    {stat.value}
-                  </div>
-                  <div 
-                    style={{ 
-                      fontSize: "10px", 
-                      letterSpacing: "1px", 
-                      color: "rgba(240, 232, 213, 0.5)",
-                      marginTop: "4px"
-                    }}
-                  >
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </div>
           </motion.div>
 
           {/* Desktop Map Card (Only on Large Screens) */}
@@ -265,40 +220,43 @@ const HeroSection = () => {
           </motion.div>
         </div>
 
-        {/* THREE PILLARS ROW - Horizontal on all devices */}
-        <div 
-          className="grid grid-cols-3 border-t border-[rgba(201,168,76,0.1)] overflow-hidden"
-          style={{ gap: "0" }}
+        {/* Phase 1 live products */}
+        <div
+          className="grid grid-cols-2 lg:grid-cols-4 border-t border-[rgba(201,168,76,0.1)] overflow-hidden"
         >
           {pillars.map((pillar, idx) => (
-            <div 
+            <Link
               key={pillar.title}
-              className={`p-3 sm:p-6 ${idx !== 2 ? 'border-r border-[rgba(201,168,76,0.1)]' : ''}`}
+              to={pillar.href}
+              className={`p-3 sm:p-6 no-underline block hover:bg-[rgba(240,232,213,0.03)] transition-colors ${idx !== pillars.length - 1 ? "border-r border-[rgba(201,168,76,0.1)]" : ""}`}
             >
               <div className="text-[18px] sm:text-[24px] mb-1 sm:mb-2">{pillar.icon}</div>
-              <div 
-                style={{ 
-                  fontFamily: "'Syne', sans-serif", 
-                  fontWeight: 700, 
+              <div
+                style={{
+                  fontFamily: "'Syne', sans-serif",
+                  fontWeight: 700,
                   color: pillar.color,
                   lineHeight: 1.1,
-                  marginBottom: "4px"
+                  marginBottom: "4px",
                 }}
-                className="text-[12px] sm:text-[18px]"
+                className="text-[12px] sm:text-[16px]"
               >
                 {pillar.title}
               </div>
-              <div 
-                style={{ 
+              <div className="text-[8px] sm:text-[10px] text-[#4CAF50] uppercase tracking-[1.5px] font-bold mb-1">
+                Live
+              </div>
+              <div
+                style={{
                   fontSize: "9px",
                   lineHeight: "1.4",
-                  color: "rgba(240, 232, 213, 0.5)", 
+                  color: "rgba(240, 232, 213, 0.5)",
                 }}
                 className="sm:text-[11px]"
               >
                 {pillar.desc}
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

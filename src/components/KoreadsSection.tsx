@@ -27,6 +27,7 @@ const KoreadsSection = () => {
             <div className="w-3 h-3 bg-accent animate-pulse-glow" />
             <h2 className="font-pixel text-sm sm:text-base md:text-lg text-foreground">
               KO READS
+              <span className="ml-3 text-[9px] text-[#4CAF50] tracking-[2px] align-middle">· LIVE</span>
             </h2>
           </div>
         </FadeIn>

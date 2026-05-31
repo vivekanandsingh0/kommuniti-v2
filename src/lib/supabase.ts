@@ -10,8 +10,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
-    storageKey: 'kommuniti-user-token',
+    storageKey: "kommuniti-user-token",
     autoRefreshToken: true,
-    detectSessionInUrl: true
-  }
+    detectSessionInUrl: true,
+    // Avoid Navigator Lock API contention when multiple requests run at once (common in React dev).
+    lock: async (_name, _acquireTimeout, fn) => fn(),
+  },
 });

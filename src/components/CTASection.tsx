@@ -1,7 +1,17 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { Link } from "react-router-dom";
+import { LIVE_LAUNCH_LINKS } from "@/config/comingSoonPages";
 
-const FadeIn = ({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) => {
+const FadeIn = ({
+  children,
+  delay = 0,
+  className = "",
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
   return (
@@ -20,62 +30,49 @@ const FadeIn = ({ children, delay = 0, className = "" }: { children: React.React
 const CTASection = () => {
   return (
     <section id="cta" className="relative py-32 sm:py-40 px-4 pixel-grid-hero overflow-hidden">
-      {/* Floating elements */}
       <div className="absolute top-16 left-[12%] w-5 h-5 bg-accent/20 rotate-45 animate-float-pixel" />
       <div className="absolute bottom-20 right-[18%] w-4 h-4 bg-primary/30 rounded-full animate-float-pixel-slow" />
-      <div className="absolute top-[40%] right-[8%] w-3 h-3 bg-foreground/10 animate-float-pixel" />
 
       <div className="relative z-10 max-w-4xl mx-auto">
         <FadeIn>
-          <p className="font-pixel text-[8px] text-foreground/30 tracking-[0.4em] mb-8">
-            ITS TIME FOR
+          <p className="font-pixel text-[8px] text-[#4CAF50] tracking-[0.4em] mb-8">PHASE 1 IS LIVE</p>
+        </FadeIn>
+
+        <FadeIn delay={0.1}>
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-foreground mb-4" style={{ fontFamily: "'Syne', sans-serif" }}>
+            Pick your entry point
+          </h2>
+          <p className="text-foreground/45 mb-12 max-w-lg leading-relaxed">
+            Konnect, KO Reads, About, and Volunteer are ready. Choose one and start — the rest of Kommuniti is coming soon.
           </p>
         </FadeIn>
 
-        {/* Bracket headline */}
-        <FadeIn delay={0.1}>
-          <div className="space-y-2 mb-10">
-            <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="font-pixel text-foreground/20 text-xl sm:text-3xl">[</span>
-              <span className="text-2xl sm:text-4xl md:text-5xl font-bold text-foreground">Begin Your</span>
-            </div>
-            <div className="flex items-baseline gap-3 flex-wrap pl-4">
-              <span className="text-2xl sm:text-4xl md:text-5xl font-bold text-foreground/30">Journey</span>
-              <span className="font-pixel text-foreground/20 text-xl sm:text-3xl">]</span>
-            </div>
-          </div>
-        </FadeIn>
-
-        {/* Mission statements */}
         <FadeIn delay={0.2}>
-          <div className="space-y-3 text-foreground/40 mb-12 max-w-xl text-sm leading-relaxed">
-            <p>To travel to meet new cultures, practices and innovations</p>
-            <p>To give education a new perspective to solve real problems</p>
-            <p>To create a greater equity in world economic order</p>
-            <p>To preserve individual identities for world unity</p>
+          <div className="grid sm:grid-cols-2 gap-3 mb-10">
+            {LIVE_LAUNCH_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className="flex items-center gap-3 border border-white/10 hover:border-white/25 px-5 py-4 no-underline transition-colors group"
+                style={{ borderLeftWidth: 3, borderLeftColor: link.color }}
+              >
+                <span className="text-2xl">{link.icon}</span>
+                <div>
+                  <div className="font-bold text-foreground group-hover:text-white transition-colors">{link.label}</div>
+                  <div className="text-[10px] uppercase tracking-[2px] text-[#4CAF50]">Live now</div>
+                </div>
+              </Link>
+            ))}
           </div>
         </FadeIn>
 
         <FadeIn delay={0.3}>
-          <p className="font-pixel text-[8px] sm:text-[9px] text-accent/70 tracking-[0.3em] mb-4">
-            WE HAVE A DUTY TO UNITE — WHATEVER OUR DIFFERENCES
-          </p>
-        </FadeIn>
-
-        <FadeIn delay={0.35}>
-          <p className="font-pixel text-[10px] sm:text-xs text-primary tracking-[0.4em] mb-10">
-            KOMMUTE · KONNECT · KREATE
-          </p>
-        </FadeIn>
-
-        <FadeIn delay={0.4}>
-          <a href="#about" className="btn-pixel-primary inline-block">
-            JOIN KOMMUNITI
-          </a>
+          <Link to="/volunteer" className="btn-pixel-primary inline-block">
+            Join as volunteer
+          </Link>
         </FadeIn>
       </div>
 
-      {/* Giant watermark */}
       <div className="absolute bottom-0 left-0 right-0 overflow-hidden pointer-events-none">
         <p className="font-pixel text-[60px] sm:text-[100px] md:text-[140px] text-foreground/[0.02] leading-none whitespace-nowrap text-center select-none">
           KOMMUNITI

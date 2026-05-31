@@ -1,10 +1,10 @@
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
+import LiveLaunchSection from "@/components/LiveLaunchSection";
 import MarqueeSection from "@/components/MarqueeSection";
 import AboutSection from "@/components/AboutSection";
-import ProgramsSection from "@/components/ProgramsSection";
 import KoreadsSection from "@/components/KoreadsSection";
-import TestimonialsSection from "@/components/TestimonialsSection";
+import ComingSoonStrip from "@/components/ComingSoonStrip";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 
@@ -14,12 +14,11 @@ const Index = () => {
       <Navbar />
       <main>
         <HeroSection />
-        <MarqueeSection />
-        <AboutSection />
-        <ProgramsSection />
+        <LiveLaunchSection />
         <MarqueeSection />
         <KoreadsSection />
-        <TestimonialsSection />
+        <AboutSection />
+        <ComingSoonStrip />
         <CTASection />
       </main>
       <Footer />

@@ -3,12 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { LogOut, ArrowLeft, Trophy, Zap, Map, Coins, Wallet, Flame } from "lucide-react";
+import { LogOut, ArrowLeft, Trophy, Zap, Map, Coins, Wallet, Flame, Heart } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { fetchUserContributions, fetchUserFollowedBooks, fetchUserTaskSubmissions } from "@/lib/koreads";
 import { computeReaderBadges } from "@/lib/koreads-phase2";
+import { fetchVolunteerApprovalStatus, fetchVolunteerDashboard } from "@/lib/about";
 import { ReaderBadge } from "@/types/koreads";
 import { KoreadsContribution, KoreadsTaskSubmission } from "@/types/koreads";
+import { VolunteerDashboard } from "@/types/about";
+import VolunteerDashboardSection from "@/components/volunteer/VolunteerDashboardSection";
 
 const Profile = () => {
   const { user, loading, refreshProfile } = useAuth();
@@ -17,6 +20,8 @@ const Profile = () => {
   const [koreadsSubmissions, setKoreadsSubmissions] = useState<KoreadsTaskSubmission[]>([]);
   const [followedBooks, setFollowedBooks] = useState<any[]>([]);
   const [badges, setBadges] = useState<ReaderBadge[]>([]);
+  const [isApprovedVolunteer, setIsApprovedVolunteer] = useState(false);
+  const [volunteerDashboard, setVolunteerDashboard] = useState<VolunteerDashboard | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -28,11 +33,18 @@ const Profile = () => {
         fetchUserTaskSubmissions(user.id),
         fetchUserFollowedBooks(user.id),
         computeReaderBadges(user.id),
-      ]).then(([contribRes, subsRes, followsRes, badgeList]) => {
+        fetchVolunteerApprovalStatus(user.id, user.email),
+      ]).then(async ([contribRes, subsRes, followsRes, badgeList, volunteerApproved]) => {
         setKoreadsContributions(contribRes.contributions);
         setKoreadsSubmissions(subsRes.submissions);
         setFollowedBooks(followsRes.follows);
         setBadges(badgeList);
+        const approved = volunteerApproved || !!user.profile?.is_approved_volunteer;
+        setIsApprovedVolunteer(approved);
+        if (approved) {
+          const dashboard = await fetchVolunteerDashboard(user.id);
+          setVolunteerDashboard(dashboard);
+        }
       });
     }
   }, [user, loading, navigate]);
@@ -107,7 +119,13 @@ const Profile = () => {
               >
                 {user?.user_metadata?.full_name?.toUpperCase() || user?.email?.split('@')[0].toUpperCase() || "COMMUNITY MEMBER"}
               </h1>
-              <p className="text-[rgba(240,232,213,0.5)] mb-6 flex items-center justify-center lg:justify-start gap-2">
+              {isApprovedVolunteer && (
+                <div className="inline-flex items-center gap-2 bg-[#C9A84C]/15 border border-[#C9A84C]/40 text-[#C9A84C] px-4 py-2 mb-4 text-[10px] uppercase tracking-[2px] font-bold">
+                  <Heart size={14} fill="currentColor" />
+                  Approved Kommuniti Volunteer
+                </div>
+              )}
+              <p className="text-[rgba(240,232,213,0.5)] mb-6 flex items-center justify-center lg:justify-start gap-2 flex-wrap">
                 <span className="text-[#6BBFB5]">🌀 Mankulam Kore Zero</span> • Branch Level • Koordinator
               </p>
 
@@ -143,6 +161,10 @@ const Profile = () => {
           </div>
         </div>
       </section>
+
+      {isApprovedVolunteer && volunteerDashboard && (
+        <VolunteerDashboardSection dashboard={volunteerDashboard} />
+      )}
 
       <section className="py-16 px-6 lg:px-12 bg-[#0B1828]">
         <div className="container mx-auto">
