@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { adminDb } from "@/lib/admin-db";
 import {
   VOLUNTEER_GIG_STATUSES,
   VolunteerApplication,
@@ -48,9 +48,9 @@ const AdminVolunteerHub = ({ roles, applications, onRefresh }: AdminVolunteerHub
   const loadHub = useCallback(async () => {
     const accepted = applications.filter((a) => a.status === "accepted");
     const [profilesRes, noticesRes, gigsRes] = await Promise.all([
-      supabaseAdmin.from("volunteer_member_profiles").select("*, role:volunteer_roles(*)"),
-      supabaseAdmin.from("volunteer_notices").select("*").order("created_at", { ascending: false }),
-      supabaseAdmin.from("volunteer_gigs").select("*, role:volunteer_roles(*)").order("created_at", { ascending: false }),
+      adminDb.from("volunteer_member_profiles").select("*, role:volunteer_roles(*)"),
+      adminDb.from("volunteer_notices").select("*").order("created_at", { ascending: false }),
+      adminDb.from("volunteer_gigs").select("*, role:volunteer_roles(*)").order("created_at", { ascending: false }),
     ]);
 
     const profiles = (profilesRes.data ?? []) as (VolunteerMemberProfile & { role?: VolunteerRole })[];
@@ -86,7 +86,7 @@ const AdminVolunteerHub = ({ roles, applications, onRefresh }: AdminVolunteerHub
     if (!editingMember?.user_id) return;
     setSaving(true);
     try {
-      const { error } = await supabaseAdmin.from("volunteer_member_profiles").upsert(
+      const { error } = await adminDb.from("volunteer_member_profiles").upsert(
         {
           user_id: editingMember.user_id,
           role_id: editingMember.role_id || null,
@@ -124,10 +124,10 @@ const AdminVolunteerHub = ({ roles, applications, onRefresh }: AdminVolunteerHub
         updated_at: new Date().toISOString(),
       };
       if (isNewNotice) {
-        const { error } = await supabaseAdmin.from("volunteer_notices").insert(payload);
+        const { error } = await adminDb.from("volunteer_notices").insert(payload);
         if (error) throw error;
       } else if (editingNotice.id) {
-        const { error } = await supabaseAdmin.from("volunteer_notices").update(payload).eq("id", editingNotice.id);
+        const { error } = await adminDb.from("volunteer_notices").update(payload).eq("id", editingNotice.id);
         if (error) throw error;
       }
       toast.success("Notice saved");
@@ -162,10 +162,10 @@ const AdminVolunteerHub = ({ roles, applications, onRefresh }: AdminVolunteerHub
         updated_at: new Date().toISOString(),
       };
       if (isNewGig) {
-        const { error } = await supabaseAdmin.from("volunteer_gigs").insert(payload);
+        const { error } = await adminDb.from("volunteer_gigs").insert(payload);
         if (error) throw error;
       } else if (editingGig.id) {
-        const { error } = await supabaseAdmin.from("volunteer_gigs").update(payload).eq("id", editingGig.id);
+        const { error } = await adminDb.from("volunteer_gigs").update(payload).eq("id", editingGig.id);
         if (error) throw error;
       }
       toast.success("Gig saved");
@@ -182,7 +182,7 @@ const AdminVolunteerHub = ({ roles, applications, onRefresh }: AdminVolunteerHub
   const deleteRow = async (table: string, id: string, label: string) => {
     if (!confirm(`Delete this ${label}?`)) return;
     try {
-      const { error } = await supabaseAdmin.from(table).delete().eq("id", id);
+      const { error } = await adminDb.from(table).delete().eq("id", id);
       if (error) throw error;
       toast.success("Deleted");
       await loadHub();

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -11,6 +11,8 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/";
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +26,7 @@ const Auth = () => {
         });
         if (error) throw error;
         toast.success("Welcome back!");
-        navigate("/");
+        navigate(redirectTo.startsWith("/") ? redirectTo : "/");
       } else {
         const { error } = await supabase.auth.signUp({
           email,

@@ -18,7 +18,8 @@ import {
   UserCheck,
   Coins
 } from "lucide-react";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { adminDb } from "@/lib/admin-db";
+import { PROFILE_SELECT } from "@/lib/profile-fields";
 import { toast } from "sonner";
 
 const AdminMemberDetail = () => {
@@ -30,23 +31,25 @@ const AdminMemberDetail = () => {
   useEffect(() => {
     const fetchUserDetail = async () => {
       try {
-        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.getUserById(id!);
-        if (authError) throw authError;
-        
-        // Try fetching profile, but don't fail if it doesn't exist yet
-        let profile = null;
-        try {
-          const { data: profileData } = await supabaseAdmin
-            .from('profiles')
-            .select('*')
-            .eq('id', id!)
-            .single();
-          profile = profileData;
-        } catch (e) {
-          console.log("Profile not found or table doesn't exist yet");
+        const { data: profile, error } = await adminDb
+          .from("profiles")
+          .select(PROFILE_SELECT)
+          .eq("id", id!)
+          .maybeSingle();
+        if (error) throw error;
+        if (!profile) {
+          toast.error("Member profile not found");
+          navigate("/admin");
+          return;
         }
 
-        setUser({ ...authData.user, profile });
+        setUser({
+          id: profile.id,
+          email: `${profile.id.substring(0, 8)}…@member`,
+          profile,
+          user_metadata: { full_name: profile.full_name },
+          app_metadata: { provider: "email" },
+        });
       } catch (error: any) {
         console.error("Error fetching user detail:", error.message);
         toast.error("Failed to load member details: " + error.message);
@@ -157,13 +160,16 @@ const AdminMemberDetail = () => {
                   <div className="space-y-1">
                     <div className="text-[10px] uppercase tracking-widest text-[rgba(240,232,213,0.3)]">Authentication Provider</div>
                     <div className="text-sm font-mono text-[#F0E8D5] flex items-center gap-2 capitalize">
-                      <Globe size={14} className="text-[#4895EF]" /> {user.app_metadata.provider || "Email"}
+                      <Globe size={14} className="text-[#4895EF]" /> {user.app_metadata?.provider || "Email"}
                     </div>
                   </div>
                   <div className="space-y-1">
                     <div className="text-[10px] uppercase tracking-widest text-[rgba(240,232,213,0.3)]">Creation Date (UTC)</div>
                     <div className="text-sm font-mono text-[#F0E8D5] flex items-center gap-2">
-                      <Calendar size={14} className="text-[rgba(240,232,213,0.4)]" /> {new Date(user.created_at).toLocaleString()}
+                      <Calendar size={14} className="text-[rgba(240,232,213,0.4)]" />{" "}
+                      {user.profile?.created_at
+                        ? new Date(user.profile.created_at).toLocaleString()
+                        : "—"}
                     </div>
                   </div>
                   <div className="space-y-1">
@@ -198,9 +204,10 @@ const AdminMemberDetail = () => {
                         onClick={async () => {
                           try {
                             const current = user.profile?.ko_coins || 0;
-                            const { error } = await supabaseAdmin
-                              .from('profiles')
-                              .upsert({ id: user.id, ko_coins: current + 100 });
+                            const { error } = await adminDb
+                              .from("profiles")
+                              .update({ ko_coins: current + 100 })
+                              .eq("id", user.id);
                             if (error) throw error;
                             toast.success("+100 Coins Minted");
                             // Re-fetch logic or local state update
@@ -218,9 +225,10 @@ const AdminMemberDetail = () => {
                           try {
                             const current = user.profile?.ko_coins || 0;
                             if (current < 100) return toast.error("Insufficient balance");
-                            const { error } = await supabaseAdmin
-                              .from('profiles')
-                              .upsert({ id: user.id, ko_coins: current - 100 });
+                            const { error } = await adminDb
+                              .from("profiles")
+                              .update({ ko_coins: current - 100 })
+                              .eq("id", user.id);
                             if (error) throw error;
                             toast.success("-100 Coins Burned");
                             setUser({ ...user, profile: { ...user.profile, ko_coins: current - 100 } });

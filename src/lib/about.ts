@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/supabase";
-import { supabaseAdmin } from "@/lib/supabase-admin";
 import {
   AboutDutyLine,
   AboutPageSettings,
@@ -251,11 +250,11 @@ async function resolveUserIdByEmail(email: string): Promise<string | null> {
   const normalized = email.trim().toLowerCase();
   if (!normalized) return null;
 
-  const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  if (error || !data?.users) return null;
-
-  const match = data.users.find((u) => u.email?.toLowerCase() === normalized);
-  return match?.id ?? null;
+  const { data, error } = await supabase.rpc("kommuniti_user_id_by_email", {
+    lookup_email: normalized,
+  });
+  if (error || !data) return null;
+  return data as string;
 }
 
 /** Called from admin when application status changes — links user + sets profile badge. */
@@ -266,7 +265,7 @@ export async function syncVolunteerApproval(application: VolunteerApplication) {
   if (!userId && email) {
     userId = await resolveUserIdByEmail(email);
     if (userId) {
-      await supabaseAdmin
+      await supabase
         .from("volunteer_applications")
         .update({ user_id: userId, updated_at: new Date().toISOString() })
         .eq("id", application.id);
@@ -279,7 +278,7 @@ export async function syncVolunteerApproval(application: VolunteerApplication) {
 
   const isApproved = application.status === "accepted";
 
-  const { data: existing } = await supabaseAdmin.from("profiles").select("id").eq("id", userId).maybeSingle();
+  const { data: existing } = await supabase.from("profiles").select("id").eq("id", userId).maybeSingle();
 
   const profilePayload = {
     id: userId,
@@ -288,11 +287,11 @@ export async function syncVolunteerApproval(application: VolunteerApplication) {
   };
 
   const { error } = existing
-    ? await supabaseAdmin.from("profiles").update({ is_approved_volunteer: isApproved, updated_at: profilePayload.updated_at }).eq("id", userId)
-    : await supabaseAdmin.from("profiles").insert(profilePayload);
+    ? await supabase.from("profiles").update({ is_approved_volunteer: isApproved, updated_at: profilePayload.updated_at }).eq("id", userId)
+    : await supabase.from("profiles").insert(profilePayload);
 
   if (!error && isApproved) {
-    await supabaseAdmin.from("volunteer_member_profiles").upsert(
+    await supabase.from("volunteer_member_profiles").upsert(
       {
         user_id: userId,
         role_id: application.preferred_role_id,

@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { adminDb } from "@/lib/admin-db";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 
 const AdminKores = () => {
@@ -31,7 +31,7 @@ const AdminKores = () => {
   const fetchKores = async (retryCount = 0) => {
     setIsRefreshing(true);
     try {
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await adminDb
         .from('kores')
         .select('*')
         .order('created_at', { ascending: false });

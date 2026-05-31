@@ -14,6 +14,8 @@ import AdminKonnect from "./pages/AdminKonnect";
 import AdminKoreads from "./pages/AdminKoreads";
 import AdminAbout from "./pages/AdminAbout";
 import Konnect from "./pages/Konnect";
+import KonnectEventPage from "./pages/KonnectEventPage";
+import KonnectFeaturedPage from "./pages/KonnectFeaturedPage";
 import About from "./pages/About";
 import Volunteer from "./pages/Volunteer";
 import Koreads from "./pages/Koreads";
@@ -28,7 +30,7 @@ import AuthorBookDetail from "./pages/AuthorBookDetail";
 import ComingSoon from "./pages/ComingSoon";
 import NotFound from "./pages/NotFound";
 import { COMING_SOON_ROUTES } from "./config/comingSoonPages";
-
+import AdminRoute from "./components/admin/AdminRoute";
 import { AuthProvider } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
@@ -44,14 +46,16 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/admin/users/:id" element={<AdminMemberDetail />} />
-            <Route path="/admin/map" element={<AdminMap />} />
-            <Route path="/admin/kores" element={<AdminKores />} />
-            <Route path="/admin/konnect" element={<AdminKonnect />} />
-            <Route path="/admin/koreads" element={<AdminKoreads />} />
-            <Route path="/admin/about" element={<AdminAbout />} />
+            <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
+            <Route path="/admin/users/:id" element={<AdminRoute><AdminMemberDetail /></AdminRoute>} />
+            <Route path="/admin/map" element={<AdminRoute><AdminMap /></AdminRoute>} />
+            <Route path="/admin/kores" element={<AdminRoute><AdminKores /></AdminRoute>} />
+            <Route path="/admin/konnect" element={<AdminRoute><AdminKonnect /></AdminRoute>} />
+            <Route path="/admin/koreads" element={<AdminRoute><AdminKoreads /></AdminRoute>} />
+            <Route path="/admin/about" element={<AdminRoute><AdminAbout /></AdminRoute>} />
             <Route path="/konnect" element={<Konnect />} />
+            <Route path="/konnect/events/:eventId" element={<KonnectEventPage />} />
+            <Route path="/konnect/featured" element={<KonnectFeaturedPage />} />
             <Route path="/about" element={<About />} />
             <Route path="/volunteer" element={<Volunteer />} />
             <Route path="/koreads" element={<Koreads />} />

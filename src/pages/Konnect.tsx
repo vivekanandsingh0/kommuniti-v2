@@ -1,9 +1,11 @@
+import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Calendar, ExternalLink, Users } from "lucide-react";
+import { Calendar, Users } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { fetchKonnectPageData, filterKonnectEvents } from "@/lib/konnect";
+import { EventTile } from "@/components/konnect/EventTile";
+import { fetchKonnectPageData, filterKonnectEvents, partitionKonnectEvents } from "@/lib/konnect";
 import {
   DEFAULT_FEATURED,
   DEFAULT_PAGE_SETTINGS,
@@ -49,9 +51,7 @@ const Konnect = () => {
     [events, activeFilter]
   );
 
-  const openRegistration = (url: string | null) => {
-    if (url) window.open(url, "_blank", "noopener,noreferrer");
-  };
+  const pastEvents = useMemo(() => partitionKonnectEvents(events).past, [events]);
 
   return (
     <motion.div
@@ -158,117 +158,35 @@ const Konnect = () => {
               No sessions in this category yet. Check back soon.
             </p>
           ) : (
-            <motion.div
-              layout
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5"
-            >
+            <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
               {visibleEvents.map((session) => (
-                <motion.button
-                  key={session.id}
-                  type="button"
-                  onClick={() => openRegistration(session.registration_url)}
-                  whileHover={{ scale: 1.02, boxShadow: "0 8px 24px rgba(0,0,0,0.35)" }}
-                  whileTap={{ scale: 0.98 }}
-                  className="konnect-event-tile text-left w-full"
-                  style={{
-                    background: session.tile_color,
-                    color: "#fff",
-                    minHeight: "140px",
-                    padding: "16px",
-                    position: "relative",
-                    overflow: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    border: "none",
-                    cursor: session.registration_url ? "pointer" : "default",
-                  }}
-                >
-                  <div>
-                    <span
-                      style={{
-                        fontFamily: "'Syne', sans-serif",
-                        fontWeight: 800,
-                        fontSize: "10px",
-                        letterSpacing: "3px",
-                        textTransform: "uppercase",
-                        opacity: 0.8,
-                        display: "block",
-                      }}
-                    >
-                      {session.month_label}
-                    </span>
-                  </div>
-
-                  <span
-                    aria-hidden
-                    style={{
-                      fontFamily: "'Syne', sans-serif",
-                      fontWeight: 800,
-                      fontSize: "56px",
-                      lineHeight: 0.9,
-                      letterSpacing: "-3px",
-                      color: "rgba(0, 0, 0, 0.15)",
-                      position: "absolute",
-                      top: "8px",
-                      right: "12px",
-                    }}
-                  >
-                    {session.day_label}
-                  </span>
-
-                  <div>
-                    <div
-                      style={{
-                        fontFamily: "'Rajdhani', sans-serif",
-                        fontSize: "10px",
-                        letterSpacing: "1.5px",
-                        textTransform: "uppercase",
-                        opacity: 0.85,
-                        marginBottom: "4px",
-                      }}
-                    >
-                      {session.category}
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: "'Syne', sans-serif",
-                        fontWeight: 700,
-                        fontSize: "14px",
-                        color: "#fff",
-                      }}
-                    >
-                      {session.title}
-                    </div>
-                    {session.ko_coins_earned != null && (
-                      <p className="text-[9px] mt-1 opacity-80">🪙 Earn {session.ko_coins_earned} KO</p>
-                    )}
-                  </div>
-
-                  <span
-                    aria-hidden
-                    style={{
-                      position: "absolute",
-                      right: "12px",
-                      bottom: "12px",
-                      fontSize: "28px",
-                      opacity: 0.2,
-                    }}
-                  >
-                    {session.icon}
-                  </span>
-                  {session.registration_url && (
-                    <ExternalLink
-                      size={12}
-                      className="absolute top-3 left-3 opacity-40"
-                      aria-hidden
-                    />
-                  )}
-                </motion.button>
+                <EventTile key={session.id} session={session} />
               ))}
             </motion.div>
           )}
         </section>
+
+        {pastEvents.length > 0 && (
+          <section className="px-6 pb-6 sm:px-8 lg:px-10">
+            <p
+              style={{
+                fontSize: "10px",
+                letterSpacing: "2px",
+                textTransform: "uppercase",
+                color: "rgba(240, 232, 213, 0.4)",
+                marginBottom: "14px",
+                fontFamily: "'Rajdhani', sans-serif",
+              }}
+            >
+              {settings.past_section_label || "Past Sessions"}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5 opacity-80">
+              {pastEvents.map((session) => (
+                <EventTile key={session.id} session={session} compact />
+              ))}
+            </div>
+          </section>
+        )}
 
         {featured.is_visible && (
           <section className="px-6 pb-12 sm:px-8 lg:px-10">
@@ -375,9 +293,8 @@ const Konnect = () => {
                 >
                   {featured.price_ko_coins}
                 </p>
-                <button
-                  type="button"
-                  onClick={() => openRegistration(featured.button_url)}
+                <Link
+                  to="/konnect/featured"
                   style={{
                     background: featured.button_color,
                     color: "#fff",
@@ -388,14 +305,14 @@ const Konnect = () => {
                     textTransform: "uppercase",
                     padding: "10px 20px",
                     border: "none",
-                    cursor: featured.button_url ? "pointer" : "default",
                     marginTop: "4px",
-                    opacity: featured.button_url ? 1 : 0.6,
+                    display: "inline-block",
+                    textAlign: "center",
                   }}
                   className="hover:opacity-90 active:scale-95 transition-all"
                 >
-                  {featured.button_label}
-                </button>
+                  {featured.button_label || "RSVP"}
+                </Link>
               </div>
             </div>
           </section>

@@ -3,7 +3,7 @@ import { Plus, RefreshCcw, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminVolunteerHub from "@/components/admin/AdminVolunteerHub";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { adminDb } from "@/lib/admin-db";
 import { syncVolunteerApproval } from "@/lib/about";
 import {
   AboutDutyLine,
@@ -94,17 +94,17 @@ const AdminAbout = () => {
     try {
       const [settingsRes, pillarsRes, statsRes, dutyRes, voicesRes, vSettingsRes, fieldsRes, vPageRes, benefitsRes, rolesRes, appsRes] =
         await Promise.all([
-          supabaseAdmin.from("about_page_settings").select("*").eq("id", 1).maybeSingle(),
-          supabaseAdmin.from("about_pillars").select("*").order("sort_order", { ascending: true }),
-          supabaseAdmin.from("about_stats").select("*").order("sort_order", { ascending: true }),
-          supabaseAdmin.from("about_duty_lines").select("*").order("sort_order", { ascending: true }),
-          supabaseAdmin.from("about_voices").select("*").order("sort_order", { ascending: true }),
-          supabaseAdmin.from("volunteer_form_settings").select("*").eq("id", 1).maybeSingle(),
-          supabaseAdmin.from("volunteer_form_fields").select("*").order("sort_order", { ascending: true }),
-          supabaseAdmin.from("volunteer_page_settings").select("*").eq("id", 1).maybeSingle(),
-          supabaseAdmin.from("volunteer_benefits").select("*").order("sort_order", { ascending: true }),
-          supabaseAdmin.from("volunteer_roles").select("*").order("sort_order", { ascending: true }),
-          supabaseAdmin
+          adminDb.from("about_page_settings").select("*").eq("id", 1).maybeSingle(),
+          adminDb.from("about_pillars").select("*").order("sort_order", { ascending: true }),
+          adminDb.from("about_stats").select("*").order("sort_order", { ascending: true }),
+          adminDb.from("about_duty_lines").select("*").order("sort_order", { ascending: true }),
+          adminDb.from("about_voices").select("*").order("sort_order", { ascending: true }),
+          adminDb.from("volunteer_form_settings").select("*").eq("id", 1).maybeSingle(),
+          adminDb.from("volunteer_form_fields").select("*").order("sort_order", { ascending: true }),
+          adminDb.from("volunteer_page_settings").select("*").eq("id", 1).maybeSingle(),
+          adminDb.from("volunteer_benefits").select("*").order("sort_order", { ascending: true }),
+          adminDb.from("volunteer_roles").select("*").order("sort_order", { ascending: true }),
+          adminDb
             .from("volunteer_applications")
             .select("*")
             .order("created_at", { ascending: false }),
@@ -149,7 +149,7 @@ const AdminAbout = () => {
   const savePageSettings = async () => {
     setSaving(true);
     try {
-      const { error } = await supabaseAdmin
+      const { error } = await adminDb
         .from("about_page_settings")
         .upsert({ ...pageSettings, id: 1, updated_at: new Date().toISOString() });
       if (error) throw error;
@@ -164,7 +164,7 @@ const AdminAbout = () => {
   const saveVolunteerSettings = async () => {
     setSaving(true);
     try {
-      const { error } = await supabaseAdmin
+      const { error } = await adminDb
         .from("volunteer_form_settings")
         .upsert({ ...volunteerSettings, id: 1, updated_at: new Date().toISOString() });
       if (error) throw error;
@@ -179,7 +179,7 @@ const AdminAbout = () => {
   const saveVolunteerPageSettings = async () => {
     setSaving(true);
     try {
-      const { error } = await supabaseAdmin
+      const { error } = await adminDb
         .from("volunteer_page_settings")
         .upsert({ ...volunteerPageSettings, id: 1, updated_at: new Date().toISOString() });
       if (error) throw error;
@@ -207,10 +207,10 @@ const AdminAbout = () => {
         updated_at: new Date().toISOString(),
       };
       if (isNewBenefit) {
-        const { error } = await supabaseAdmin.from("volunteer_benefits").insert(payload);
+        const { error } = await adminDb.from("volunteer_benefits").insert(payload);
         if (error) throw error;
       } else if (editingBenefit.id) {
-        const { error } = await supabaseAdmin.from("volunteer_benefits").update(payload).eq("id", editingBenefit.id);
+        const { error } = await adminDb.from("volunteer_benefits").update(payload).eq("id", editingBenefit.id);
         if (error) throw error;
       }
       toast.success("Benefit saved");
@@ -243,10 +243,10 @@ const AdminAbout = () => {
         updated_at: new Date().toISOString(),
       };
       if (isNewRole) {
-        const { error } = await supabaseAdmin.from("volunteer_roles").insert(payload);
+        const { error } = await adminDb.from("volunteer_roles").insert(payload);
         if (error) throw error;
       } else if (editingRole.id) {
-        const { error } = await supabaseAdmin.from("volunteer_roles").update(payload).eq("id", editingRole.id);
+        const { error } = await adminDb.from("volunteer_roles").update(payload).eq("id", editingRole.id);
         if (error) throw error;
       }
       toast.success("Role saved");
@@ -280,10 +280,10 @@ const AdminAbout = () => {
         updated_at: new Date().toISOString(),
       };
       if (isNewPillar) {
-        const { error } = await supabaseAdmin.from("about_pillars").insert(payload);
+        const { error } = await adminDb.from("about_pillars").insert(payload);
         if (error) throw error;
       } else if (editingPillar.id) {
-        const { error } = await supabaseAdmin.from("about_pillars").update(payload).eq("id", editingPillar.id);
+        const { error } = await adminDb.from("about_pillars").update(payload).eq("id", editingPillar.id);
         if (error) throw error;
       }
       toast.success("Pillar saved");
@@ -313,10 +313,10 @@ const AdminAbout = () => {
         updated_at: new Date().toISOString(),
       };
       if (isNewStat) {
-        const { error } = await supabaseAdmin.from("about_stats").insert(payload);
+        const { error } = await adminDb.from("about_stats").insert(payload);
         if (error) throw error;
       } else if (editingStat.id) {
-        const { error } = await supabaseAdmin.from("about_stats").update(payload).eq("id", editingStat.id);
+        const { error } = await adminDb.from("about_stats").update(payload).eq("id", editingStat.id);
         if (error) throw error;
       }
       toast.success("Stat saved");
@@ -344,10 +344,10 @@ const AdminAbout = () => {
         updated_at: new Date().toISOString(),
       };
       if (isNewDuty) {
-        const { error } = await supabaseAdmin.from("about_duty_lines").insert(payload);
+        const { error } = await adminDb.from("about_duty_lines").insert(payload);
         if (error) throw error;
       } else if (editingDuty.id) {
-        const { error } = await supabaseAdmin.from("about_duty_lines").update(payload).eq("id", editingDuty.id);
+        const { error } = await adminDb.from("about_duty_lines").update(payload).eq("id", editingDuty.id);
         if (error) throw error;
       }
       toast.success("Duty line saved");
@@ -378,10 +378,10 @@ const AdminAbout = () => {
         updated_at: new Date().toISOString(),
       };
       if (isNewVoice) {
-        const { error } = await supabaseAdmin.from("about_voices").insert(payload);
+        const { error } = await adminDb.from("about_voices").insert(payload);
         if (error) throw error;
       } else if (editingVoice.id) {
-        const { error } = await supabaseAdmin.from("about_voices").update(payload).eq("id", editingVoice.id);
+        const { error } = await adminDb.from("about_voices").update(payload).eq("id", editingVoice.id);
         if (error) throw error;
       }
       toast.success("Voice saved");
@@ -421,10 +421,10 @@ const AdminAbout = () => {
       };
 
       if (isNewField) {
-        const { error } = await supabaseAdmin.from("volunteer_form_fields").insert(payload);
+        const { error } = await adminDb.from("volunteer_form_fields").insert(payload);
         if (error) throw error;
       } else if (editingField.id) {
-        const { error } = await supabaseAdmin.from("volunteer_form_fields").update(payload).eq("id", editingField.id);
+        const { error } = await adminDb.from("volunteer_form_fields").update(payload).eq("id", editingField.id);
         if (error) throw error;
       }
       toast.success("Form field saved");
@@ -441,7 +441,7 @@ const AdminAbout = () => {
   const deleteRow = async (table: string, id: string, label: string) => {
     if (!confirm(`Delete this ${label}?`)) return;
     try {
-      const { error } = await supabaseAdmin.from(table).delete().eq("id", id);
+      const { error } = await adminDb.from(table).delete().eq("id", id);
       if (error) throw error;
       toast.success("Deleted");
       await loadAll();
@@ -455,7 +455,7 @@ const AdminAbout = () => {
     const status = nextStatus ?? activeApplication.status;
     setSaving(true);
     try {
-      const { error } = await supabaseAdmin
+      const { error } = await adminDb
         .from("volunteer_applications")
         .update({
           status,

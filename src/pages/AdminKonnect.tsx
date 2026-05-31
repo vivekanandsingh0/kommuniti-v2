@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { Plus, RefreshCcw, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import AdminSidebar from "@/components/admin/AdminSidebar";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { AdminKonnectRsvpPanel } from "@/components/admin/AdminKonnectRsvpPanel";
+import { adminDb } from "@/lib/admin-db";
+import { normalizeEvent } from "@/lib/konnect";
 import {
   DEFAULT_FEATURED,
   DEFAULT_PAGE_SETTINGS,
@@ -12,10 +14,12 @@ import {
   KonnectPageSettings,
   KonnectSessionType,
   emptyEvent,
+  imagesFromTextarea,
   labelsFromDate,
+  parsePostEventImages,
 } from "@/types/konnect";
 
-type Tab = "page" | "events" | "featured";
+type Tab = "page" | "events" | "featured" | "rsvp-fields" | "rsvps";
 
 const inputClass =
   "w-full bg-[rgba(240,232,213,0.03)] border border-[rgba(201,168,76,0.1)] rounded-sm py-2.5 px-3 text-sm focus:border-[#C9A84C] outline-none";
@@ -37,9 +41,9 @@ const AdminKonnect = () => {
     setLoading(true);
     try {
       const [settingsRes, featuredRes, eventsRes] = await Promise.all([
-        supabaseAdmin.from("konnect_page_settings").select("*").eq("id", 1).maybeSingle(),
-        supabaseAdmin.from("konnect_featured").select("*").eq("id", 1).maybeSingle(),
-        supabaseAdmin
+        adminDb.from("konnect_page_settings").select("*").eq("id", 1).maybeSingle(),
+        adminDb.from("konnect_featured").select("*").eq("id", 1).maybeSingle(),
+        adminDb
           .from("konnect_events")
           .select("*")
           .order("sort_order", { ascending: true }),
@@ -55,8 +59,14 @@ const AdminKonnect = () => {
       if (eventsRes.error) throw eventsRes.error;
 
       if (settingsRes.data) setPageSettings(settingsRes.data as KonnectPageSettings);
-      if (featuredRes.data) setFeatured(featuredRes.data as KonnectFeatured);
-      setEvents((eventsRes.data as KonnectEvent[]) || []);
+      if (featuredRes.data) {
+        const f = featuredRes.data as KonnectFeatured;
+        setFeatured({
+          ...f,
+          post_event_images: parsePostEventImages(f.post_event_images),
+        });
+      }
+      setEvents(((eventsRes.data as KonnectEvent[]) || []).map(normalizeEvent));
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Failed to load Konnect data";
       toast.error(msg);
@@ -72,7 +82,7 @@ const AdminKonnect = () => {
   const savePageSettings = async () => {
     setSaving(true);
     try {
-      const { error } = await supabaseAdmin
+      const { error } = await adminDb
         .from("konnect_page_settings")
         .upsert({ ...pageSettings, id: 1, updated_at: new Date().toISOString() });
       if (error) throw error;
@@ -87,7 +97,7 @@ const AdminKonnect = () => {
   const saveFeatured = async () => {
     setSaving(true);
     try {
-      const { error } = await supabaseAdmin
+      const { error } = await adminDb
         .from("konnect_featured")
         .upsert({ ...featured, id: 1, updated_at: new Date().toISOString() });
       if (error) throw error;
@@ -121,15 +131,22 @@ const AdminKonnect = () => {
         tile_color: editingEvent.tile_color ?? KONNECT_TILE_PRESETS[0],
         registration_url: editingEvent.registration_url || null,
         ko_coins_earned: editingEvent.ko_coins_earned ?? null,
+        long_description: editingEvent.long_description || null,
+        location: editingEvent.location || null,
+        schedule_detail: editingEvent.schedule_detail || null,
+        capacity: editingEvent.capacity ?? null,
+        post_event_message: editingEvent.post_event_message || null,
+        post_event_images: editingEvent.post_event_images ?? [],
+        rsvp_enabled: editingEvent.rsvp_enabled !== false,
         updated_at: new Date().toISOString(),
       };
 
       if (isNewEvent) {
-        const { error } = await supabaseAdmin.from("konnect_events").insert(payload);
+        const { error } = await adminDb.from("konnect_events").insert(payload);
         if (error) throw error;
         toast.success("Event created");
       } else if (editingEvent.id) {
-        const { error } = await supabaseAdmin
+        const { error } = await adminDb
           .from("konnect_events")
           .update(payload)
           .eq("id", editingEvent.id);
@@ -150,7 +167,7 @@ const AdminKonnect = () => {
   const deleteEvent = async (id: string) => {
     if (!confirm("Delete this event?")) return;
     try {
-      const { error } = await supabaseAdmin.from("konnect_events").delete().eq("id", id);
+      const { error } = await adminDb.from("konnect_events").delete().eq("id", id);
       if (error) throw error;
       toast.success("Event deleted");
       await loadAll();
@@ -187,7 +204,7 @@ const AdminKonnect = () => {
               Konnect CMS
             </h1>
             <p className="text-[rgba(240,232,213,0.4)] text-sm">
-              Manage events, colors, registration links, and page copy — changes appear on{" "}
+              Manage sessions, RSVP forms, post-event recaps, and page copy — changes appear on{" "}
               <a href="/konnect" target="_blank" rel="noreferrer" className="text-[#FF6B35] hover:underline">
                 /konnect
               </a>
@@ -219,6 +236,8 @@ const AdminKonnect = () => {
               ["page", "Page Copy"],
               ["events", `Events (${events.length})`],
               ["featured", "Featured Workshop"],
+              ["rsvp-fields", "RSVP Fields"],
+              ["rsvps", "RSVPs"],
             ] as const
           ).map(([id, label]) => (
             <button
@@ -258,6 +277,9 @@ const AdminKonnect = () => {
                     ["filter_online_label", "Tab: Online"],
                     ["filter_in_person_label", "Tab: In-Person"],
                     ["filter_on_demand_label", "Tab: On-Demand"],
+                    ["past_section_label", "Past sessions section label"],
+                    ["rsvp_section_label", "RSVP section label"],
+                    ["post_event_section_label", "Post-event recap label"],
                     ["accent_color", "Accent color (hex)"],
                   ] as const
                 ).map(([key, lbl]) => (
@@ -265,7 +287,7 @@ const AdminKonnect = () => {
                     <label className={labelClass}>{lbl}</label>
                     <input
                       className={inputClass}
-                      value={pageSettings[key]}
+                      value={pageSettings[key] ?? ""}
                       onChange={(e) => setPageSettings({ ...pageSettings, [key]: e.target.value })}
                     />
                   </div>
@@ -286,6 +308,14 @@ const AdminKonnect = () => {
                 <label className="flex items-center gap-2 cursor-pointer mb-4">
                   <input
                     type="checkbox"
+                    checked={featured.rsvp_enabled !== false}
+                    onChange={(e) => setFeatured({ ...featured, rsvp_enabled: e.target.checked })}
+                  />
+                  <span className="text-sm">RSVP form enabled on featured page</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer mb-4">
+                  <input
+                    type="checkbox"
                     checked={featured.is_visible}
                     onChange={(e) => setFeatured({ ...featured, is_visible: e.target.checked })}
                   />
@@ -303,8 +333,7 @@ const AdminKonnect = () => {
                       ["ko_coins_text", "KO Coins line"],
                       ["price_inr", "Price (INR)"],
                       ["price_ko_coins", "Price (KO Coins)"],
-                      ["button_label", "Button label"],
-                      ["button_url", "Registration URL"],
+                      ["button_label", "RSVP button label"],
                       ["button_color", "Button color"],
                       ["border_color", "Border color"],
                       ["icon_bg_start", "Icon bg start"],
@@ -333,6 +362,33 @@ const AdminKonnect = () => {
                       )}
                     </div>
                   ))}
+                </div>
+                <div>
+                  <label className={labelClass}>Location (optional)</label>
+                  <input
+                    className={inputClass}
+                    value={featured.location ?? ""}
+                    onChange={(e) => setFeatured({ ...featured, location: e.target.value || null })}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Post-event message (shown after workshop)</label>
+                  <textarea
+                    className={`${inputClass} min-h-[80px]`}
+                    value={featured.post_event_message ?? ""}
+                    onChange={(e) => setFeatured({ ...featured, post_event_message: e.target.value || null })}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Post-event image URLs (one per line)</label>
+                  <textarea
+                    className={`${inputClass} min-h-[80px]`}
+                    value={(featured.post_event_images ?? []).join("\n")}
+                    onChange={(e) =>
+                      setFeatured({ ...featured, post_event_images: imagesFromTextarea(e.target.value) })
+                    }
+                    placeholder="https://…"
+                  />
                 </div>
                 <button
                   type="button"
@@ -416,6 +472,17 @@ const AdminKonnect = () => {
                           }
                         />
                         <span className="text-sm">Published (visible on site)</span>
+                      </label>
+
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={editingEvent.rsvp_enabled !== false}
+                          onChange={(e) =>
+                            setEditingEvent({ ...editingEvent, rsvp_enabled: e.target.checked })
+                          }
+                        />
+                        <span className="text-sm">RSVP form enabled</span>
                       </label>
 
                       <div>
@@ -522,7 +589,83 @@ const AdminKonnect = () => {
                       </div>
 
                       <div>
-                        <label className={labelClass}>Registration URL</label>
+                        <label className={labelClass}>Long description (event page)</label>
+                        <textarea
+                          className={`${inputClass} min-h-[100px]`}
+                          value={editingEvent.long_description ?? ""}
+                          onChange={(e) =>
+                            setEditingEvent({ ...editingEvent, long_description: e.target.value || null })
+                          }
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className={labelClass}>Location</label>
+                          <input
+                            className={inputClass}
+                            value={editingEvent.location ?? ""}
+                            onChange={(e) =>
+                              setEditingEvent({ ...editingEvent, location: e.target.value || null })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Schedule detail</label>
+                          <input
+                            className={inputClass}
+                            value={editingEvent.schedule_detail ?? ""}
+                            onChange={(e) =>
+                              setEditingEvent({ ...editingEvent, schedule_detail: e.target.value || null })
+                            }
+                            placeholder="Sat 10am–1pm"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className={labelClass}>Capacity (optional)</label>
+                        <input
+                          type="number"
+                          className={inputClass}
+                          value={editingEvent.capacity ?? ""}
+                          onChange={(e) =>
+                            setEditingEvent({
+                              ...editingEvent,
+                              capacity: e.target.value ? Number(e.target.value) : null,
+                            })
+                          }
+                        />
+                      </div>
+
+                      <div>
+                        <label className={labelClass}>Post-event message</label>
+                        <textarea
+                          className={`${inputClass} min-h-[80px]`}
+                          value={editingEvent.post_event_message ?? ""}
+                          onChange={(e) =>
+                            setEditingEvent({ ...editingEvent, post_event_message: e.target.value || null })
+                          }
+                        />
+                      </div>
+
+                      <div>
+                        <label className={labelClass}>Post-event image URLs (one per line)</label>
+                        <textarea
+                          className={`${inputClass} min-h-[80px]`}
+                          value={(editingEvent.post_event_images ?? []).join("\n")}
+                          onChange={(e) =>
+                            setEditingEvent({
+                              ...editingEvent,
+                              post_event_images: imagesFromTextarea(e.target.value),
+                            })
+                          }
+                          placeholder="https://…"
+                        />
+                      </div>
+
+                      <div>
+                        <label className={labelClass}>Legacy external URL (optional, unused if RSVP on)</label>
                         <input
                           className={inputClass}
                           value={editingEvent.registration_url ?? ""}
@@ -618,6 +761,10 @@ const AdminKonnect = () => {
                   </div>
                 )}
               </div>
+            )}
+
+            {(tab === "rsvp-fields" || tab === "rsvps") && (
+              <AdminKonnectRsvpPanel events={events} subTab={tab === "rsvp-fields" ? "fields" : "submissions"} />
             )}
           </>
         )}

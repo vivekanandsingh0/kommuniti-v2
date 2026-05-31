@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { BookOpen, Coins, Plus, RefreshCcw, Save, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import AdminSidebar from "@/components/admin/AdminSidebar";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { adminDb } from "@/lib/admin-db";
 import { updateContributionResponse, updateTaskSubmissionResponse } from "@/lib/koreads";
 import {
   EMPTY_CHAPTER_CONTENT,
@@ -73,21 +73,21 @@ const AdminKoreads = () => {
     setLoading(true);
     try {
       const [authorsRes, booksRes, chaptersRes, contributionsRes, tasksRes, usersRes] = await Promise.all([
-        supabaseAdmin.from("koreads_authors").select("*").order("updated_at", { ascending: false }),
-        supabaseAdmin.from("koreads_books").select("*, author:koreads_authors(*)").order("updated_at", { ascending: false }),
-        supabaseAdmin.from("koreads_chapters").select("*").order("chapter_number", { ascending: true }),
-        supabaseAdmin
+        adminDb.from("koreads_authors").select("*").order("updated_at", { ascending: false }),
+        adminDb.from("koreads_books").select("*, author:koreads_authors(*)").order("updated_at", { ascending: false }),
+        adminDb.from("koreads_chapters").select("*").order("chapter_number", { ascending: true }),
+        adminDb
           .from("koreads_contributions")
           .select("*, book:koreads_books(title, cover_color), chapter:koreads_chapters(title, chapter_number)")
           .order("created_at", { ascending: false }),
-        supabaseAdmin.from("koreads_tasks").select("*, book:koreads_books(title)").order("created_at", { ascending: false }),
-        supabaseAdmin.auth.admin.listUsers(),
+        adminDb.from("koreads_tasks").select("*, book:koreads_books(title)").order("created_at", { ascending: false }),
+        adminDb.from("profiles").select("id, full_name, ko_coins").order("full_name", { ascending: true }),
       ]);
 
       const taskIds = ((tasksRes.data as KoreadsTask[]) || []).map((t) => t.id);
       const submissionsRes =
         taskIds.length > 0
-          ? await supabaseAdmin
+          ? await adminDb
               .from("koreads_task_submissions")
               .select("*, task:koreads_tasks(title, task_category, book:koreads_books(title))")
               .in("task_id", taskIds)
@@ -110,7 +110,13 @@ const AdminKoreads = () => {
       setContributions((contributionsRes.data as KoreadsContribution[]) || []);
       setTasks((tasksRes.data as KoreadsTask[]) || []);
       setTaskSubmissions((submissionsRes.data as KoreadsTaskSubmission[]) || []);
-      setUsers(usersRes.data.users || []);
+      setUsers(
+        (usersRes.data || []).map((p: { id: string; full_name?: string | null }) => ({
+          id: p.id,
+          email: p.full_name || p.id,
+          user_metadata: { full_name: p.full_name },
+        }))
+      );
       if (!selectedBookId && booksRes.data?.[0]) setSelectedBookId(booksRes.data[0].id);
     } catch (error: any) {
       toast.error(error.message || "Failed to load KO Reads admin data");
@@ -144,8 +150,8 @@ const AdminKoreads = () => {
     };
 
     const query = authorForm.id
-      ? supabaseAdmin.from("koreads_authors").update(payload).eq("id", authorForm.id)
-      : supabaseAdmin.from("koreads_authors").insert(payload);
+      ? adminDb.from("koreads_authors").update(payload).eq("id", authorForm.id)
+      : adminDb.from("koreads_authors").insert(payload);
 
     const { error } = await query;
     if (error) toast.error(error.message);
@@ -182,8 +188,8 @@ const AdminKoreads = () => {
     };
 
     const query = bookForm.id
-      ? supabaseAdmin.from("koreads_books").update(payload).eq("id", bookForm.id)
-      : supabaseAdmin.from("koreads_books").insert(payload);
+      ? adminDb.from("koreads_books").update(payload).eq("id", bookForm.id)
+      : adminDb.from("koreads_books").insert(payload);
 
     const { error } = await query;
     if (error) toast.error(error.message);
@@ -215,8 +221,8 @@ const AdminKoreads = () => {
     };
 
     const query = activeChapter.id
-      ? supabaseAdmin.from("koreads_chapters").update(payload).eq("id", activeChapter.id)
-      : supabaseAdmin.from("koreads_chapters").insert(payload);
+      ? adminDb.from("koreads_chapters").update(payload).eq("id", activeChapter.id)
+      : adminDb.from("koreads_chapters").insert(payload);
 
     const { error } = await query;
     if (error) toast.error(error.message);
@@ -229,7 +235,7 @@ const AdminKoreads = () => {
 
   const deleteChapter = async (chapterId: string) => {
     if (!confirm("Delete this chapter?")) return;
-    const { error } = await supabaseAdmin.from("koreads_chapters").delete().eq("id", chapterId);
+    const { error } = await adminDb.from("koreads_chapters").delete().eq("id", chapterId);
     if (error) toast.error(error.message);
     else {
       toast.success("Chapter deleted");
@@ -254,8 +260,8 @@ const AdminKoreads = () => {
       updated_at: new Date().toISOString(),
     };
     const query = taskForm.id
-      ? supabaseAdmin.from("koreads_tasks").update(payload).eq("id", taskForm.id)
-      : supabaseAdmin.from("koreads_tasks").insert(payload);
+      ? adminDb.from("koreads_tasks").update(payload).eq("id", taskForm.id)
+      : adminDb.from("koreads_tasks").insert(payload);
     const { error } = await query;
     if (error) toast.error(error.message);
     else {
@@ -308,11 +314,11 @@ const AdminKoreads = () => {
       return;
     }
 
-    const profileRes = await supabaseAdmin.from("profiles").select("ko_coins").eq("id", author.user_id).maybeSingle();
+    const profileRes = await adminDb.from("profiles").select("ko_coins").eq("id", author.user_id).maybeSingle();
     const currentCoins = profileRes.data?.ko_coins ?? 0;
     const amount = Math.max(1, Number(authorGrant.amount || 0));
 
-    const updateRes = await supabaseAdmin
+    const updateRes = await adminDb
       .from("profiles")
       .update({ ko_coins: currentCoins + amount })
       .eq("id", author.user_id);
@@ -321,7 +327,7 @@ const AdminKoreads = () => {
       return;
     }
 
-    await supabaseAdmin.from("ko_coin_transactions").insert({
+    await adminDb.from("ko_coin_transactions").insert({
       recipient_user_id: author.user_id,
       actor_user_id: null,
       author_id: author.id,

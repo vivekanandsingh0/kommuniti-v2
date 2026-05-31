@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { adminDb } from "@/lib/admin-db";
 import { MapGeoService } from "@/utils/map-geo-service";
 
 const AdminMap = () => {
@@ -55,7 +55,7 @@ const AdminMap = () => {
   useEffect(() => {
     // Fetch live map config first
     const fetchConfig = async () => {
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await adminDb
         .from('map_config')
         .select('*')
         .eq('city_name', activeCity)
@@ -74,7 +74,7 @@ const AdminMap = () => {
     const fetchOverrides = async () => {
         setLoading(true);
         try {
-            const { data, error } = await supabaseAdmin
+            const { data, error } = await adminDb
                 .from('map_zones')
                 .select('*')
                 .eq('city_name', activeCity);
@@ -99,7 +99,7 @@ const AdminMap = () => {
   const handleDeploy = async () => {
     setLoading(true);
     try {
-      const { error } = await supabaseAdmin
+      const { error } = await adminDb
         .from('map_config')
         .upsert({
           city_name: activeCity,
@@ -179,7 +179,7 @@ const AdminMap = () => {
           };
         });
 
-        const { error } = await supabaseAdmin
+        const { error } = await adminDb
           .from('map_zones')
           .upsert(payload, { onConflict: 'zone_index' });
 
@@ -200,7 +200,7 @@ const AdminMap = () => {
     setIsSaving(true);
     
     try {
-        const { error } = await supabaseAdmin
+        const { error } = await adminDb
             .from('map_zones')
             .upsert({
                 zone_index: selectedCell,

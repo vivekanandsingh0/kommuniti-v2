@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { adminDb } from "@/lib/admin-db";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 
 const Admin = () => {
@@ -32,12 +32,15 @@ const Admin = () => {
   const fetchRealUsers = async () => {
     setIsRefreshing(true);
     try {
-      const { data, error } = await supabaseAdmin.auth.admin.listUsers();
+      const { data, error } = await adminDb
+        .from("profiles")
+        .select("id, full_name, ko_coins, is_admin, is_approved_volunteer")
+        .order("full_name", { ascending: true });
       if (error) throw error;
-      setUsers(data.users || []);
+      setUsers(data || []);
     } catch (error: any) {
       console.error("Error fetching users:", error.message);
-      toast.error("Failed to fetch real users: " + error.message);
+      toast.error("Failed to fetch members: " + error.message);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -48,15 +51,23 @@ const Admin = () => {
     fetchRealUsers();
   }, []);
 
-  const filteredUsers = users.filter(user => 
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredUsers = users.filter((user) =>
+    user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalKoCoins = users.reduce((sum, user) => sum + (Number(user.ko_coins) || 0), 0);
 
   const stats = [
     { label: "Real Members", value: users.length.toString(), trend: "Live", icon: <Users size={20} />, color: "#C9A84C" },
     { label: "Active Kores", value: "0", trend: "Pending", icon: <CircleDot size={20} />, color: "#6BBFB5" },
-    { label: "KO Coins", value: "0", trend: "Alpha", icon: <Coins size={20} />, color: "#FF6B35" },
+    {
+      label: "KO Coins",
+      value: totalKoCoins.toLocaleString(),
+      trend: "In circulation",
+      icon: <Coins size={20} />,
+      color: "#FF6B35",
+    },
     { label: "System Status", value: "Healthy", trend: "100%", icon: <Shield size={20} />, color: "#E63946" },
   ];
 
@@ -69,7 +80,7 @@ const Admin = () => {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
           <div>
             <h1 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800 }} className="text-3xl mb-2">User Directory</h1>
-            <p className="text-[rgba(240,232,213,0.4)] text-sm tracking-wide">Viewing actual authenticated members from Supabase Auth.</p>
+            <p className="text-[rgba(240,232,213,0.4)] text-sm tracking-wide">Member profiles from Kommuniti (run admin_security.sql for access).</p>
           </div>
           <div className="flex gap-4">
             <button 
@@ -106,7 +117,7 @@ const Admin = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[rgba(240,232,213,0.3)]" size={18} />
               <input 
                 type="text" 
-                placeholder="Search by email address or User ID..."
+                placeholder="Search by name or User ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-[rgba(240,232,213,0.03)] border border-[rgba(201,168,76,0.1)] rounded-sm py-3 pl-10 pr-4 text-sm focus:border-[#C9A84C] outline-none transition-all"
@@ -119,7 +130,7 @@ const Admin = () => {
             {loading ? (
               <div className="p-20 text-center text-[rgba(240,232,213,0.3)]">
                 <RefreshCcw size={40} className="mx-auto mb-4 animate-spin" />
-                <p className="uppercase tracking-[3px] text-xs">Accessing Supabase Auth API...</p>
+                <p className="uppercase tracking-[3px] text-xs">Loading member profiles...</p>
               </div>
             ) : (
               <table className="w-full text-left">
@@ -127,8 +138,8 @@ const Admin = () => {
                   <tr className="border-b border-[rgba(201,168,76,0.1)] bg-[rgba(240,232,213,0.01)]">
                     <th className="px-6 py-4 text-[10px] uppercase tracking-[2px] text-[rgba(240,232,213,0.4)] font-bold">Member Information</th>
                     <th className="px-6 py-4 text-[10px] uppercase tracking-[2px] text-[rgba(240,232,213,0.4)] font-bold">Created At</th>
-                    <th className="px-6 py-4 text-[10px] uppercase tracking-[2px] text-[rgba(240,232,213,0.4)] font-bold">Last Sign In</th>
-                    <th className="px-6 py-4 text-[10px] uppercase tracking-[2px] text-[rgba(240,232,213,0.4)] font-bold">Status</th>
+                    <th className="px-6 py-4 text-[10px] uppercase tracking-[2px] text-[rgba(240,232,213,0.4)] font-bold">KO Coins</th>
+                    <th className="px-6 py-4 text-[10px] uppercase tracking-[2px] text-[rgba(240,232,213,0.4)] font-bold">Roles</th>
                     <th className="px-6 py-4 text-[10px] uppercase tracking-[2px] text-[rgba(240,232,213,0.4)] font-bold text-right">Actions</th>
                   </tr>
                 </thead>
@@ -142,33 +153,41 @@ const Admin = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#C9A84C] to-[#0B1828] border border-[rgba(201,168,76,0.3)] flex items-center justify-center text-xs font-bold text-[#F0E8D5]">
-                            {user.user_metadata?.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
+                            {user.full_name?.charAt(0).toUpperCase() || user.id.charAt(0).toUpperCase()}
                           </div>
                           <div>
                             <div className="text-sm font-bold flex items-center gap-2">
-                              {user.user_metadata?.full_name || user.email}
-                              {user.email_confirmed_at && <Shield size={12} className="text-[#4CAF50]" title="Verified" />}
+                              {user.full_name || `Member ${user.id.substring(0, 8)}`}
+                              {user.is_admin && <Shield size={12} className="text-[#C9A84C]" title="Admin" />}
                             </div>
                             <div className="text-[9px] text-[rgba(240,232,213,0.4)] font-mono tracking-tight uppercase">
-                              {user.user_metadata?.full_name ? user.email : `ID: ${user.id.substring(0, 15)}...`}
+                              ID: {user.id.substring(0, 18)}...
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2 text-xs text-[rgba(240,232,213,0.6)]">
-                          <Calendar size={12} /> {new Date(user.created_at).toLocaleDateString()}
+                          <Calendar size={12} />{" "}
+                          {user.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2 text-xs text-[rgba(240,232,213,0.6)]">
-                          <Clock size={12} /> {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : "Never"}
+                          <Coins size={12} /> {user.ko_coins ?? 0}
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-1.5 h-1.5 rounded-full ${user.email_confirmed_at ? 'bg-[#4CAF50]' : 'bg-[#FF6B35]'}`} />
-                          <span className="text-[10px] uppercase tracking-wider">{user.email_confirmed_at ? 'Confirmed' : 'Unconfirmed'}</span>
+                        <div className="flex flex-wrap gap-2">
+                          {user.is_admin && (
+                            <span className="text-[10px] uppercase tracking-wider text-[#C9A84C]">Admin</span>
+                          )}
+                          {user.is_approved_volunteer && (
+                            <span className="text-[10px] uppercase tracking-wider text-[#6BBFB5]">Volunteer</span>
+                          )}
+                          {!user.is_admin && !user.is_approved_volunteer && (
+                            <span className="text-[10px] uppercase tracking-wider text-[rgba(240,232,213,0.4)]">Member</span>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
@@ -192,7 +211,7 @@ const Admin = () => {
           
           <div className="p-6 border-t border-[rgba(201,168,76,0.1)] flex justify-between items-center">
             <p className="text-[10px] text-[rgba(240,232,213,0.4)] uppercase tracking-widest">
-              Live Connection to Supabase Auth • {filteredUsers.length} Users Listed
+              Live member profiles • {filteredUsers.length} listed
             </p>
             <div className="flex gap-2">
               <button className="px-4 py-1 border border-[rgba(201,168,76,0.1)] text-[10px] uppercase tracking-widest opacity-50 cursor-not-allowed">Export CSV</button>

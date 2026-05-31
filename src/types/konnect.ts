@@ -10,6 +10,9 @@ export interface KonnectPageSettings {
   hero_line_3: string;
   sessions_section_label: string;
   featured_section_label: string;
+  past_section_label?: string;
+  rsvp_section_label?: string;
+  post_event_section_label?: string;
   filter_upcoming_label: string;
   filter_online_label: string;
   filter_in_person_label: string;
@@ -32,6 +35,13 @@ export interface KonnectEvent {
   tile_color: string;
   registration_url: string | null;
   ko_coins_earned: number | null;
+  long_description?: string | null;
+  location?: string | null;
+  schedule_detail?: string | null;
+  capacity?: number | null;
+  post_event_message?: string | null;
+  post_event_images?: string[];
+  rsvp_enabled?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -54,7 +64,42 @@ export interface KonnectFeatured {
   border_color: string;
   icon_bg_start: string;
   icon_bg_end: string;
+  location?: string | null;
+  post_event_message?: string | null;
+  post_event_images?: string[];
+  rsvp_enabled?: boolean;
   updated_at?: string;
+}
+
+export type KonnectRsvpFieldType = "text" | "email" | "tel" | "textarea" | "select";
+export type KonnectRsvpAppliesTo = "all" | "event" | "featured";
+
+export interface KonnectRsvpField {
+  id: string;
+  sort_order: number;
+  is_active: boolean;
+  applies_to: KonnectRsvpAppliesTo;
+  event_id: string | null;
+  field_key: string;
+  label: string;
+  field_type: KonnectRsvpFieldType;
+  placeholder: string | null;
+  help_text: string | null;
+  options: string[];
+  is_required: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface KonnectRsvp {
+  id: string;
+  event_id: string | null;
+  is_featured: boolean;
+  user_id: string | null;
+  attendee_name: string | null;
+  attendee_email: string;
+  responses: Record<string, string>;
+  created_at?: string;
 }
 
 export const KONNECT_TILE_PRESETS = [
@@ -76,6 +121,9 @@ export const DEFAULT_PAGE_SETTINGS: KonnectPageSettings = {
   hero_line_3: "community.",
   sessions_section_label: "2026 · Upcoming Sessions Across Kores",
   featured_section_label: "Featured Workshop Series",
+  past_section_label: "Past Sessions",
+  rsvp_section_label: "RSVP",
+  post_event_section_label: "Event recap",
   filter_upcoming_label: "Upcoming",
   filter_online_label: "Online",
   filter_in_person_label: "In-Person",
@@ -102,6 +150,8 @@ export const DEFAULT_FEATURED: KonnectFeatured = {
   border_color: "#FF6B35",
   icon_bg_start: "#3A1800",
   icon_bg_end: "#1A0800",
+  rsvp_enabled: true,
+  post_event_images: [],
 };
 
 export function labelsFromDate(isoDate: string): { month_label: string; day_label: string } {
@@ -126,5 +176,44 @@ export function emptyEvent(sortOrder: number): Omit<KonnectEvent, "id" | "create
     tile_color: KONNECT_TILE_PRESETS[0],
     registration_url: null,
     ko_coins_earned: null,
+    long_description: null,
+    location: null,
+    schedule_detail: null,
+    capacity: null,
+    post_event_message: null,
+    post_event_images: [],
+    rsvp_enabled: true,
   };
+}
+
+export const DEFAULT_KONNECT_RSVP_FIELDS: Omit<KonnectRsvpField, "id" | "created_at" | "updated_at">[] = [
+  { sort_order: 1, is_active: true, applies_to: "all", event_id: null, field_key: "full_name", label: "Full name", field_type: "text", placeholder: "Your name", help_text: null, options: [], is_required: true },
+  { sort_order: 2, is_active: true, applies_to: "all", event_id: null, field_key: "email", label: "Email", field_type: "email", placeholder: "you@example.com", help_text: null, options: [], is_required: true },
+  { sort_order: 3, is_active: true, applies_to: "all", event_id: null, field_key: "phone", label: "Phone / WhatsApp", field_type: "tel", placeholder: "+91 …", help_text: null, options: [], is_required: false },
+];
+
+export function emptyRsvpField(sortOrder: number): Omit<KonnectRsvpField, "id" | "created_at" | "updated_at"> {
+  return {
+    sort_order: sortOrder,
+    is_active: true,
+    applies_to: "all",
+    event_id: null,
+    field_key: `field_${sortOrder}`,
+    label: "New field",
+    field_type: "text",
+    placeholder: null,
+    help_text: null,
+    options: [],
+    is_required: false,
+  };
+}
+
+export function parsePostEventImages(raw: unknown): string[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw.filter((u): u is string => typeof u === "string" && u.trim().length > 0);
+  return [];
+}
+
+export function imagesFromTextarea(text: string): string[] {
+  return text.split(/\r?\n|,/).map((s) => s.trim()).filter(Boolean);
 }
