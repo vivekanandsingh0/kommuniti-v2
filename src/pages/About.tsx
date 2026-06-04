@@ -38,10 +38,18 @@ const FadeIn = ({
   );
 };
 
-const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex items-center gap-4 mb-6">
+const SectionLabel = ({
+  children,
+  className = "",
+  titleClassName = "text-sm sm:text-base md:text-lg",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  titleClassName?: string;
+}) => (
+  <div className={`flex items-center gap-4 mb-6 ${className}`}>
     <div className="w-3 h-3 bg-primary animate-pulse-glow" />
-    <h2 className="font-pixel text-sm sm:text-base md:text-lg text-foreground">{children}</h2>
+    <h2 className={`font-pixel text-foreground ${titleClassName}`}>{children}</h2>
   </div>
 );
 
@@ -203,17 +211,21 @@ const About = () => {
         {dutyLines.length > 0 && (
           <section className="section-padding pixel-grid-hero border-b border-border">
             <div className="max-w-4xl mx-auto">
-              <FadeIn>
-                <SectionLabel>{settings.duty_section_label}</SectionLabel>
-                <div className="space-y-3 text-foreground/45 mb-10 text-sm sm:text-base leading-relaxed">
+              <FadeIn className="md:flex md:flex-col md:items-center">
+                <SectionLabel className="md:justify-center w-full" titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl">
+                  {settings.duty_section_label}
+                </SectionLabel>
+                <div className="space-y-3 text-foreground/45 mb-10 text-sm sm:text-base leading-relaxed md:text-center w-full max-w-2xl">
                   {dutyLines.map((line) => (
                     <p key={line.id}>{line.text}</p>
                   ))}
                 </div>
-                <p className="font-pixel text-[8px] sm:text-[9px] tracking-[0.3em] text-accent/70 mb-3">
+                <p className="font-pixel text-[8px] sm:text-[9px] tracking-[0.3em] text-accent/70 mb-3 md:text-center w-full">
                   {settings.duty_headline}
                 </p>
-                <p className="font-pixel text-[10px] tracking-[0.35em] text-primary">{settings.duty_footer}</p>
+                <p className="font-pixel text-[10px] tracking-[0.35em] text-primary md:text-center w-full">
+                  {settings.duty_footer}
+                </p>
               </FadeIn>
             </div>
           </section>
