@@ -35,7 +35,7 @@ const CTASection = () => {
 
       <div className="relative z-10 max-w-4xl mx-auto">
         <FadeIn>
-          <p className="font-pixel text-[8px] text-[#4CAF50] tracking-[0.4em] mb-8">PHASE 1 IS LIVE</p>
+          <p className="font-pixel text-[8px] text-[#4CAF50] tracking-[0.4em] mb-8">CHOOSE YOUR PATHWAY</p>
         </FadeIn>
 
         <FadeIn delay={0.1}>
@@ -56,7 +56,10 @@ const CTASection = () => {
                 className="flex items-center gap-3 border border-white/10 hover:border-white/25 px-5 py-4 no-underline transition-colors group"
                 style={{ borderLeftWidth: 3, borderLeftColor: link.color }}
               >
-                <span className="text-2xl">{link.icon}</span>
+                {(() => {
+                  const LinkIcon = link.icon;
+                  return <LinkIcon size={24} style={{ color: link.color }} />;
+                })()}
                 <div>
                   <div className="font-bold text-foreground group-hover:text-white transition-colors">{link.label}</div>
                   <div className="text-[10px] uppercase tracking-[2px] text-[#4CAF50]">Live now</div>

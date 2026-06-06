@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { ArrowRight, Heart } from "lucide-react";
+import { ArrowRight, Heart, Map, GraduationCap, Zap, Compass } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { fetchAboutPageData } from "@/lib/about";
@@ -13,6 +13,23 @@ import {
   AboutStat,
   AboutVoice,
 } from "@/types/about";
+
+const getPremiumIcon = (iconStr: string) => {
+  const norm = (iconStr || "").trim();
+  switch (norm) {
+    case "🗺️":
+    case "KOMMUTE":
+      return Map;
+    case "🎓":
+    case "KONNECT":
+      return GraduationCap;
+    case "⚡":
+    case "KREATE":
+      return Zap;
+    default:
+      return Compass;
+  }
+};
 
 const FadeIn = ({
   children,
@@ -177,7 +194,14 @@ const About = () => {
                           className="md:w-1/3 p-8 sm:p-10 border-b md:border-b-0 md:border-r border-border bg-card/30"
                           style={{ borderLeftWidth: 3, borderLeftColor: pillar.accent_color }}
                         >
-                          <div className="text-3xl mb-4">{pillar.icon}</div>
+                          {(() => {
+                            const PillarIcon = getPremiumIcon(pillar.icon);
+                            return (
+                              <div className="mb-4" style={{ color: pillar.accent_color }}>
+                                <PillarIcon size={32} />
+                              </div>
+                            );
+                          })()}
                           <h3 className="font-pixel text-xs mb-2" style={{ color: pillar.accent_color }}>
                             {pillar.title}
                           </h3>

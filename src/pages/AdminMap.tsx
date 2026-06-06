@@ -433,8 +433,8 @@ const AdminMap = () => {
                       <h3 className="text-xl font-bold mb-1">Zone #{selectedCell}</h3>
                       <p className="text-[10px] uppercase tracking-[2px] text-[#C9A84C]">Metadata Editor</p>
                     </div>
-                    <div className="p-3 bg-[#C9A84C]/10 border border-[#C9A84C]/20 text-xl">
-                      📍
+                    <div className="p-3 bg-[#C9A84C]/10 border border-[#C9A84C]/20 text-[#C9A84C] flex items-center justify-center">
+                      <MapPin size={24} />
                     </div>
                   </div>
 
@@ -507,7 +507,9 @@ const AdminMap = () => {
                 </motion.div>
               ) : (
                 <div className="h-full min-h-[400px] border border-dashed border-white/10 flex flex-col items-center justify-center p-12 text-center">
-                  <div className="text-4xl opacity-20 mb-6">🖱</div>
+                  <div className="opacity-20 mb-6 text-[#F0E8D5] flex items-center justify-center">
+                    <MapPin size={40} />
+                  </div>
                   <h4 className="text-sm font-bold uppercase tracking-[2px] opacity-40">Select a cell to manage</h4>
                   <p className="text-[11px] text-white/20 mt-2">Every pixel represents a 1km² community zone.</p>
                 </div>

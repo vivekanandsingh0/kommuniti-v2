@@ -1,13 +1,48 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { KonnectEvent } from "@/types/konnect";
+import { 
+  Coins, 
+  Hammer, 
+  Sprout, 
+  Scissors, 
+  Leaf, 
+  Palette, 
+  Smartphone, 
+  Trees, 
+  Calendar 
+} from "lucide-react";
 
-type EventTileProps = {
-  session: KonnectEvent;
-  compact?: boolean;
-};
+export function getEventIcon(iconStr: string) {
+  const norm = (iconStr || "").trim();
+  switch (norm) {
+    case "🏗️":
+      return Hammer;
+    case "🌾":
+    case "🌱":
+      return Sprout;
+    case "💰":
+      return Coins;
+    case "🧵":
+      return Scissors;
+    case "🌿":
+      return Leaf;
+    case "🏺":
+      return Palette;
+    case "📱":
+      return Smartphone;
+    case "🎋":
+      return Trees;
+    case "📅":
+      return Calendar;
+    default:
+      return Calendar;
+  }
+}
 
-export function EventTile({ session, compact }: EventTileProps) {
+export function EventTile({ session, compact }: { session: KonnectEvent; compact?: boolean }) {
+  const Icon = getEventIcon(session.icon);
+  
   return (
     <Link to={`/konnect/events/${session.id}`} className="block w-full">
       <motion.div
@@ -84,7 +119,10 @@ export function EventTile({ session, compact }: EventTileProps) {
             {session.title}
           </div>
           {session.ko_coins_earned != null && (
-            <p className="text-[9px] mt-1 opacity-80">🪙 Earn {session.ko_coins_earned} KO</p>
+            <p className="text-[9px] mt-1 opacity-80 flex items-center gap-1">
+              <Coins size={10} className="text-[#C9A84C]" />
+              <span>Earn {session.ko_coins_earned} KO</span>
+            </p>
           )}
           <p className="text-[9px] mt-2 opacity-70 uppercase tracking-wider">View & RSVP →</p>
         </div>
@@ -93,13 +131,12 @@ export function EventTile({ session, compact }: EventTileProps) {
           aria-hidden
           style={{
             position: "absolute",
-            right: "12px",
-            bottom: "12px",
-            fontSize: "28px",
-            opacity: 0.2,
+            right: "16px",
+            bottom: "16px",
+            opacity: 0.22,
           }}
         >
-          {session.icon}
+          <Icon size={26} />
         </span>
       </motion.div>
     </Link>

@@ -16,10 +16,10 @@ const AdminSidebar = () => {
 
   return (
     <aside className="w-64 border-r border-[rgba(201,168,76,0.1)] hidden lg:flex flex-col p-6 sticky top-0 h-screen">
-      <div className="flex items-center gap-2 mb-12">
-        <span className="text-2xl">🌻</span>
-        <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800 }} className="text-xl">
-          Admin <span className="text-[#C9A84C]">Hub</span>
+      <div className="flex flex-col gap-1 mb-12">
+        <img src="/kommuniti-new-logo.png" alt="Kommuniti Logo" className="h-7 w-auto object-contain self-start" />
+        <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800 }} className="text-[10px] tracking-[2px] text-[rgba(240,232,213,0.4)] uppercase mt-1">
+          Admin Hub
         </span>
       </div>
 

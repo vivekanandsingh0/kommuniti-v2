@@ -70,19 +70,8 @@ const Auth = () => {
           className="bg-[#0B1828] border border-[rgba(201,168,76,0.2)] p-8 sm:p-12 shadow-2xl rounded-sm"
         >
           {/* Logo */}
-          <div className="flex items-center justify-center gap-2 mb-10">
-            <span className="text-[28px]">🌻</span>
-            <span 
-              style={{ 
-                fontFamily: "'Syne', sans-serif", 
-                fontWeight: 800, 
-                fontSize: "24px",
-                color: "#F0E8D5",
-                lineHeight: 1
-              }}
-            >
-              Kommu<span style={{ color: "#F5C842" }}>ni</span><span style={{ color: "#E63946" }}>t</span>i
-            </span>
+          <div className="flex items-center justify-center mb-10 cursor-pointer" onClick={() => navigate("/")}>
+            <img src="/kommuniti-new-logo.png" alt="Kommuniti Logo" className="h-10 w-auto object-contain" />
           </div>
 
           <h2 

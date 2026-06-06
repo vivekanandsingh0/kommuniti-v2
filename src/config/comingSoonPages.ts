@@ -1,17 +1,29 @@
+import { 
+  GraduationCap, 
+  BookOpen, 
+  Info, 
+  HeartHandshake, 
+  Map, 
+  Compass, 
+  Zap, 
+  ShoppingBag,
+  LucideIcon 
+} from "lucide-react";
+
 export interface ComingSoonPageConfig {
   path: string;
   title: string;
   subtitle: string;
   description: string;
   accentColor: string;
-  icon: string;
+  icon: LucideIcon;
 }
 
 export interface SiteNavLink {
   label: string;
   href: string;
   color: string;
-  icon: string;
+  icon: LucideIcon;
   subtitle?: string;
   description?: string;
 }
@@ -22,7 +34,7 @@ export const LIVE_LAUNCH_LINKS: SiteNavLink[] = [
     label: "Konnect",
     href: "/konnect",
     color: "#FF6B35",
-    icon: "🎓",
+    icon: GraduationCap,
     subtitle: "Workshops & events",
     description:
       "Join talks, intensives, and community learning. Show up, connect, and earn KO Coins.",
@@ -31,7 +43,7 @@ export const LIVE_LAUNCH_LINKS: SiteNavLink[] = [
     label: "KO Reads",
     href: "/koreads",
     color: "#C77DFF",
-    icon: "📖",
+    icon: BookOpen,
     subtitle: "Community-powered books",
     description:
       "Read chapters, contribute ideas, and help authors build stories with the community.",
@@ -40,7 +52,7 @@ export const LIVE_LAUNCH_LINKS: SiteNavLink[] = [
     label: "About",
     href: "/about",
     color: "#F0E8D5",
-    icon: "🌻",
+    icon: Info,
     subtitle: "Mission & story",
     description:
       "Why Kommuniti exists — decentralised community, commerce, and collective action.",
@@ -49,7 +61,7 @@ export const LIVE_LAUNCH_LINKS: SiteNavLink[] = [
     label: "Volunteer",
     href: "/volunteer",
     color: "#C9A84C",
-    icon: "🤝",
+    icon: HeartHandshake,
     subtitle: "Join the movement",
     description:
       "Explore benefits, see open roles, and apply to help neighbourhoods become Kores.",
@@ -65,7 +77,7 @@ export const COMING_SOON_ROUTES: ComingSoonPageConfig[] = [
     description:
       "Curated stays, neighbourhood journeys, and community travel across Kores — experience places as a guest, not a tourist.",
     accentColor: "#6BBFB5",
-    icon: "🗺️",
+    icon: Map,
   },
   {
     path: "/kores",
@@ -74,7 +86,7 @@ export const COMING_SOON_ROUTES: ComingSoonPageConfig[] = [
     description:
       "Discover local community hubs, see who is gathering near you, and find the Kore that fits your rhythm.",
     accentColor: "#C9A84C",
-    icon: "◉",
+    icon: Compass,
   },
   {
     path: "/kreate",
@@ -83,7 +95,7 @@ export const COMING_SOON_ROUTES: ComingSoonPageConfig[] = [
     description:
       "An incubation space for ideas — connect with tribe members, build the right ecosystem, and take your vision to market.",
     accentColor: "#AAFF00",
-    icon: "⚡",
+    icon: Zap,
   },
   {
     path: "/kostore",
@@ -92,7 +104,7 @@ export const COMING_SOON_ROUTES: ComingSoonPageConfig[] = [
     description:
       "A social, equitable marketplace for products that help you grow as a healthy and responsible citizen.",
     accentColor: "#C9A84C",
-    icon: "🛒",
+    icon: ShoppingBag,
   },
 ];
 
@@ -115,3 +127,4 @@ export function getComingSoonConfig(pathname: string): ComingSoonPageConfig | nu
 export function isComingSoonPath(pathname: string): boolean {
   return COMING_SOON_ROUTES.some((route) => route.path === pathname);
 }
+

@@ -52,7 +52,10 @@ const ComingSoonStrip = () => {
                 to={item.href}
                 className="flex flex-col items-center text-center border border-dashed border-white/10 hover:border-white/20 p-5 transition-colors no-underline opacity-70 hover:opacity-90"
               >
-                <span className="text-2xl mb-2 grayscale-[30%]">{item.icon}</span>
+                {(() => {
+                  const RouteIcon = item.icon;
+                  return <RouteIcon size={26} className="mb-2 opacity-80" style={{ color: item.color }} />;
+                })()}
                 <span className="font-bold text-sm text-[rgba(240,232,213,0.65)] mb-1">{item.label}</span>
                 <span
                   className="text-[9px] uppercase tracking-[2px] font-bold px-2 py-0.5 border border-[rgba(240,232,213,0.15)] text-[rgba(240,232,213,0.35)]"

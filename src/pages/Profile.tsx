@@ -131,14 +131,14 @@ const Profile = () => {
 
               <div className="flex flex-wrap justify-center lg:justify-start gap-4">
                 <div className="bg-[rgba(201,168,76,0.1)] border border-[rgba(201,168,76,0.3)] rounded-full px-4 py-2 flex items-center gap-2">
-                  <span className="text-xl">🪙</span>
+                  <Coins size={18} className="text-[#C9A84C]" />
                   <span className="font-bold text-[#C9A84C]">{user?.profile?.ko_coins || 0}</span>
                 </div>
-                <div className="bg-[rgba(76,175,80,0.15)] border border-[#4CAF50] rounded-full px-4 py-2 flex items-center gap-2 text-[#4CAF50]">
+                <div className="hidden bg-[rgba(76,175,80,0.15)] border border-[#4CAF50] rounded-full px-4 py-2 flex items-center gap-2 text-[#4CAF50]">
                   <span className="font-bold text-lg">₹0</span>
                   <span className="text-[10px] opacity-70 uppercase tracking-widest">withdrawable</span>
                 </div>
-                <div className="bg-[rgba(230,57,70,0.1)] border border-[rgba(230,57,70,0.4)] rounded-full px-4 py-2 flex items-center gap-2 text-[#E63946]">
+                <div className="hidden bg-[rgba(230,57,70,0.1)] border border-[rgba(230,57,70,0.4)] rounded-full px-4 py-2 flex items-center gap-2 text-[#E63946]">
                   <Flame size={18} />
                   <span className="font-bold">0 weeks</span>
                 </div>
@@ -146,7 +146,7 @@ const Profile = () => {
             </div>
 
             {/* KSS Score Ring */}
-            <div className="text-center flex-shrink-0">
+            <div className="hidden text-center flex-shrink-0">
               <div className="w-32 h-32 rounded-full border-[6px] border-[rgba(201,168,76,0.1)] border-t-[#C9A84C] flex flex-col items-center justify-center relative">
                 <div 
                   style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800 }}
@@ -168,10 +168,10 @@ const Profile = () => {
 
       <section className="py-16 px-6 lg:px-12 bg-[#0B1828]">
         <div className="container mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          <div className="max-w-3xl mx-auto">
             
             {/* KSS Dimensions */}
-            <div>
+            <div className="hidden">
               <h3 className="text-[11px] uppercase tracking-[3px] text-[rgba(240,232,213,0.4)] mb-8">
                 Your KSS Dimensions — Kore Strength Score
               </h3>
@@ -196,7 +196,7 @@ const Profile = () => {
             </div>
 
             {/* Earnings & Achievements */}
-            <div className="space-y-12">
+            <div className="hidden space-y-12">
               {/* Earnings Grid */}
               <div>
                 <h3 className="text-[11px] uppercase tracking-[3px] text-[rgba(240,232,213,0.4)] mb-8">

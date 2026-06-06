@@ -20,21 +20,9 @@ const Footer = () => {
     <footer className="bg-[#0B1828] pt-16 pb-8 border-t border-[rgba(201,168,76,0.1)]">
       <div className="container mx-auto px-6 lg:px-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 mb-16">
-          <div className="lg:col-span-4">
-            <Link to="/" className="flex items-center gap-2 mb-6 no-underline">
-              <span className="text-[28px]">🌻</span>
-              <span
-                style={{
-                  fontFamily: "'Syne', sans-serif",
-                  fontWeight: 800,
-                  fontSize: "22px",
-                  color: "#F0E8D5",
-                  lineHeight: 1,
-                }}
-              >
-                Kommu<span style={{ color: "#F5C842" }}>ni</span>
-                <span style={{ color: "#E63946" }}>t</span>i
-              </span>
+          <div className="lg:col-span-6">
+            <Link to="/" className="flex items-center mb-6 no-underline">
+              <img src="/kommuniti-new-logo.png" alt="Kommuniti Logo" className="h-12 sm:h-16 w-auto object-contain" />
             </Link>
             <p
               style={{
@@ -48,7 +36,7 @@ const Footer = () => {
               A Feeling of Home.
             </p>
             <p className="text-xs text-[rgba(240,232,213,0.5)] leading-relaxed max-w-xs mb-6">
-              Phase 1 is live: Konnect, KO Reads, About, and Volunteer. More of the Kommuniti universe arrives soon.
+              Active platforms: Konnect, KO Reads, About, and Volunteer. Empowering neighbourhoods into collective action.
             </p>
             <Link
               to="/konnect"
@@ -74,41 +62,25 @@ const Footer = () => {
               Live now
             </h4>
             <ul className="list-none p-0 m-0 space-y-3">
-              {LIVE_LAUNCH_LINKS.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    style={{ color: link.color }}
-                    className="text-[13px] no-underline hover:opacity-80 transition-opacity font-semibold"
-                  >
-                    {link.icon} {link.label}
-                  </Link>
-                </li>
-              ))}
+              {LIVE_LAUNCH_LINKS.map((link) => {
+                const Icon = link.icon;
+                return (
+                  <li key={link.href}>
+                    <Link
+                      to={link.href}
+                      style={{ color: link.color }}
+                      className="text-[13px] no-underline hover:opacity-80 transition-opacity font-semibold flex items-center gap-1.5"
+                    >
+                      <Icon size={14} style={{ color: link.color }} />
+                      {link.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
           <div className="lg:col-span-3">
-            <h4 className="text-[9px] tracking-[2px] uppercase text-[rgba(240,232,213,0.35)] mb-5">
-              Coming soon
-            </h4>
-            <ul className="list-none p-0 m-0 space-y-3">
-              {COMING_SOON_NAV_LINKS.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    style={{ color: link.color }}
-                    className="text-[13px] no-underline hover:opacity-70 transition-opacity opacity-50"
-                  >
-                    {link.icon} {link.label}
-                    <span className="text-[8px] uppercase tracking-wider ml-1.5 opacity-70">· soon</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="lg:col-span-2">
             <h4 className="text-[9px] tracking-[2px] uppercase text-[rgba(240,232,213,0.4)] mb-5">
               Company
             </h4>

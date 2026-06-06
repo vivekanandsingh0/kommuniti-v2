@@ -15,7 +15,12 @@ import {
   Plus,
   X,
   Copy,
-  Info
+  Info,
+  Landmark,
+  Coins,
+  ShoppingCart,
+  Map,
+  Sprout
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -25,6 +30,24 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { MapGeoService } from "@/utils/map-geo-service";
+
+const getKreateIcon = (iconStr: string) => {
+  const norm = (iconStr || "").trim();
+  switch (norm) {
+    case "🗓":
+      return Calendar;
+    case "🏛":
+      return Landmark;
+    case "📍":
+      return MapPin;
+    case "💰":
+      return Coins;
+    case "🛒":
+      return ShoppingCart;
+    default:
+      return Info;
+  }
+};
 
 const Kreate = () => {
   const { profile, user } = useAuth();
@@ -127,7 +150,7 @@ const Kreate = () => {
         
         if (index !== null) {
           setSelectedCell(index);
-          toast.success("Current zone identified! 📍", {
+          toast.success("Current zone identified!", {
             description: "We've highlighted your 1km community block."
           });
         }
@@ -257,7 +280,7 @@ const Kreate = () => {
         if (zoneError) throw zoneError;
 
         setIsSuccess(true);
-        toast.success("Congratulations! Your Kore is officially born. 🌱");
+        toast.success("Congratulations! Your Kore is officially born.");
       } catch (err: any) {
         console.error("Founding failed:", err);
         toast.error("Founding failed: " + err.message);
@@ -732,8 +755,8 @@ const Kreate = () => {
                               );
                             })()}
 
-                            <div className="w-24 h-24 bg-[#C9A84C] border-2 border-[#F5C842] shadow-[0_0_30px_rgba(201,168,76,0.3)] mx-auto mb-8 flex items-center justify-center text-4xl">
-                              🗺
+                            <div className="w-24 h-24 bg-[#C9A84C] border-2 border-[#F5C842] shadow-[0_0_30px_rgba(201,168,76,0.3)] mx-auto mb-8 flex items-center justify-center text-[#0B1828]">
+                              <Map size={48} />
                             </div>
                             <div className="space-y-6">
                               {[
@@ -804,7 +827,7 @@ const Kreate = () => {
                         onClick={handleNext}
                         className="bg-[#C9A84C] text-[#0B1828] px-10 py-4 font-bold text-[11px] uppercase tracking-[2px] hover:brightness-110 transition-all flex items-center gap-2"
                       >
-                        {currentStep === 4 ? 'Found My Kore 🌱' : 'Continue'} <ArrowRight size={14} />
+                        {currentStep === 4 ? 'Found My Kore' : 'Continue'} <ArrowRight size={14} />
                       </button>
                     </div>
                   )}
@@ -815,9 +838,11 @@ const Kreate = () => {
                     initial={{ scale: 0, rotate: -20 }}
                     animate={{ scale: 1, rotate: 0 }}
                     transition={{ type: "spring", damping: 10 }}
-                    className="w-24 h-24 bg-[#C9A84C] border-2 border-[#F5C842] shadow-[0_0_50px_rgba(201,168,76,0.5)] mx-auto"
-                  />
-                  <h2 className="text-4xl font-extrabold tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>Your Kore is born. 🌱</h2>
+                    className="w-24 h-24 bg-[#C9A84C] border-2 border-[#F5C842] shadow-[0_0_50px_rgba(201,168,76,0.5)] mx-auto flex items-center justify-center text-[#0B1828]"
+                  >
+                    <Sprout size={48} />
+                  </motion.div>
+                  <h2 className="text-4xl font-extrabold tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>Your Kore is born.</h2>
                   <p className="text-[#F0E8D5]/60 max-w-lg mx-auto leading-relaxed">
                     Your zone just lit up on the KoKo map. Share your invite link, get 4 more members to join, and you'll be a Seed Kore — earning KO Coins and KSS points from Week 1.
                   </p>
@@ -931,15 +956,20 @@ const Kreate = () => {
                 { icon: "📍", title: "Issue Tagging — Your Zone, Your Responsibility", desc: "Members photograph civic problems — waste, water, roads, power. Every tag is pinned to a DigiPin L9 cell on the map. 3 co-tags = Heating. 10+ = Campaign. Campaign solved = permanent green pixel.", color: "#E63946" },
                 { icon: "💰", title: "Real Earnings — Not Points, Not Badges", desc: "KO Coins earned through gathering, tagging, and deliveries are real money — withdrawable via UPI to your bank account. Your Kore's KSS score determines your minting rate.", color: "#4CAF50" },
                 { icon: "🛒", title: "KOKO Store — Your Kore's Marketplace", desc: "Every Kore member can list products and services on the KOKO Store — artisan goods, organic produce, skills, experiences. Sellers earn 75–80% of every sale.", color: "#4895EF" }
-              ].map((f, i) => (
-                <div key={i} className="bg-[#12243A] border border-[#C9A84C]/12 p-6 flex gap-6 hover:bg-[#C9A84C]/[0.03] transition-all" style={{ borderLeft: `3px solid ${f.color}` }}>
-                  <div className="text-2xl mt-1">{f.icon}</div>
-                  <div>
-                    <h4 className="text-sm font-bold mb-2 uppercase tracking-wide">{f.title}</h4>
-                    <p className="text-[11.5px] text-[#F0E8D5]/50 leading-relaxed">{f.desc}</p>
+              ].map((f, i) => {
+                const IconComponent = getKreateIcon(f.icon);
+                return (
+                  <div key={i} className="bg-[#12243A] border border-[#C9A84C]/12 p-6 flex gap-6 hover:bg-[#C9A84C]/[0.03] transition-all" style={{ borderLeft: `3px solid ${f.color}` }}>
+                    <div className="mt-1 shrink-0" style={{ color: f.color }}>
+                      <IconComponent size={24} />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold mb-2 uppercase tracking-wide">{f.title}</h4>
+                      <p className="text-[11.5px] text-[#F0E8D5]/50 leading-relaxed">{f.desc}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Coins, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { COMING_SOON_NAV_LINKS, LIVE_LAUNCH_LINKS } from "@/config/comingSoonPages";
@@ -45,63 +45,26 @@ const Navbar = () => {
         }}
       >
         <div className="flex items-center w-full h-full px-5 gap-3">
-          <Link to="/" className="flex items-center gap-1.5 no-underline shrink-0">
-            <span className="text-[16px] sm:text-[20px]">🌻</span>
-            <span
-              style={{
-                fontFamily: "'Syne', sans-serif",
-                fontWeight: 800,
-                letterSpacing: "-0.5px",
-                lineHeight: 1,
-                color: "#F0E8D5",
-              }}
-              className="text-[16px] sm:text-[20px]"
-            >
-              Kommu<span style={{ color: "#F5C842" }}>ni</span>
-              <span style={{ color: "#E63946" }}>t</span>i
-            </span>
+          <Link to="/" className="flex items-center no-underline shrink-0">
+            <img src="/kommuniti-new-logo.png" alt="Kommuniti Logo" className="h-8 sm:h-12 w-auto object-contain" />
           </Link>
 
-          {/* Desktop — live first, then coming soon muted */}
-          <div className="hidden xl:flex items-center justify-center flex-1 gap-5">
-            {LIVE_LAUNCH_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className="hover:opacity-80 transition-all no-underline flex items-center gap-1.5"
-                style={linkStyle(link.color, true)}
-              >
-                <span style={{ fontSize: "15px" }}>{link.icon}</span>
-                {link.label.toUpperCase()}
-              </Link>
-            ))}
-            <span className="w-px h-4 bg-[rgba(201,168,76,0.2)] mx-1" aria-hidden />
-            {COMING_SOON_NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className="hover:opacity-80 transition-all no-underline flex items-center"
-                style={linkStyle(link.color, false)}
-              >
-                {link.label.toUpperCase()}
-                <SoonBadge />
-              </Link>
-            ))}
-          </div>
-
-          {/* Tablet — live only (coming soon in mobile menu) */}
-          <div className="hidden lg:flex xl:hidden items-center justify-center flex-1 gap-6">
-            {LIVE_LAUNCH_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className="hover:opacity-80 transition-all no-underline flex items-center gap-1"
-                style={linkStyle(link.color, true)}
-              >
-                <span style={{ fontSize: "14px" }}>{link.icon}</span>
-                {link.label.toUpperCase()}
-              </Link>
-            ))}
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center justify-center flex-1 gap-8">
+            {LIVE_LAUNCH_LINKS.map((link) => {
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className="hover:opacity-80 transition-all no-underline flex items-center gap-2"
+                  style={linkStyle(link.color, true)}
+                >
+                  <Icon size={14} style={{ color: link.color }} />
+                  {link.label.toUpperCase()}
+                </Link>
+              );
+            })}
           </div>
 
           <div className="hidden md:flex items-center gap-3 ml-auto shrink-0">
@@ -121,7 +84,7 @@ const Navbar = () => {
                   color: "#C9A84C",
                 }}
               >
-                🪙 {user.profile?.ko_coins || 0}
+                <Coins size={14} /> {user.profile?.ko_coins || 0}
               </div>
             )}
             <button
@@ -139,10 +102,11 @@ const Navbar = () => {
                 justifyContent: "center",
                 border: "2px solid rgba(201, 168, 76, 0.4)",
                 cursor: "pointer",
+                color: "#0B1828",
               }}
               className="hover:scale-105 active:scale-95 transition-transform"
             >
-              {user ? "👨‍🚀" : "👤"}
+              <User size={16} />
             </button>
             <Link
               to="/volunteer"
@@ -178,9 +142,10 @@ const Navbar = () => {
                 justifyContent: "center",
                 border: "2px solid rgba(201, 168, 76, 0.4)",
                 cursor: "pointer",
+                color: "#0B1828",
               }}
             >
-              {user ? "👨‍🚀" : "👤"}
+              <User size={15} />
             </button>
             <button type="button" className="text-[#F0E8D5] p-2" onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -200,58 +165,29 @@ const Navbar = () => {
           >
             <div className="flex flex-col h-full p-6 overflow-y-auto">
               <div className="mb-8">
-                <p className="text-[9px] tracking-[3px] uppercase text-[#4CAF50] mb-4 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#4CAF50]" />
-                  Live now
-                </p>
-                <div className="flex flex-col gap-4">
-                  {LIVE_LAUNCH_LINKS.map((link) => (
-                    <Link
-                      key={link.href}
-                      to={link.href}
-                      onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-3 no-underline py-1"
-                      style={{
-                        fontFamily: "'Rajdhani', sans-serif",
-                        fontSize: "16px",
-                        fontWeight: 700,
-                        letterSpacing: "1px",
-                        textTransform: "uppercase",
-                        color: link.color,
-                      }}
-                    >
-                      <span className="text-xl">{link.icon}</span>
-                      {link.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mb-8 pt-6 border-t border-[rgba(201,168,76,0.1)]">
-                <p className="text-[9px] tracking-[3px] uppercase text-[rgba(240,232,213,0.35)] mb-4">
-                  Coming soon
-                </p>
-                <div className="flex flex-col gap-3">
-                  {COMING_SOON_NAV_LINKS.map((link) => (
-                    <Link
-                      key={link.href}
-                      to={link.href}
-                      onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-3 no-underline py-1 opacity-55"
-                      style={{
-                        fontFamily: "'Rajdhani', sans-serif",
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        letterSpacing: "1px",
-                        textTransform: "uppercase",
-                        color: link.color,
-                      }}
-                    >
-                      <span className="text-lg grayscale">{link.icon}</span>
-                      {link.label}
-                      <SoonBadge />
-                    </Link>
-                  ))}
+                <div className="flex flex-col gap-5">
+                  {LIVE_LAUNCH_LINKS.map((link) => {
+                    const Icon = link.icon;
+                    return (
+                      <Link
+                        key={link.href}
+                        to={link.href}
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-3.5 no-underline py-2 border-b border-[rgba(201,168,76,0.05)] last:border-b-0"
+                        style={{
+                          fontFamily: "'Rajdhani', sans-serif",
+                          fontSize: "18px",
+                          fontWeight: 700,
+                          letterSpacing: "1.5px",
+                          textTransform: "uppercase",
+                          color: link.color,
+                        }}
+                      >
+                        <Icon size={20} style={{ color: link.color }} />
+                        {link.label}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -266,9 +202,13 @@ const Navbar = () => {
                       <p className="text-[8px] uppercase tracking-[2px] text-[rgba(201,168,76,0.5)] mb-1">
                         Your wallet
                       </p>
-                      <div className="text-2xl font-bold text-[#C9A84C]">🪙 {user.profile?.ko_coins || 0}</div>
+                      <div className="text-2xl font-bold text-[#C9A84C] flex items-center gap-1.5">
+                        <Coins size={20} /> {user.profile?.ko_coins || 0}
+                      </div>
                     </div>
-                    <span className="text-2xl">👨‍🚀</span>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#FF6B35] to-[#AAFF00] flex items-center justify-center border border-white/20">
+                      <User size={20} className="text-[#0B1828]" />
+                    </div>
                   </Link>
                 ) : (
                   <Link

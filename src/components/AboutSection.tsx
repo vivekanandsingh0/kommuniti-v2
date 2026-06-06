@@ -1,7 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Info, HeartHandshake } from "lucide-react";
 
 const FadeIn = ({
   children,
@@ -59,8 +59,8 @@ const AboutSection = () => {
               className="group border border-border hover:border-[#C9A84C]/40 p-8 transition-all no-underline"
             >
               <span className="text-[9px] uppercase tracking-[2px] text-[#4CAF50] font-bold">Live</span>
-              <h3 className="text-2xl font-bold text-foreground mt-2 mb-3 group-hover:text-[#C9A84C] transition-colors">
-                🌻 About Kommuniti
+              <h3 className="text-2xl font-bold text-foreground mt-2 mb-3 group-hover:text-[#C9A84C] transition-colors flex items-center gap-2.5">
+                <Info className="w-6 h-6 text-[#C9A84C] opacity-80" /> About Kommuniti
               </h3>
               <p className="text-foreground/50 text-sm leading-relaxed">
                 Mission, pillars, community voices, and the story behind neighbourhood-first action.
@@ -71,8 +71,8 @@ const AboutSection = () => {
               className="group border border-border hover:border-[#C9A84C]/40 p-8 transition-all no-underline"
             >
               <span className="text-[9px] uppercase tracking-[2px] text-[#4CAF50] font-bold">Live</span>
-              <h3 className="text-2xl font-bold text-foreground mt-2 mb-3 group-hover:text-[#C9A84C] transition-colors">
-                🤝 Volunteer
+              <h3 className="text-2xl font-bold text-foreground mt-2 mb-3 group-hover:text-[#C9A84C] transition-colors flex items-center gap-2.5">
+                <HeartHandshake className="w-6 h-6 text-[#C9A84C] opacity-80" /> Volunteer
               </h3>
               <p className="text-foreground/50 text-sm leading-relaxed">
                 Benefits, open roles, and apply to help build Kores — your time shapes real community.

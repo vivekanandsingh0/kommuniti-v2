@@ -1,4 +1,4 @@
-import { MapPin, Calendar, Users } from "lucide-react";
+import { MapPin, Calendar, Users, Coins } from "lucide-react";
 import KonnectRsvpForm from "@/components/konnect/KonnectRsvpForm";
 
 type PostEventRecapProps = {
@@ -67,7 +67,11 @@ export function EventMetaRow({ sessionType, location, schedule, seats, koCoins, 
           <Users size={14} className="opacity-70" /> {rsvpCount} / {capacity} registered
         </span>
       )}
-      {koCoins && <span style={{ color: "#C9A84C" }}>🪙 {koCoins}</span>}
+      {koCoins && (
+        <span className="flex items-center gap-1.5" style={{ color: "#C9A84C" }}>
+          <Coins size={14} /> {koCoins}
+        </span>
+      )}
     </div>
   );
 }

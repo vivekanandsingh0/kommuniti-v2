@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Users } from "lucide-react";
+import { Calendar, Users, Coins } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { EventTile } from "@/components/konnect/EventTile";
+import { EventTile, getEventIcon } from "@/components/konnect/EventTile";
 import { fetchKonnectPageData, filterKonnectEvents, partitionKonnectEvents } from "@/lib/konnect";
 import {
   DEFAULT_FEATURED,
@@ -217,12 +217,14 @@ const Konnect = () => {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "48px",
                   padding: "24px",
                   minHeight: "120px",
                 }}
               >
-                {featured.icon}
+                {(() => {
+                  const FeaturedIcon = getEventIcon(featured.icon);
+                  return <FeaturedIcon size={44} style={{ color: featured.border_color }} />;
+                })()}
               </div>
 
               <div className="p-5 sm:p-6">
@@ -269,7 +271,10 @@ const Konnect = () => {
                     <Users size={14} className="opacity-70" />
                     {featured.seats_text}
                   </span>
-                  <span style={{ color: "#C9A84C" }}>🪙 {featured.ko_coins_text}</span>
+                  <span className="flex items-center gap-1.5" style={{ color: "#C9A84C" }}>
+                    <Coins size={14} />
+                    {featured.ko_coins_text}
+                  </span>
                 </div>
               </div>
 

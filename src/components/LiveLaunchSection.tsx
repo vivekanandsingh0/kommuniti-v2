@@ -37,7 +37,7 @@ const LiveLaunchSection = () => {
             <div>
               <div className="inline-flex items-center gap-2 bg-[#4CAF50]/15 border border-[#4CAF50]/40 text-[#4CAF50] px-3 py-1 text-[10px] uppercase tracking-[2px] font-bold mb-4">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#4CAF50] animate-pulse" />
-                Live now — Phase 1
+                Core Experiences · Active now
               </div>
               <h2
                 className="text-3xl sm:text-4xl font-extrabold text-[#F0E8D5]"
@@ -61,7 +61,10 @@ const LiveLaunchSection = () => {
                 style={{ borderTopWidth: 3, borderTopColor: item.color }}
               >
                 <div className="flex items-start justify-between gap-2 mb-4">
-                  <span className="text-3xl">{item.icon}</span>
+                  {(() => {
+                    const LaunchIcon = item.icon;
+                    return <LaunchIcon size={30} style={{ color: item.color }} />;
+                  })()}
                   <span className="text-[9px] uppercase tracking-[2px] font-bold text-[#4CAF50] bg-[#4CAF50]/10 border border-[#4CAF50]/30 px-2 py-0.5 shrink-0">
                     Live
                   </span>

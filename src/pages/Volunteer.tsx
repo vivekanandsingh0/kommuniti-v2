@@ -1,6 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowRight, Clock, Heart, MapPin } from "lucide-react";
+import { 
+  ArrowRight, 
+  Clock, 
+  Heart, 
+  MapPin,
+  Coins, 
+  GraduationCap, 
+  Compass, 
+  Award, 
+  Map, 
+  HeartHandshake, 
+  BookOpen, 
+  PenTool, 
+  Settings, 
+  Globe, 
+  HelpCircle,
+  LucideIcon 
+} from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import VolunteerApplyForm from "@/components/volunteer/VolunteerApplyForm";
@@ -18,6 +35,36 @@ const locationLabel: Record<string, string> = {
   "in-person": "In person",
   hybrid: "Hybrid",
 };
+
+export function getVolunteerPremiumIcon(iconStr: string): LucideIcon {
+  const norm = (iconStr || "").trim();
+  switch (norm) {
+    case "🪙":
+      return Coins;
+    case "🎓":
+      return GraduationCap;
+    case "🌻":
+      return Compass;
+    case "📜":
+      return Award;
+    case "🗺️":
+      return Map;
+    case "🤝":
+      return HeartHandshake;
+    case "📖":
+      return BookOpen;
+    case "✍️":
+      return PenTool;
+    case "📍":
+      return MapPin;
+    case "⚙️":
+      return Settings;
+    case "🌍":
+      return Globe;
+    default:
+      return HelpCircle;
+  }
+}
 
 const Volunteer = () => {
   const [searchParams] = useSearchParams();
@@ -114,7 +161,14 @@ const Volunteer = () => {
                   className="border border-white/10 p-6 hover:border-[rgba(201,168,76,0.3)] transition-colors"
                   style={{ borderLeftWidth: 3, borderLeftColor: accent }}
                 >
-                  <div className="text-3xl mb-3">{benefit.icon}</div>
+                  {(() => {
+                    const BenefitIcon = getVolunteerPremiumIcon(benefit.icon);
+                    return (
+                      <div className="mb-3 text-[rgba(240,232,213,0.85)]">
+                        <BenefitIcon size={28} style={{ color: accent }} />
+                      </div>
+                    );
+                  })()}
                   <h3 className="font-bold text-lg mb-2">{benefit.title}</h3>
                   <p className="text-sm text-[rgba(240,232,213,0.55)] leading-relaxed">{benefit.description}</p>
                 </div>
@@ -144,7 +198,14 @@ const Volunteer = () => {
                     key={role.id}
                     className="border border-[#FF6B35]/25 bg-[#FF6B35]/5 p-6 flex flex-col"
                   >
-                    <div className="text-2xl mb-3">{role.icon}</div>
+                    {(() => {
+                      const RoleIcon = getVolunteerPremiumIcon(role.icon);
+                      return (
+                        <div className="mb-3">
+                          <RoleIcon size={24} style={{ color: "#FF6B35" }} />
+                        </div>
+                      );
+                    })()}
                     <h3 className="font-bold text-xl mb-2">{role.title}</h3>
                     <p className="text-sm text-[rgba(240,232,213,0.55)] leading-relaxed flex-1 mb-4">
                       {role.description}
@@ -185,7 +246,14 @@ const Volunteer = () => {
                   className="border border-white/10 p-5 flex flex-wrap justify-between gap-4 items-center hover:border-white/20"
                 >
                   <div className="flex items-start gap-4">
-                    <span className="text-2xl">{role.icon}</span>
+                    {(() => {
+                      const RoleIcon = getVolunteerPremiumIcon(role.icon);
+                      return (
+                        <span className="p-2 bg-white/5 border border-white/10 rounded-sm shrink-0" style={{ color: accent }}>
+                          <RoleIcon size={20} />
+                        </span>
+                      );
+                    })()}
                     <div>
                       <div className="font-bold">{role.title}</div>
                       <p className="text-sm text-[rgba(240,232,213,0.5)] mt-1 max-w-xl">{role.description}</p>

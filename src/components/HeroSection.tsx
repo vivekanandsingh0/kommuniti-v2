@@ -135,7 +135,7 @@ const HeroSection = () => {
               }}
             >
               <span style={{ width: "24px", height: "1px", background: "#C9A84C" }}></span>
-              Phase 1 · Live now
+              Explore the universe · Active now
             </div>
 
             {/* Heading */}
@@ -224,25 +224,29 @@ const HeroSection = () => {
         <div
           className="grid grid-cols-2 lg:grid-cols-4 border-t border-[rgba(201,168,76,0.1)] overflow-hidden"
         >
-          {pillars.map((pillar, idx) => (
-            <Link
-              key={pillar.title}
-              to={pillar.href}
-              className={`p-3 sm:p-6 no-underline block hover:bg-[rgba(240,232,213,0.03)] transition-colors ${idx !== pillars.length - 1 ? "border-r border-[rgba(201,168,76,0.1)]" : ""}`}
-            >
-              <div className="text-[18px] sm:text-[24px] mb-1 sm:mb-2">{pillar.icon}</div>
-              <div
-                style={{
-                  fontFamily: "'Syne', sans-serif",
-                  fontWeight: 700,
-                  color: pillar.color,
-                  lineHeight: 1.1,
-                  marginBottom: "4px",
-                }}
-                className="text-[12px] sm:text-[16px]"
+          {pillars.map((pillar, idx) => {
+            const PillarIcon = pillar.icon;
+            return (
+              <Link
+                key={pillar.title}
+                to={pillar.href}
+                className={`p-3 sm:p-6 no-underline block hover:bg-[rgba(240,232,213,0.03)] transition-colors ${idx !== pillars.length - 1 ? "border-r border-[rgba(201,168,76,0.1)]" : ""}`}
               >
-                {pillar.title}
-              </div>
+                <div className="mb-2 text-[rgba(240,232,213,0.85)]">
+                  <PillarIcon size={22} style={{ color: pillar.color }} />
+                </div>
+                <div
+                  style={{
+                    fontFamily: "'Syne', sans-serif",
+                    fontWeight: 700,
+                    color: pillar.color,
+                    lineHeight: 1.1,
+                    marginBottom: "4px",
+                  }}
+                  className="text-[12px] sm:text-[16px]"
+                >
+                  {pillar.title}
+                </div>
               <div className="text-[8px] sm:text-[10px] text-[#4CAF50] uppercase tracking-[1.5px] font-bold mb-1">
                 Live
               </div>
@@ -257,7 +261,8 @@ const HeroSection = () => {
                 {pillar.desc}
               </div>
             </Link>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

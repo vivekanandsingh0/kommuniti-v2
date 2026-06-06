@@ -1,6 +1,7 @@
-import { Briefcase, Calendar, MapPin, Megaphone, Pin } from "lucide-react";
+import { Briefcase, Calendar, MapPin, Megaphone, Pin, Coins } from "lucide-react";
 import { Link } from "react-router-dom";
 import { VolunteerDashboard, VolunteerGig } from "@/types/about";
+import { getVolunteerPremiumIcon } from "@/pages/Volunteer";
 
 const locationLabel: Record<string, string> = {
   remote: "Remote",
@@ -42,8 +43,20 @@ const GigCard = ({ gig, mine }: { gig: VolunteerGig; mine?: boolean }) => (
           <Calendar size={11} /> {new Date(gig.due_date).toLocaleDateString()}
         </span>
       )}
-      {gig.ko_coins_reward > 0 && <span>🪙 {gig.ko_coins_reward} KO Coins</span>}
-      {gig.role?.title && <span>{gig.role.icon} {gig.role.title}</span>}
+      {gig.ko_coins_reward > 0 && (
+        <span className="flex items-center gap-1">
+          <Coins size={11} className="text-[#C9A84C]" /> {gig.ko_coins_reward} KO Coins
+        </span>
+      )}
+      {gig.role?.title && (
+        <span className="flex items-center gap-1">
+          {(() => {
+            const RoleIcon = getVolunteerPremiumIcon(gig.role.icon);
+            return <RoleIcon size={11} />;
+          })()}
+          {gig.role.title}
+        </span>
+      )}
     </div>
   </div>
 );
@@ -79,7 +92,12 @@ const VolunteerDashboardSection = ({ dashboard }: VolunteerDashboardSectionProps
           <div className="border border-[#C9A84C]/25 bg-[#C9A84C]/5 p-5">
             <p className="text-[10px] uppercase tracking-[2px] text-[rgba(240,232,213,0.4)] mb-2">Your role</p>
             <div className="flex items-start gap-3">
-              <span className="text-2xl">{role?.icon ?? "🤝"}</span>
+              <span className="text-2xl" style={{ color: "#C9A84C" }}>
+                {(() => {
+                  const RoleIcon = getVolunteerPremiumIcon(role?.icon || "🤝");
+                  return <RoleIcon size={28} />;
+                })()}
+              </span>
               <div>
                 <p className="font-bold text-lg">{role?.title ?? "Volunteer"}</p>
                 {role?.commitment && (

@@ -9,7 +9,7 @@ const DEFAULT_CONFIG = {
   subtitle: "On its way",
   description: "We are building this part of Kommuniti. Check back soon.",
   accentColor: "#C9A84C",
-  icon: "✦",
+  icon: Sparkles,
 };
 
 const ComingSoon = () => {
@@ -55,9 +55,10 @@ const ComingSoon = () => {
             </div>
 
             <div className="flex items-start gap-5 mb-6">
-              <span className="text-5xl sm:text-6xl leading-none" aria-hidden>
-                {config.icon}
-              </span>
+              {(() => {
+                const ConfigIcon = config.icon;
+                return <ConfigIcon size={52} style={{ color: config.accentColor }} />;
+              })()}
               <div>
                 <p
                   className="text-[11px] uppercase tracking-[3px] mb-2"
@@ -98,21 +99,24 @@ const ComingSoon = () => {
                 Explore what&apos;s live
               </p>
               <div className="flex flex-wrap gap-3">
-                {LIVE_LAUNCH_LINKS.map((link) => (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    className="group inline-flex items-center gap-2 border border-white/10 px-4 py-3 text-[11px] uppercase tracking-[2px] font-bold hover:border-white/25 transition-all"
-                    style={{ color: link.color }}
-                  >
-                    <span>{link.icon}</span>
-                    {link.label}
-                    <ArrowRight
-                      size={14}
-                      className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
-                    />
-                  </Link>
-                ))}
+                {LIVE_LAUNCH_LINKS.map((link) => {
+                  const LinkIcon = link.icon;
+                  return (
+                    <Link
+                      key={link.href}
+                      to={link.href}
+                      className="group inline-flex items-center gap-2 border border-white/10 px-4 py-3 text-[11px] uppercase tracking-[2px] font-bold hover:border-white/25 transition-all"
+                      style={{ color: link.color }}
+                    >
+                      <LinkIcon size={14} style={{ color: link.color }} />
+                      {link.label}
+                      <ArrowRight
+                        size={14}
+                        className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+                      />
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </div>
