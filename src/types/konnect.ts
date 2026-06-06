@@ -33,6 +33,7 @@ export interface KonnectEvent {
   title: string;
   icon: string;
   tile_color: string;
+  cover_image_url?: string | null;
   registration_url: string | null;
   ko_coins_earned: number | null;
   long_description?: string | null;
@@ -174,6 +175,7 @@ export function emptyEvent(sortOrder: number): Omit<KonnectEvent, "id" | "create
     title: "",
     icon: "📅",
     tile_color: KONNECT_TILE_PRESETS[0],
+    cover_image_url: null,
     registration_url: null,
     ko_coins_earned: null,
     long_description: null,

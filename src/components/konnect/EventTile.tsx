@@ -50,7 +50,10 @@ export function EventTile({ session, compact }: { session: KonnectEvent; compact
         whileTap={{ scale: 0.98 }}
         className="konnect-event-tile text-left w-full h-full"
         style={{
-          background: session.tile_color,
+          background: session.cover_image_url
+            ? `linear-gradient(to bottom, ${session.tile_color}B3 0%, #0B1828FA 100%), url(${session.cover_image_url}) center/cover no-repeat`
+            : session.tile_color,
+          borderLeft: session.cover_image_url ? `4px solid ${session.tile_color}` : undefined,
           color: "#fff",
           minHeight: compact ? "120px" : "140px",
           padding: "16px",

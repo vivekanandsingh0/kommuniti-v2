@@ -22,6 +22,7 @@ function todayStart() {
 export function normalizeEvent(row: KonnectEvent): KonnectEvent {
   return {
     ...row,
+    cover_image_url: row.cover_image_url || null,
     post_event_images: parsePostEventImages(row.post_event_images),
     rsvp_enabled: row.rsvp_enabled !== false,
   };
@@ -178,4 +179,29 @@ export async function fetchKonnectRsvpCount(eventId?: string | null, isFeatured?
   else return 0;
   const { count } = await q;
   return count ?? 0;
+}
+
+export async function uploadEventCoverImage(file: File, eventId: string) {
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error("File size must be less than 5MB");
+  }
+
+  const fileExt = file.name.split(".").pop();
+  const fileName = `cover-${Date.now()}.${fileExt}`;
+  const filePath = `${eventId}/${fileName}`;
+
+  const { error } = await supabase.storage
+    .from("event-covers")
+    .upload(filePath, file, {
+      cacheControl: "3600",
+      upsert: true,
+    });
+
+  if (error) throw error;
+
+  const { data: publicUrlData } = supabase.storage
+    .from("event-covers")
+    .getPublicUrl(filePath);
+
+  return publicUrlData.publicUrl;
 }

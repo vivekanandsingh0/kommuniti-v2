@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { AdminKonnectRsvpPanel } from "@/components/admin/AdminKonnectRsvpPanel";
 import { adminDb } from "@/lib/admin-db";
-import { normalizeEvent } from "@/lib/konnect";
+import { normalizeEvent, uploadEventCoverImage } from "@/lib/konnect";
 import {
   DEFAULT_FEATURED,
   DEFAULT_PAGE_SETTINGS,
@@ -129,6 +129,7 @@ const AdminKonnect = () => {
         title: editingEvent.title,
         icon: editingEvent.icon ?? "📅",
         tile_color: editingEvent.tile_color ?? KONNECT_TILE_PRESETS[0],
+        cover_image_url: editingEvent.cover_image_url || null,
         registration_url: editingEvent.registration_url || null,
         ko_coins_earned: editingEvent.ko_coins_earned ?? null,
         long_description: editingEvent.long_description || null,
@@ -564,6 +565,65 @@ const AdminKonnect = () => {
                       </div>
 
                       <div>
+                        <label className={labelClass}>Event Cover Image (Recommended: 800 × 400 px, max 5MB)</label>
+                        <div className="flex items-center gap-4 bg-[rgba(240,232,213,0.03)] border border-[rgba(201,168,76,0.1)] p-4 mb-4 rounded-sm">
+                          {editingEvent.cover_image_url ? (
+                            <img
+                              src={editingEvent.cover_image_url}
+                              alt="Cover preview"
+                              className="w-24 h-12 border border-white/20 shrink-0 object-contain bg-[#0b1828]"
+                            />
+                          ) : (
+                            <div
+                              className="w-24 h-12 border border-white/10 shrink-0 flex items-center justify-center text-[9px] text-[rgba(240,232,213,0.3)] uppercase tracking-wider rounded-sm text-center"
+                              style={{ background: editingEvent.tile_color || KONNECT_TILE_PRESETS[0] }}
+                            >
+                              No Cover
+                            </div>
+                          )}
+                          <div className="space-y-1.5 flex-1">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                try {
+                                  toast.loading("Uploading event cover...", { id: "upload-event-cover" });
+                                  const targetEventId = editingEvent.id || `new-event-${Date.now()}`;
+                                  const url = await uploadEventCoverImage(file, targetEventId);
+                                  setEditingEvent({ ...editingEvent, cover_image_url: url });
+                                  toast.success("Event cover uploaded successfully!", { id: "upload-event-cover" });
+                                } catch (err: any) {
+                                  toast.error(err.message || "Upload failed", { id: "upload-event-cover" });
+                                }
+                              }}
+                              className="hidden"
+                              id="event-cover-upload"
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => document.getElementById("event-cover-upload")?.click()}
+                                className="px-3 py-1.5 border border-[#C9A84C] text-[#C9A84C] text-[9px] uppercase tracking-[1.5px] font-bold bg-transparent hover:bg-[#C9A84C]/10 transition-all"
+                              >
+                                {editingEvent.cover_image_url ? "Change" : "Upload"}
+                              </button>
+                              {editingEvent.cover_image_url && (
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingEvent({ ...editingEvent, cover_image_url: null })}
+                                  className="px-3 py-1.5 border border-red-500/50 text-red-400 text-[9px] uppercase tracking-[1.5px] font-bold bg-transparent hover:bg-red-500/10 transition-all"
+                                >
+                                  Remove
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
                         <label className={labelClass}>Tile color</label>
                         <div className="flex flex-wrap gap-2 mb-2">
                           {KONNECT_TILE_PRESETS.map((c) => (
@@ -713,8 +773,13 @@ const AdminKonnect = () => {
                       <div>
                         <label className={labelClass}>Preview</label>
                         <div
-                          className="relative p-4 min-h-[120px] flex flex-col justify-between text-white"
-                          style={{ background: editingEvent.tile_color ?? "#4DC9C9" }}
+                          className="relative p-4 min-h-[120px] flex flex-col justify-between text-white overflow-hidden transition-all"
+                          style={{
+                            background: editingEvent.cover_image_url
+                              ? `linear-gradient(to bottom, ${(editingEvent.tile_color ?? "#4DC9C9")}B3 0%, #0B1828FA 100%), url(${editingEvent.cover_image_url}) center/cover no-repeat`
+                              : editingEvent.tile_color ?? "#4DC9C9",
+                            borderLeft: editingEvent.cover_image_url ? `4px solid ${editingEvent.tile_color ?? "#4DC9C9"}` : undefined,
+                          }}
                         >
                           <span className="text-[10px] tracking-[3px] uppercase opacity-80">
                             {editingEvent.month_label}
