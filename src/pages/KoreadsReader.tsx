@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, BookOpen, Coins, Highlighter, MessageSquare, Send } from "lucide-react";
+import { ArrowLeft, BookOpen, Coins, Highlighter, Maximize2, MessageSquare, Minimize2, Send } from "lucide-react";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/context/AuthContext";
@@ -25,6 +25,23 @@ const KoreadsReader = () => {
   const [selection, setSelection] = useState<SelectionState | null>(null);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsFullScreen(false);
+      }
+    };
+    if (isFullScreen) {
+      window.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [isFullScreen]);
 
   useEffect(() => {
     if (!bookId || !chapterId) return;
@@ -119,25 +136,52 @@ const KoreadsReader = () => {
           </button>
 
           <div className="grid lg:grid-cols-[0.72fr_0.28fr] gap-10 items-start">
-            <article className="bg-[#F0E8D5] text-[#182334] p-6 sm:p-10 lg:p-14 shadow-2xl">
-              <div className="text-[10px] uppercase tracking-[3px] text-[#7A6B45] mb-4">
-                {book.title} · Chapter {chapter.chapter_number}
-              </div>
-              <h1
-                className="text-3xl md:text-5xl font-extrabold leading-tight mb-10 text-[#0B1828]"
-                style={{ fontFamily: "'Syne', sans-serif" }}
-              >
-                {chapter.title}
-              </h1>
+            <article
+              className={`bg-[#F0E8D5] text-[#182334] transition-all shadow-2xl ${
+                isFullScreen
+                  ? "fixed inset-0 z-50 overflow-y-auto p-8 sm:p-16 lg:p-24 flex flex-col items-center"
+                  : "relative p-6 sm:p-10 lg:p-14"
+              }`}
+            >
+              <div className={isFullScreen ? "max-w-[760px] w-full relative pb-16 animate-in fade-in zoom-in-95 duration-200" : "relative"}>
+                <button
+                  type="button"
+                  onClick={() => setIsFullScreen(!isFullScreen)}
+                  className="absolute top-0 right-0 text-[#7A6B45]/60 hover:text-[#0B1828] p-2 transition-colors rounded-full hover:bg-[#0b1828]/5 flex items-center gap-1.5 text-xs font-semibold"
+                  title={isFullScreen ? "Exit Focus Mode" : "Focus Mode"}
+                >
+                  {isFullScreen ? (
+                    <>
+                      <Minimize2 size={16} />
+                      <span className="hidden sm:inline opacity-70">Exit Focus Mode (Esc)</span>
+                    </>
+                  ) : (
+                    <>
+                      <Maximize2 size={16} />
+                      <span className="hidden sm:inline opacity-70">Focus Mode</span>
+                    </>
+                  )}
+                </button>
 
-              <div
-                ref={contentRef}
-                onMouseUp={inlineOpen ? captureSelection : undefined}
-                onTouchEnd={inlineOpen ? captureSelection : undefined}
-                className={`prose prose-lg max-w-none leading-8 whitespace-pre-wrap ${inlineOpen ? "select-text" : "select-none"}`}
-                style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px" }}
-              >
-                {chapter.content}
+                <div className="text-[10px] uppercase tracking-[3px] text-[#7A6B45] mb-4 pr-32">
+                  {book.title} · Chapter {chapter.chapter_number}
+                </div>
+                <h1
+                  className="text-3xl md:text-5xl font-extrabold leading-tight mb-10 text-[#0B1828] pr-32"
+                  style={{ fontFamily: "'Syne', sans-serif" }}
+                >
+                  {chapter.title}
+                </h1>
+
+                <div
+                  ref={contentRef}
+                  onMouseUp={inlineOpen ? captureSelection : undefined}
+                  onTouchEnd={inlineOpen ? captureSelection : undefined}
+                  className={`prose prose-lg max-w-none leading-9 whitespace-pre-wrap ${inlineOpen ? "select-text" : "select-none"}`}
+                  style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "22px" }}
+                >
+                  {chapter.content}
+                </div>
               </div>
             </article>
 

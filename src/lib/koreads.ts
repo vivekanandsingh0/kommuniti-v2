@@ -605,3 +605,28 @@ export async function updateTaskSubmissionResponse(payload: {
 
   return { error: null };
 }
+
+export async function uploadBookCoverImage(file: File, bookId: string) {
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error("File size must be less than 5MB");
+  }
+
+  const fileExt = file.name.split(".").pop();
+  const fileName = `cover-${Date.now()}.${fileExt}`;
+  const filePath = `${bookId}/${fileName}`;
+
+  const { error } = await supabase.storage
+    .from("book-covers")
+    .upload(filePath, file, {
+      cacheControl: "3600",
+      upsert: true,
+    });
+
+  if (error) throw error;
+
+  const { data: publicUrlData } = supabase.storage
+    .from("book-covers")
+    .getPublicUrl(filePath);
+
+  return publicUrlData.publicUrl;
+}

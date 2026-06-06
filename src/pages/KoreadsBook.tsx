@@ -19,6 +19,14 @@ import {
   TASK_CATEGORY_LABELS,
 } from "@/types/koreads";
 
+const getTitleFontSize = (title: string) => {
+  const len = title.length;
+  if (len > 60) return "text-sm sm:text-base md:text-lg";
+  if (len > 40) return "text-base sm:text-lg md:text-xl";
+  if (len > 25) return "text-lg sm:text-xl md:text-2xl";
+  return "text-2xl sm:text-3xl md:text-4xl";
+};
+
 const KoreadsBook = () => {
   const { bookId } = useParams();
   const navigate = useNavigate();
@@ -120,25 +128,44 @@ const KoreadsBook = () => {
           </button>
 
           <div className="grid lg:grid-cols-[0.42fr_0.58fr] gap-12 items-start">
-            <div
-              className="min-h-[480px] border border-white/10 shadow-2xl relative overflow-hidden p-8 flex flex-col justify-end"
-              style={{
-                background: `linear-gradient(145deg, ${book.cover_color}, #060D16 78%)`,
-              }}
-            >
-              <div className="absolute inset-y-0 left-10 w-px bg-white/15" />
-              <div className="relative">
-                <div className="text-[10px] uppercase tracking-[3px] text-white/50 mb-5">
-                  {book.genre || "KO Reads Draft"} · Unreleased
+            {book.cover_image_url ? (
+              <div className="w-full max-w-[360px] mx-auto lg:mx-0 border border-white/10 shadow-2xl relative overflow-hidden flex flex-col justify-end">
+                <img
+                  src={book.cover_image_url}
+                  alt={book.title}
+                  className="w-full h-auto block"
+                />
+                {/* Status Banner at the bottom of the cover */}
+                <div className="absolute bottom-0 left-0 right-0 bg-black/60 py-3.5 px-4 backdrop-blur-[4px] border-t border-white/10 text-center z-10">
+                  <div className="text-[9px] uppercase tracking-[2.5px] text-white/90 font-bold">
+                    {book.genre || "KO Reads Draft"} · Unreleased
+                  </div>
                 </div>
-                <h1
-                  className="text-4xl md:text-5xl font-extrabold leading-none"
-                  style={{ fontFamily: "'Syne', sans-serif" }}
-                >
-                  {book.title}
-                </h1>
               </div>
-            </div>
+            ) : (
+              <div
+                className="w-full max-w-[360px] aspect-[2/3] mx-auto lg:mx-0 border border-white/10 shadow-2xl relative overflow-hidden flex flex-col justify-end"
+                style={{
+                  background: `linear-gradient(145deg, ${book.cover_color}, #060D16 78%)`,
+                }}
+              >
+                <div className="absolute inset-y-0 left-10 w-px bg-white/15" />
+                <div className="absolute inset-0 p-8 flex flex-col justify-center pb-20">
+                  <h1
+                    className={`${getTitleFontSize(book.title)} font-extrabold leading-tight text-white/90`}
+                    style={{ fontFamily: "'Syne', sans-serif" }}
+                  >
+                    {book.title}
+                  </h1>
+                </div>
+                {/* Status Banner at the bottom of the cover */}
+                <div className="w-full bg-black/60 py-3.5 px-4 backdrop-blur-[4px] border-t border-white/10 text-center z-10">
+                  <div className="text-[9px] uppercase tracking-[2.5px] text-white/90 font-bold">
+                    {book.genre || "KO Reads Draft"} · Unreleased
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div>
               <div className="text-[10px] uppercase tracking-[3px] text-[#C77DFF] mb-4">

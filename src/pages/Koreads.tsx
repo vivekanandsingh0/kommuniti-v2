@@ -26,17 +26,25 @@ const BookCard = ({ book, compact = false }: { book: KoreadsBook; compact?: bool
     }`}
   >
     <div className="flex gap-4">
-      <div
-        className={`${compact ? "w-14 h-20" : "w-20 h-28"} shrink-0 border border-white/10 shadow-xl relative overflow-hidden`}
-        style={{
-          background: `linear-gradient(145deg, ${book.cover_color}, #0B1828 82%)`,
-        }}
-      >
-        <div className="absolute inset-y-0 left-3 w-px bg-white/15" />
-        <div className="absolute bottom-3 left-3 right-3 text-[7px] uppercase tracking-[1.5px] text-white/60">
-          Draft
+      {book.cover_image_url ? (
+        <img
+          src={book.cover_image_url}
+          alt={book.title}
+          className={`${compact ? "w-14" : "w-20"} h-auto shrink-0 border border-white/10 shadow-xl`}
+        />
+      ) : (
+        <div
+          className={`${compact ? "w-14" : "w-20"} aspect-[2/3] shrink-0 border border-white/10 shadow-xl relative overflow-hidden flex items-center justify-center`}
+          style={{
+            background: `linear-gradient(145deg, ${book.cover_color}, #0B1828 82%)`,
+          }}
+        >
+          <div className="absolute inset-y-0 left-3 w-px bg-white/15" />
+          <div className="absolute bottom-3 left-3 right-3 text-[7px] uppercase tracking-[1.5px] text-white/60">
+            Draft
+          </div>
         </div>
-      </div>
+      )}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 mb-2">
           <span className="text-[9px] uppercase tracking-[2px] text-[#C9A84C]">

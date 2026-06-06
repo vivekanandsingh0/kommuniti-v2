@@ -166,7 +166,18 @@ const AuthorDashboard = () => {
                   className="block bg-[rgba(240,232,213,0.025)] border border-[rgba(201,168,76,0.1)] hover:border-[#C77DFF]/50 p-4"
                 >
                   <div className="flex gap-4">
-                    <div className="w-3 shrink-0" style={{ background: book.cover_color }} />
+                    {book.cover_image_url ? (
+                      <img 
+                        src={book.cover_image_url} 
+                        alt={book.title} 
+                        className="w-8 h-auto shrink-0 border border-white/10"
+                      />
+                    ) : (
+                      <div 
+                        className="w-8 h-12 shrink-0 border border-white/10" 
+                        style={{ background: book.cover_color }} 
+                      />
+                    )}
                     <div>
                       <div className="font-bold">{book.title}</div>
                       <div className="text-[10px] uppercase tracking-[2px] text-[rgba(240,232,213,0.35)] mt-1">

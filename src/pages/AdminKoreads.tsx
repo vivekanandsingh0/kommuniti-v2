@@ -3,7 +3,7 @@ import { BookOpen, Coins, Plus, RefreshCcw, Save, Trash2, Users } from "lucide-r
 import { toast } from "sonner";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { adminDb } from "@/lib/admin-db";
-import { updateContributionResponse, updateTaskSubmissionResponse } from "@/lib/koreads";
+import { updateContributionResponse, updateTaskSubmissionResponse, uploadBookCoverImage } from "@/lib/koreads";
 import {
   EMPTY_CHAPTER_CONTENT,
   KOREADS_COVER_COLORS,
@@ -47,6 +47,7 @@ const AdminKoreads = () => {
     title: "",
     author_id: "",
     cover_color: KOREADS_COVER_COLORS[0],
+    cover_image_url: null,
     status: "draft",
     is_featured: false,
     is_spotlight: false,
@@ -175,6 +176,7 @@ const AdminKoreads = () => {
       tagline: bookForm.tagline || null,
       genre: bookForm.genre || null,
       cover_color: bookForm.cover_color || KOREADS_COVER_COLORS[0],
+      cover_image_url: bookForm.cover_image_url || null,
       status: bookForm.status || "draft",
       is_featured: !!bookForm.is_featured,
       is_spotlight: !!bookForm.is_spotlight,
@@ -199,6 +201,7 @@ const AdminKoreads = () => {
         title: "",
         author_id: "",
         cover_color: KOREADS_COVER_COLORS[0],
+        cover_image_url: null,
         status: "draft",
         is_featured: false,
         is_spotlight: false,
@@ -490,6 +493,63 @@ const AdminKoreads = () => {
                       </select>
                     </div>
                   </div>
+            <div>
+              <label className={labelClass}>Book Cover Image (Recommended: 600 × 900 px, max 5MB)</label>
+              <div className="flex items-center gap-4 bg-[rgba(240,232,213,0.04)] border border-[rgba(201,168,76,0.12)] p-4 mb-4">
+                {bookForm.cover_image_url ? (
+                  <div 
+                    className="w-16 h-24 border border-white/20 shrink-0" 
+                    style={{ background: `#0b1828 url(${bookForm.cover_image_url}) center/contain no-repeat` }}
+                  />
+                ) : (
+                  <div 
+                    className="w-16 h-24 border border-white/10 shrink-0 flex items-center justify-center text-[10px] text-[rgba(240,232,213,0.3)] uppercase tracking-wider"
+                    style={{ background: `linear-gradient(145deg, ${bookForm.cover_color || '#C77DFF'}, #060D16 78%)` }}
+                  >
+                    No Image
+                  </div>
+                )}
+                <div className="space-y-2 flex-1">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        toast.loading("Uploading cover image...", { id: "upload-cover" });
+                        const targetBookId = bookForm.id || `new-book-${Date.now()}`;
+                        const url = await uploadBookCoverImage(file, targetBookId);
+                        setBookForm({ ...bookForm, cover_image_url: url });
+                        toast.success("Cover image uploaded successfully!", { id: "upload-cover" });
+                      } catch (err: any) {
+                        toast.error(err.message || "Upload failed", { id: "upload-cover" });
+                      }
+                    }}
+                    className="hidden"
+                    id="admin-cover-upload"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById("admin-cover-upload")?.click()}
+                      className="px-3 py-1.5 border border-[#C77DFF] text-[#C77DFF] text-[9px] uppercase tracking-[1.5px] font-bold bg-transparent"
+                    >
+                      {bookForm.cover_image_url ? "Change Image" : "Upload Image"}
+                    </button>
+                    {bookForm.cover_image_url && (
+                      <button
+                        type="button"
+                        onClick={() => setBookForm({ ...bookForm, cover_image_url: null })}
+                        className="px-3 py-1.5 border border-red-500/50 text-red-400 text-[9px] uppercase tracking-[1.5px] font-bold bg-transparent"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
                   <div>
                     <label className={labelClass}>Cover color</label>
                     <div className="flex gap-2 flex-wrap mb-2">
@@ -541,7 +601,18 @@ const AdminKoreads = () => {
                   {books.map((book) => (
                     <button key={book.id} onClick={() => setBookForm(book)} className="w-full text-left bg-[rgba(240,232,213,0.025)] border border-white/10 hover:border-[#C77DFF]/50 p-4">
                       <div className="flex gap-3">
-                        <div className="w-3 shrink-0" style={{ background: book.cover_color }} />
+                        {book.cover_image_url ? (
+                          <img 
+                            src={book.cover_image_url} 
+                            alt={book.title} 
+                            className="w-8 h-auto shrink-0 border border-white/10"
+                          />
+                        ) : (
+                          <div 
+                            className="w-8 h-12 shrink-0 border border-white/10" 
+                            style={{ background: book.cover_color }} 
+                          />
+                        )}
                         <div>
                           <div className="font-bold">{book.title}</div>
                           <div className="text-[10px] uppercase tracking-[2px] text-[rgba(240,232,213,0.35)]">

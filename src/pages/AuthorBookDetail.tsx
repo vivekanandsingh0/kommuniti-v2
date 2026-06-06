@@ -9,6 +9,7 @@ import {
   fetchAuthorForUser,
   updateContributionResponse,
   updateTaskSubmissionResponse,
+  uploadBookCoverImage,
 } from "@/lib/koreads";
 import {
   closePollAdmin,
@@ -168,6 +169,7 @@ const AuthorBookDetail = () => {
         tagline: book.tagline,
         genre: book.genre,
         cover_color: book.cover_color,
+        cover_image_url: book.cover_image_url || null,
         visibility: book.visibility || "public",
         tags: book.tags || [],
         status: book.status,
@@ -427,6 +429,62 @@ const AuthorBookDetail = () => {
                   })
                 }
               />
+            </div>
+            <div>
+              <label className={labelClass}>Book Cover Image (Recommended: 600 × 900 px, max 5MB)</label>
+              <div className="flex items-center gap-4 bg-[rgba(240,232,213,0.04)] border border-white/10 p-4 mb-4">
+                {book.cover_image_url ? (
+                  <div 
+                    className="w-16 h-24 border border-white/20 shrink-0" 
+                    style={{ background: `#0b1828 url(${book.cover_image_url}) center/contain no-repeat` }}
+                  />
+                ) : (
+                  <div 
+                    className="w-16 h-24 border border-white/10 shrink-0 flex items-center justify-center text-[10px] text-[rgba(240,232,213,0.3)] uppercase tracking-wider"
+                    style={{ background: `linear-gradient(145deg, ${book.cover_color}, #060D16 78%)` }}
+                  >
+                    No Image
+                  </div>
+                )}
+                <div className="space-y-2 flex-1">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        toast.loading("Uploading cover image...", { id: "upload-cover" });
+                        const url = await uploadBookCoverImage(file, book.id);
+                        setBook({ ...book, cover_image_url: url });
+                        toast.success("Cover image uploaded successfully!", { id: "upload-cover" });
+                      } catch (err: any) {
+                        toast.error(err.message || "Upload failed", { id: "upload-cover" });
+                      }
+                    }}
+                    className="hidden"
+                    id="author-cover-upload"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById("author-cover-upload")?.click()}
+                      className="px-3 py-1.5 border border-[#C77DFF] text-[#C77DFF] text-[9px] uppercase tracking-[1.5px] font-bold"
+                    >
+                      {book.cover_image_url ? "Change Image" : "Upload Image"}
+                    </button>
+                    {book.cover_image_url && (
+                      <button
+                        type="button"
+                        onClick={() => setBook({ ...book, cover_image_url: null })}
+                        className="px-3 py-1.5 border border-red-500/50 text-red-400 text-[9px] uppercase tracking-[1.5px] font-bold"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="flex flex-wrap gap-2">
               {KOREADS_COVER_COLORS.map((color) => (
