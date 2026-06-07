@@ -139,6 +139,9 @@ const AdminKonnect = () => {
         post_event_message: editingEvent.post_event_message || null,
         post_event_images: editingEvent.post_event_images ?? [],
         rsvp_enabled: editingEvent.rsvp_enabled !== false,
+        brochure_url: editingEvent.brochure_url || null,
+        wa_group_link: editingEvent.wa_group_link || null,
+        post_rsvp_message: editingEvent.post_rsvp_message || null,
         updated_at: new Date().toISOString(),
       };
 
@@ -389,6 +392,35 @@ const AdminKonnect = () => {
                       setFeatured({ ...featured, post_event_images: imagesFromTextarea(e.target.value) })
                     }
                     placeholder="https://…"
+                  />
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelClass}>Brochure / Materials Download URL</label>
+                    <input
+                      className={inputClass}
+                      value={featured.brochure_url ?? ""}
+                      onChange={(e) => setFeatured({ ...featured, brochure_url: e.target.value || null })}
+                      placeholder="https://example.com/brochure.pdf"
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>WhatsApp Group Link</label>
+                    <input
+                      className={inputClass}
+                      value={featured.wa_group_link ?? ""}
+                      onChange={(e) => setFeatured({ ...featured, wa_group_link: e.target.value || null })}
+                      placeholder="https://chat.whatsapp.com/..."
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>Post-RSVP Message (Confirmation)</label>
+                  <textarea
+                    className={`${inputClass} min-h-[80px]`}
+                    value={featured.post_rsvp_message ?? ""}
+                    onChange={(e) => setFeatured({ ...featured, post_rsvp_message: e.target.value || null })}
+                    placeholder="E.g., Welcome to the workshop! Download the brochure above and join the WhatsApp group for updates."
                   />
                 </div>
                 <button
@@ -721,6 +753,43 @@ const AdminKonnect = () => {
                             })
                           }
                           placeholder="https://…"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className={labelClass}>Brochure / Materials Download URL</label>
+                          <input
+                            className={inputClass}
+                            value={editingEvent.brochure_url ?? ""}
+                            onChange={(e) =>
+                              setEditingEvent({ ...editingEvent, brochure_url: e.target.value || null })
+                            }
+                            placeholder="https://example.com/brochure.pdf"
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>WhatsApp Group Link</label>
+                          <input
+                            className={inputClass}
+                            value={editingEvent.wa_group_link ?? ""}
+                            onChange={(e) =>
+                              setEditingEvent({ ...editingEvent, wa_group_link: e.target.value || null })
+                            }
+                            placeholder="https://chat.whatsapp.com/..."
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className={labelClass}>Post-RSVP Message (Confirmation)</label>
+                        <textarea
+                          className={`${inputClass} min-h-[80px]`}
+                          value={editingEvent.post_rsvp_message ?? ""}
+                          onChange={(e) =>
+                            setEditingEvent({ ...editingEvent, post_rsvp_message: e.target.value || null })
+                          }
+                          placeholder="E.g., Welcome to the workshop! Download the brochure above and join the WhatsApp group for updates."
                         />
                       </div>
 

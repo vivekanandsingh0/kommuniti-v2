@@ -43,6 +43,9 @@ export interface KonnectEvent {
   post_event_message?: string | null;
   post_event_images?: string[];
   rsvp_enabled?: boolean;
+  brochure_url?: string | null;
+  wa_group_link?: string | null;
+  post_rsvp_message?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -69,6 +72,9 @@ export interface KonnectFeatured {
   post_event_message?: string | null;
   post_event_images?: string[];
   rsvp_enabled?: boolean;
+  brochure_url?: string | null;
+  wa_group_link?: string | null;
+  post_rsvp_message?: string | null;
   updated_at?: string;
 }
 
@@ -153,6 +159,9 @@ export const DEFAULT_FEATURED: KonnectFeatured = {
   icon_bg_end: "#1A0800",
   rsvp_enabled: true,
   post_event_images: [],
+  brochure_url: null,
+  wa_group_link: null,
+  post_rsvp_message: null,
 };
 
 export function labelsFromDate(isoDate: string): { month_label: string; day_label: string } {
@@ -185,6 +194,9 @@ export function emptyEvent(sortOrder: number): Omit<KonnectEvent, "id" | "create
     post_event_message: null,
     post_event_images: [],
     rsvp_enabled: true,
+    brochure_url: null,
+    wa_group_link: null,
+    post_rsvp_message: null,
   };
 }
 

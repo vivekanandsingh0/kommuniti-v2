@@ -10,6 +10,9 @@ type KonnectRsvpFormProps = {
   accent?: string;
   submitLabel?: string;
   onSuccess?: () => void;
+  brochureUrl?: string | null;
+  waGroupLink?: string | null;
+  postRsvpMessage?: string | null;
 };
 
 const inputClass =
@@ -21,6 +24,9 @@ const KonnectRsvpForm = ({
   accent = "#FF6B35",
   submitLabel = "Submit RSVP",
   onSuccess,
+  brochureUrl,
+  waGroupLink,
+  postRsvpMessage,
 }: KonnectRsvpFormProps) => {
   const { user } = useAuth();
   const [fields, setFields] = useState<KonnectRsvpField[]>([]);
@@ -86,9 +92,38 @@ const KonnectRsvpForm = ({
 
   if (submitted) {
     return (
-      <div className="border border-[rgba(201,168,76,0.25)] bg-[rgba(201,168,76,0.06)] p-6 text-center">
-        <p className="text-lg font-bold text-[#C9A84C] mb-2">You're on the list</p>
-        <p className="text-sm text-[rgba(240,232,213,0.55)]">Thank you for registering. Check your email for updates.</p>
+      <div className="border border-[rgba(201,168,76,0.25)] bg-[rgba(201,168,76,0.06)] p-6 rounded-sm text-center space-y-4">
+        <div>
+          <p className="text-lg font-bold text-[#C9A84C] mb-1">You're registered!</p>
+          <p className="text-sm text-[rgba(240,232,213,0.7)] leading-relaxed">
+            {postRsvpMessage || "Thank you for registering. Check your email for updates."}
+          </p>
+        </div>
+
+        {(brochureUrl || waGroupLink) && (
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+            {brochureUrl && (
+              <a
+                href={brochureUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-[#C9A84C] text-[#C9A84C] text-[10px] uppercase tracking-widest font-bold hover:bg-[#C9A84C]/10 transition-all"
+              >
+                📥 Download Brochure
+              </a>
+            )}
+            {waGroupLink && (
+              <a
+                href={waGroupLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#25D366] text-[#0B1828] text-[10px] uppercase tracking-widest font-bold hover:opacity-90 transition-all"
+              >
+                💬 Join WhatsApp Group
+              </a>
+            )}
+          </div>
+        )}
       </div>
     );
   }

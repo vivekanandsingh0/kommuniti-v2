@@ -84,6 +84,9 @@ type RsvpSectionProps = {
   accent: string;
   sectionLabel: string;
   submitLabel: string;
+  brochureUrl?: string | null;
+  waGroupLink?: string | null;
+  postRsvpMessage?: string | null;
 };
 
 export function RsvpSection({
@@ -94,6 +97,9 @@ export function RsvpSection({
   accent,
   sectionLabel,
   submitLabel,
+  brochureUrl,
+  waGroupLink,
+  postRsvpMessage,
 }: RsvpSectionProps) {
   if (isPast) {
     return (
@@ -110,7 +116,15 @@ export function RsvpSection({
       <p className="text-[10px] uppercase tracking-[2px] text-[rgba(240,232,213,0.4)] mb-6 font-['Rajdhani',sans-serif]">
         {sectionLabel}
       </p>
-      <KonnectRsvpForm scope={scope} eventId={eventId} accent={accent} submitLabel={submitLabel} />
+      <KonnectRsvpForm
+        scope={scope}
+        eventId={eventId}
+        accent={accent}
+        submitLabel={submitLabel}
+        brochureUrl={brochureUrl}
+        waGroupLink={waGroupLink}
+        postRsvpMessage={postRsvpMessage}
+      />
     </section>
   );
 }

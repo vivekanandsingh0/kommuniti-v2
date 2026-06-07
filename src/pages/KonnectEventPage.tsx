@@ -67,8 +67,14 @@ const KonnectEventPage = () => {
 
       <main className="pt-[72px]">
         <div
-          className="relative px-6 py-12 sm:px-10 overflow-hidden"
-          style={{ background: event.tile_color, minHeight: "220px" }}
+          className="relative px-6 py-12 sm:px-10 overflow-hidden transition-all"
+          style={{
+            background: event.cover_image_url
+              ? `linear-gradient(to bottom, ${(event.tile_color ?? "#4DC9C9")}B3 0%, #0B1828FA 100%), url(${event.cover_image_url}) center/cover no-repeat`
+              : event.tile_color ?? "#4DC9C9",
+            minHeight: "220px",
+            borderLeft: event.cover_image_url ? `4px solid ${event.tile_color ?? "#4DC9C9"}` : undefined,
+          }}
         >
           <Link
             to="/konnect"
@@ -125,6 +131,9 @@ const KonnectEventPage = () => {
             accent={accent}
             sectionLabel={settings.rsvp_section_label || "RSVP"}
             submitLabel="Confirm RSVP"
+            brochureUrl={event.brochure_url}
+            waGroupLink={event.wa_group_link}
+            postRsvpMessage={event.post_rsvp_message}
           />
 
           {(past || event.post_event_message || (event.post_event_images?.length ?? 0) > 0) && (

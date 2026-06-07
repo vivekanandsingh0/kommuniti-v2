@@ -102,6 +102,9 @@ const KonnectFeaturedPage = () => {
             accent={accent}
             sectionLabel={settings.rsvp_section_label || "RSVP"}
             submitLabel={featured.button_label || "Confirm RSVP"}
+            brochureUrl={featured.brochure_url}
+            waGroupLink={featured.wa_group_link}
+            postRsvpMessage={featured.post_rsvp_message}
           />
 
           <PostEventRecap
