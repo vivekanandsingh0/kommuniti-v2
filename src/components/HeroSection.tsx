@@ -220,7 +220,8 @@ const HeroSection = () => {
           </motion.div>
         </div>
 
-        {/* Phase 1 live products */}
+        {/* Phase 1 live products (hidden for now) */}
+        {/*
         <div
           className="grid grid-cols-2 lg:grid-cols-4 border-t border-[rgba(201,168,76,0.1)] overflow-hidden"
         >
@@ -264,6 +265,13 @@ const HeroSection = () => {
             );
           })}
         </div>
+        */}
+      </div>
+
+      <div className="absolute bottom-0 left-0 right-0 overflow-hidden pointer-events-none z-0">
+        <p className="font-pixel text-[60px] sm:text-[100px] md:text-[140px] text-foreground/[0.02] leading-none whitespace-nowrap text-center select-none">
+          KOMMUNITI
+        </p>
       </div>
     </section>
   );

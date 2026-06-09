@@ -29,6 +29,8 @@ const FadeIn = ({
 };
 
 const LiveLaunchSection = () => {
+  const entryPoints = LIVE_LAUNCH_LINKS.filter((item) => item.label !== "About");
+
   return (
     <section id="live" className="py-16 lg:py-24 bg-[#0B1828] border-b border-[rgba(201,168,76,0.12)]">
       <div className="container mx-auto px-6 lg:px-12">
@@ -43,46 +45,55 @@ const LiveLaunchSection = () => {
                 className="text-3xl sm:text-4xl font-extrabold text-[#F0E8D5]"
                 style={{ fontFamily: "'Syne', sans-serif" }}
               >
-                Start here
+                Pick your entry point
               </h2>
               <p className="text-[rgba(240,232,213,0.5)] mt-3 max-w-xl leading-relaxed">
-                These four experiences are ready today. Everything else on Kommuniti is on the way — clearly marked below.
+                These three core entry points are ready today. Choose a pathway to start learning, reading, or volunteering — the rest of Kommuniti is coming soon.
               </p>
             </div>
           </div>
         </FadeIn>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {LIVE_LAUNCH_LINKS.map((item, i) => (
+        <div className="grid md:grid-cols-3 gap-6">
+          {entryPoints.map((item, i) => (
             <FadeIn key={item.href} delay={0.08 * i}>
               <Link
                 to={item.href}
-                className="group block h-full border border-white/10 hover:border-[rgba(201,168,76,0.35)] bg-[rgba(240,232,213,0.02)] p-6 transition-all no-underline"
+                className="group flex flex-col justify-between h-full border border-white/10 hover:border-[rgba(201,168,76,0.35)] bg-[rgba(240,232,213,0.02)] p-6 transition-all no-underline"
                 style={{ borderTopWidth: 3, borderTopColor: item.color }}
               >
-                <div className="flex items-start justify-between gap-2 mb-4">
-                  {(() => {
-                    const LaunchIcon = item.icon;
-                    return <LaunchIcon size={30} style={{ color: item.color }} />;
-                  })()}
-                  <span className="text-[9px] uppercase tracking-[2px] font-bold text-[#4CAF50] bg-[#4CAF50]/10 border border-[#4CAF50]/30 px-2 py-0.5 shrink-0">
-                    Live
-                  </span>
+                <div>
+                  <div className="flex items-start justify-between gap-2 mb-4">
+                    {(() => {
+                      const LaunchIcon = item.icon;
+                      return <LaunchIcon size={30} style={{ color: item.color }} />;
+                    })()}
+                    <span className="text-[9px] uppercase tracking-[2px] font-bold text-[#4CAF50] bg-[#4CAF50]/10 border border-[#4CAF50]/30 px-2 py-0.5 shrink-0">
+                      Live
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-lg text-[#F0E8D5] mb-1 group-hover:text-white transition-colors">
+                    {item.label}
+                  </h3>
+                  <p className="text-[10px] uppercase tracking-[2px] mb-3" style={{ color: item.color }}>
+                    {item.subtitle}
+                  </p>
+                  <p className="text-sm text-[rgba(240,232,213,0.5)] leading-relaxed mb-6 line-clamp-3">
+                    {item.description}
+                  </p>
                 </div>
-                <h3 className="font-bold text-lg text-[#F0E8D5] mb-1 group-hover:text-white transition-colors">
-                  {item.label}
-                </h3>
-                <p className="text-[10px] uppercase tracking-[2px] mb-3" style={{ color: item.color }}>
-                  {item.subtitle}
-                </p>
-                <p className="text-sm text-[rgba(240,232,213,0.5)] leading-relaxed mb-5 line-clamp-3">
-                  {item.description}
-                </p>
                 <span
-                  className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[2px] font-bold group-hover:gap-2 transition-all"
-                  style={{ color: item.color }}
+                  className="inline-flex items-center justify-between gap-2 text-[10px] sm:text-[11px] uppercase tracking-[2px] font-bold px-4 py-2.5 border transition-all duration-300 group-hover:bg-[var(--hover-bg)] group-hover:text-[var(--hover-text)] group-hover:border-transparent self-start"
+                  style={{
+                    borderColor: `${item.color}40`,
+                    color: item.color,
+                    background: `${item.color}0a`,
+                    "--hover-bg": item.color,
+                    "--hover-text": "#0B1828",
+                  } as React.CSSProperties}
                 >
-                  Explore <ArrowRight size={12} />
+                  Explore Pathway
+                  <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </span>
               </Link>
             </FadeIn>

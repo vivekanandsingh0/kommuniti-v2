@@ -38,7 +38,7 @@ const AboutSection = () => {
                 <div className="w-3 h-3 bg-primary animate-pulse-glow" />
                 <h2 className="font-pixel text-sm sm:text-base md:text-lg text-foreground">WHY KOMMUNITI?</h2>
               </div>
-              <p className="text-indent text-xl sm:text-2xl md:text-3xl font-light text-foreground/70 leading-relaxed max-w-4xl">
+              <p className="text-xl sm:text-2xl md:text-3xl font-light text-foreground/70 leading-relaxed max-w-4xl">
                 Kommuniti envisions to be a decentralised, international and non-partisan commune where mankind
                 can function as one while expressing their individual uniqueness.
               </p>
