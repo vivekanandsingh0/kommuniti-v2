@@ -41,7 +41,7 @@ const Konnect = () => {
       { id: "upcoming", label: settings.filter_upcoming_label },
       { id: "online", label: settings.filter_online_label },
       { id: "in-person", label: settings.filter_in_person_label },
-      { id: "on-demand", label: settings.filter_on_demand_label },
+      // { id: "on-demand", label: settings.filter_on_demand_label },
     ],
     [settings]
   );
