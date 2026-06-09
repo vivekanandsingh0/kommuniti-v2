@@ -136,7 +136,7 @@ const About = () => {
           <div className="max-w-6xl mx-auto">
             <FadeIn>
               <SectionLabel>{settings.mission_section_label}</SectionLabel>
-              <p className="text-indent text-xl sm:text-2xl md:text-3xl font-light text-foreground/70 leading-relaxed max-w-4xl">
+              <p className="text-xl sm:text-2xl md:text-3xl font-light text-foreground/70 leading-relaxed max-w-4xl">
                 {settings.mission_text}
               </p>
             </FadeIn>
@@ -148,7 +148,7 @@ const About = () => {
           <div className="max-w-6xl mx-auto">
             <FadeIn>
               <SectionLabel>{settings.what_section_label}</SectionLabel>
-              <p className="text-indent text-lg sm:text-xl text-foreground/55 leading-relaxed max-w-4xl">
+              <p className="text-lg sm:text-xl text-foreground/55 leading-relaxed max-w-4xl">
                 {settings.what_text}
               </p>
             </FadeIn>
