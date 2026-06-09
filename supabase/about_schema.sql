@@ -190,9 +190,9 @@ WHERE NOT EXISTS (SELECT 1 FROM about_pillars LIMIT 1);
 -- Seed stats
 INSERT INTO about_stats (sort_order, value, label, color)
 SELECT * FROM (VALUES
-  (1, '2,000+', 'Kore Members', '#C9A84C'),
-  (2, '45', 'Active Kores', '#6BBFB5'),
-  (3, '₹12L+', 'Community Earned', '#FF6B35')
+  (1, '100+', 'Ko Members', '#C9A84C'),
+  (2, '5', 'Active Kores', '#6BBFB5'),
+  (3, 'Growing', 'Earning Potential', '#FF6B35')
 ) AS v(sort_order, value, label, color)
 WHERE NOT EXISTS (SELECT 1 FROM about_stats LIMIT 1);
 
